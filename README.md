@@ -7,8 +7,7 @@
 * Avoid nested `if-else`, using if return instead.
 * Using `nullptr` instead of `NULL`
 * Using `""` to include self-defined headers and libraries in directory `/lib` , `< >` for system libraries.
-* Using `const` often
-* 
+* Using `const` as often as possible
 
 ## Codes need to be refactored:
 * Render.h
