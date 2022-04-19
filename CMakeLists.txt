@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 3.19)
+project(CGFinal)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall")
+
+include_directories( ./include ./basic ./gui ./landscape ./model)
+link_directories ( ./lib)
+link_libraries(libglfw.3.dylib libassimp.dylib)
+
+file(GLOB_RECURSE imgui_cpp ${PROJECT_SOURCE_DIR}/include/imgui/*.cpp)
+add_executable(CGFinal main.cpp glad.c ${imgui_cpp})
+

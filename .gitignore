@@ -1,0 +1,11 @@
+/lib
+/include/assimp
+/include/glad
+/include/GLFW
+/include/glm
+/include/imgui
+/include/KHR
+/build
+/bin
+glad.c
+/.idea
