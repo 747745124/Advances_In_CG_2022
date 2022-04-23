@@ -4,7 +4,7 @@
 * Class Name: Upper Camel Case
 * avoid `using namespace std` in global scope;(Instead use "using std::vector;" in your own function!)
 * Using standard libraries(e.g. smart pointers) properly for safety.(RAII design is better)
-* Avoid nested `if-else`, using if return instead.(nested if-else maybe substitude by switch, which runs much faster)
+* Avoid nested `if-else`, using if return instead.(nested if-elses code may be substitude by switch-cases code, which runs much faster)
 * Using `nullptr` instead of `NULL`
 * Using `""` to include self-defined headers and libraries in directory `/lib` , `< >` for system libraries.
 * Using `const` as often as possible
@@ -20,3 +20,10 @@
 * Real Time Local Reflections (Stochastic Screen-Space Reflections)
 * Cascaded Shadows Maps && Softshadow approximation
 * SSAO && SSDO
+
+# References
+* https://learnopengl.com/Advanced-Lighting/Deferred-Shading
+* https://ogldev.org/www/tutorial35/tutorial35.html
+* https://github.com/lettier/3d-game-shaders-for-beginners
+* http://www.klayge.org/material/4_1/SSR/S2011_SecretsCryENGINE3Tech_0.pdf
+* https://github.com/GPUOpen-Effects/FidelityFX-SSSR
