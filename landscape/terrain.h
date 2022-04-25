@@ -9,13 +9,14 @@
 
 #ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#include "stb_image.h"
 #endif
 
-#include <mesh.h>
-#include <terrain_random.h>
 #include <vector>
 #include <string>
+#include "FileSystem.h"
+#include "terrain_random.h"
+#include "mesh.h"
 
 namespace KooNan
 {
@@ -119,6 +120,10 @@ namespace KooNan
 		{
 			int width, height, nrComponents;
 			unsigned char *data = stbi_load(heightmap_path.c_str(), &width, &height, &nrComponents, 0);
+			if(!data)
+			{
+				throw runtime_error("Open terrain map failed!");
+			}
 			assert(width == height);//width of heightmap must be equal to height
 			this->vertex_count = width;
 			this->land_heights.resize(vertex_count*vertex_count);

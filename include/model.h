@@ -74,13 +74,13 @@ public:
 		int totalModels = 0;
 		path basePath(modelsPath);
 		cout << "Loading models from path: " << modelsPath << endl;
-		if (!exists(FileSystem::getPath(basePath)))
+		if (!exists(basePath))
 		{
 			cout << "Error: Failed to load models from path: " << modelsPath;
 			cout << ", File path doesn't exist!" << endl;
 			return 0;
 		}
-		else if (directory_entry(FileSystem::getPath(basePath)).status().type() != file_type::directory)
+		else if (directory_entry(basePath).status().type() != file_type::directory)
 		{
 			cout << "Error: \"" << modelsPath << "\" is not a directory." << endl;
 			return 0;
@@ -98,10 +98,9 @@ private:
 	static int loadModelsFromPath_r(filesystem::path relPath, ModelType type)
 	{
 		using namespace filesystem;
-		filesystem::path basePath(FileSystem::getPath(relPath));
-		directory_iterator fileList1(basePath), fileList2(basePath);
+		directory_iterator fileList1(relPath), fileList2(relPath);
 		int totalModels = 0;
-		cout << "Looking into " << basePath << " ..." << endl;
+		cout << "Looking into " << relPath << " ..." << endl;
 
 		// First pass, check if there is an obj file.
 		string previewFilename = "", modelFilename = "";

@@ -94,7 +94,7 @@ int main()
 	// glfw window creation
 	// --------------------
 
-    GLFWwindow* window = glfwCreateWindow(Common::SCR_WIDTH/2, Common::SCR_HEIGHT/2, "Koonan", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(Common::SCR_WIDTH, Common::SCR_HEIGHT, "Koonan", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
