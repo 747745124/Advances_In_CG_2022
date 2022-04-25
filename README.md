@@ -1,4 +1,15 @@
 # Advanced Topics in Computer Graphics
+## Build Instructions:
+* Download and build glfw and glad suitable to your own platform 
+* Download and build assimp on your own platform
+* Download imgui src
+* Edit cmakelist for your own platform if needed
+1. Add /GLFW /glad /KHR /glm /imgui /assimp to /include directory
+2. Add runtime and compile-time libs(For glfw and assimp) to /lib directory
+3. `mkdir build&&cd build`
+4. `cmake ..`
+5. Use your own ide to build project
+
 ## Style Guidance:
 * Function Name: Either Lower Camel Case or using '_'
 * Class Name: Upper Camel Case
