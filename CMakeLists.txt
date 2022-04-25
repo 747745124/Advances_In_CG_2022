@@ -7,7 +7,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall")
 include_directories( ./include ./basic ./gui ./landscape ./model)
 link_directories ( ./lib)
 
-IF (CMAKE_SYSTEM_NAME MATCHES "MacOS")
+IF (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 	link_libraries(libglfw.3.dylib libassimp.dylib)
 ELSEIF (CMAKE_SYSTEM_NAME MATCHES "Windows")
 	link_libraries(glfw3.lib assimp-vc142-mt.lib)
