@@ -25,21 +25,13 @@ namespace KooNan
 	public:
 		Render(Scene &main_scene, Light &main_light, Water_Frame_Buffer &waterfb, PickingTexture &mouse_picking, Shadow_Frame_Buffer &shadowfb) : main_scene(main_scene), main_light(main_light), waterfb(waterfb), mouse_picking(mouse_picking), shadowfb(shadowfb)
 		{
-			main_scene.TerrainShader.use();
-			main_light.SetLight(main_scene.TerrainShader);
-
-			main_scene.WaterShader.use();
-			main_light.SetLight(main_scene.WaterShader);
+			InitLighting(main_scene.TerrainShader);
+			InitLighting(main_scene.WaterShader);
 		}
-		void InitLighting(Shader &shader)
-		{
-			main_light.SetLight(shader);
-		}
+		
 		void DrawReflection(Shader &modelShader)
 		{
-			main_scene.TerrainShader.use();
-			main_light.SetLight(main_scene.TerrainShader);
-			modelShader.use();
+			InitLighting(main_scene.TerrainShader);
 			InitLighting(modelShader);
 
 			glm::vec4 clipping_plane = glm::vec4(0.0, 1.0, 0.0, -main_scene.getWaterHeight());
@@ -73,9 +65,7 @@ namespace KooNan
 
 		void DrawRefraction(Shader &modelShader)
 		{
-			main_scene.TerrainShader.use();
-			main_light.SetLight(main_scene.TerrainShader);
-			modelShader.use();
+			InitLighting(main_scene.TerrainShader);
 			InitLighting(modelShader);
 
 			glm::vec4 clipping_plane = glm::vec4(0.0, -1.0, 0.0, main_scene.getWaterHeight());
@@ -89,8 +79,6 @@ namespace KooNan
 
 			DrawObjects(modelShader, clipping_plane, false);
 
-			// we now draw as many light bulbs as we have point lights.
-			main_light.Draw(GameController::mainCamera, clipping_plane);
 			// render the main scene
 			main_scene.Draw(GameController::deltaTime, GameController::mainCamera, clipping_plane, false);
 
@@ -99,11 +87,8 @@ namespace KooNan
 
 		void DrawAll(Shader &pickingShader, Shader &modelShader, Shader &shadowShader)
 		{
-			main_scene.WaterShader.use();
-			main_light.SetLight(main_scene.WaterShader);
-			main_scene.TerrainShader.use();
-			main_light.SetLight(main_scene.TerrainShader);
-			modelShader.use();
+			InitLighting(main_scene.WaterShader);
+			InitLighting(main_scene.TerrainShader);
 			InitLighting(modelShader);
 
 			glm::vec4 clipping_plane = glm::vec4(0.0, -1.0, 0.0, 99999.0f);
@@ -150,6 +135,10 @@ namespace KooNan
 		}
 
 	private:
+		void InitLighting(Shader& shader)
+		{
+			main_light.SetLight(shader);
+		}
 		void DrawObjects(Shader &modelShader, glm::vec4 clippling_plane, bool IsAfterPicking)
 		{
 			glEnable(GL_CULL_FACE);
@@ -167,7 +156,7 @@ namespace KooNan
 				if (enablePicking)
 				{
 					float hitObjID = mouse_picking.ReadPixel(GameController::cursorX,
-															 Common::SCR_HEIGHT / 2 - GameController::cursorY)
+															 Common::SCR_HEIGHT - GameController::cursorY)
 										 .ObjID; // deviation of y under resolution 1920*1080 maybe 22
 					if ((unsigned int)hitObjID == i + 1)
 					{

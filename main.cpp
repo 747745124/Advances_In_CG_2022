@@ -10,20 +10,19 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <GameController.h>
-#include <terrain.h>
-#include <gui.h>
-#include <GameController.h>
-#include <GameObject.h>
-#include <common.h>
-#include <waterframebuffer.h>
-#include <pickingtexture.h>
-#include <scene.h>
-#include <cube.h>
-#include <gui.h>
-#include <light.h>
-#include <Texture.h>
-#include <Render.h>
+#include "GameController.h"
+#include "terrain.h"
+#include "gui.h"
+#include "GameObject.h"
+#include "common.h"
+#include "waterframebuffer.h"
+#include "pickingtexture.h"
+#include "scene.h"
+#include "cube.h"
+#include "gui.h"
+#include "light.h"
+#include "Texture.h"
+#include "Render.h"
 #include <iostream>
 
 
@@ -118,13 +117,23 @@ int main()
 
     // build and compile our shader program
     // ------------------------------------
-	Shader terrainShader(FileSystem::getPath("landscape/terrain.vs").c_str(), FileSystem::getPath("landscape/terrain.fs").c_str());
-	Shader waterShader(FileSystem::getPath("landscape/water.vs").c_str(), FileSystem::getPath("landscape/water.fs").c_str());
-	Shader skyShader(FileSystem::getPath("landscape/skybox.vs").c_str(), FileSystem::getPath("landscape/skybox.fs").c_str());
-	Shader lightShader(FileSystem::getPath("landscape/lightcube.vs").c_str(), FileSystem::getPath("landscape/lightcube.fs").c_str());
-	Shader pickingShader(FileSystem::getPath("gui/picking.vs").c_str(), FileSystem::getPath("gui/picking.fs").c_str());
-	Shader modelShader(FileSystem::getPath("model/model.vs").c_str(), FileSystem::getPath("model/model.fs").c_str());
-	Shader shadowShader(FileSystem::getPath("landscape/shadow.vs").c_str(), FileSystem::getPath("landscape/shadow.fs").c_str());
+#ifdef DEFERRED_SHADING
+	Shader terrainShader(FileSystem::getPath("shaders/deferred/terrain.vs").c_str(), FileSystem::getPath("shaders/deferred/terrain.fs").c_str());
+	Shader waterShader(FileSystem::getPath("shaders/deferred/water.vs").c_str(), FileSystem::getPath("shaders/deferred/water.fs").c_str());
+	Shader skyShader(FileSystem::getPath("shaders/deferred/skybox.vs").c_str(), FileSystem::getPath("shaders/deferred/skybox.fs").c_str());
+	Shader lightShader(FileSystem::getPath("shaders/deferred/lightcube.vs").c_str(), FileSystem::getPath("shaders/deferred/lightcube.fs").c_str());
+	Shader pickingShader(FileSystem::getPath("shaders/deferred/picking.vs").c_str(), FileSystem::getPath("shaders/deferred/picking.fs").c_str());
+	Shader modelShader(FileSystem::getPath("shaders/deferred/model.vs").c_str(), FileSystem::getPath("shaders/deferred/model.fs").c_str());
+	Shader shadowShader(FileSystem::getPath("shaders/deferred/shadow.vs").c_str(), FileSystem::getPath("shaders/deferred/shadow.fs").c_str());
+#else
+	Shader terrainShader(FileSystem::getPath("shaders/forward/terrain.vs").c_str(), FileSystem::getPath("shaders/forward/terrain.fs").c_str());
+	Shader waterShader(FileSystem::getPath("shaders/forward/water.vs").c_str(), FileSystem::getPath("shaders/forward/water.fs").c_str());
+	Shader skyShader(FileSystem::getPath("shaders/forward/skybox.vs").c_str(), FileSystem::getPath("shaders/forward/skybox.fs").c_str());
+	Shader lightShader(FileSystem::getPath("shaders/forward/lightcube.vs").c_str(), FileSystem::getPath("shaders/forward/lightcube.fs").c_str());
+	Shader pickingShader(FileSystem::getPath("shaders/forward/picking.vs").c_str(), FileSystem::getPath("shaders/forward/picking.fs").c_str());
+	Shader modelShader(FileSystem::getPath("shaders/forward/model.vs").c_str(), FileSystem::getPath("shaders/forward/model.fs").c_str());
+	Shader shadowShader(FileSystem::getPath("shaders/forward/shadow.vs").c_str(), FileSystem::getPath("shaders/forward/shadow.fs").c_str());
+#endif
 
 
 	// Instantiate the main_scene
@@ -146,7 +155,7 @@ int main()
 	DirLight parallel{
 		glm::vec3(0.3f, -0.7f, 1.0f),
 		glm::vec3(0.3f, 0.3f, 0.3f),
-		glm::vec3(0.3f, 0.3f, 0.3f),
+		glm::vec3(0.4f, 0.4f, 0.4f),
 		glm::vec3(0.4f, 0.4f, 0.4f)
 	};
 	Light main_light(parallel, lightShader);
