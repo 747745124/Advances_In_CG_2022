@@ -77,6 +77,8 @@ std::vector<std::string> groundPaths = {
 
 void addlights(Light& light);
 
+Shader* DeferredShading::lightingShader = nullptr;
+
 int main()
 {
 	// glfw: initialize and configure
@@ -85,7 +87,10 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#ifndef DEFERRED_SHADING
 	glfwWindowHint(GLFW_SAMPLES, 4);
+#endif // !DEFERRED_SHADING
+	
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
@@ -113,18 +118,20 @@ int main()
 
 	// configure global opengl state
 	// -----------------------------
-	glEnable(GL_MULTISAMPLE);
+	//glEnable(GL_MULTISAMPLE);
 
     // build and compile our shader program
     // ------------------------------------
 #ifdef DEFERRED_SHADING
-	Shader terrainShader(FileSystem::getPath("shaders/deferred/terrain.vs").c_str(), FileSystem::getPath("shaders/deferred/terrain.fs").c_str());
+	Shader terrainShader(FileSystem::getPath("shaders/deferred/gbuffer.vs").c_str(), FileSystem::getPath("shaders/deferred/terrain.fs").c_str());
 	Shader waterShader(FileSystem::getPath("shaders/deferred/water.vs").c_str(), FileSystem::getPath("shaders/deferred/water.fs").c_str());
 	Shader skyShader(FileSystem::getPath("shaders/deferred/skybox.vs").c_str(), FileSystem::getPath("shaders/deferred/skybox.fs").c_str());
 	Shader lightShader(FileSystem::getPath("shaders/deferred/lightcube.vs").c_str(), FileSystem::getPath("shaders/deferred/lightcube.fs").c_str());
 	Shader pickingShader(FileSystem::getPath("shaders/deferred/picking.vs").c_str(), FileSystem::getPath("shaders/deferred/picking.fs").c_str());
-	Shader modelShader(FileSystem::getPath("shaders/deferred/model.vs").c_str(), FileSystem::getPath("shaders/deferred/model.fs").c_str());
+	Shader modelShader(FileSystem::getPath("shaders/deferred/gbuffer.vs").c_str(), FileSystem::getPath("shaders/deferred/gbuffer.fs").c_str());
 	Shader shadowShader(FileSystem::getPath("shaders/deferred/shadow.vs").c_str(), FileSystem::getPath("shaders/deferred/shadow.fs").c_str());
+	Shader lightingShader(FileSystem::getPath("shaders/deferred/light.vs").c_str(), FileSystem::getPath("shaders/deferred/light.fs").c_str());
+	DeferredShading::lightingShader = &lightingShader;
 #else
 	Shader terrainShader(FileSystem::getPath("shaders/forward/terrain.vs").c_str(), FileSystem::getPath("shaders/forward/terrain.fs").c_str());
 	Shader waterShader(FileSystem::getPath("shaders/forward/water.vs").c_str(), FileSystem::getPath("shaders/forward/water.fs").c_str());
@@ -154,9 +161,9 @@ int main()
 	// ------------------------------------
 	DirLight parallel{
 		glm::vec3(0.3f, -0.7f, 1.0f),
-		glm::vec3(0.3f, 0.3f, 0.3f),
-		glm::vec3(0.4f, 0.4f, 0.4f),
-		glm::vec3(0.4f, 0.4f, 0.4f)
+		glm::vec3(0.45f, 0.45f, 0.45f),
+		glm::vec3(0.35f, 0.35f, 0.35f),
+		glm::vec3(0.2f, 0.2f, 0.2f)
 	};
 	Light main_light(parallel, lightShader);
 	GameController::mainLight = &main_light; // 这个设计实在不行
@@ -190,10 +197,13 @@ int main()
 
 		//需要渲染三次 前两次不渲染水面 最后一次渲染水面
 
+#ifndef DEFERRED_SHADING
 
 		main_renderer.DrawReflection(modelShader);
-		
+
 		main_renderer.DrawRefraction(modelShader);
+
+#endif // !DEFERRED_SHADING
 
 		main_renderer.DrawAll(pickingShader, modelShader, shadowShader);
 		

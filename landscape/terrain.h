@@ -195,7 +195,7 @@ namespace KooNan
 			float heightR = generator.heightsGeneration(x + 1, z);
 			float heightD = generator.heightsGeneration(x, z - 1);
 			float heightU = generator.heightsGeneration(x, z + 1);
-			glm::vec3 Norm = glm::normalize(glm::vec3(heightL - heightR, 2.0f, heightD - heightU));
+			glm::vec3 Norm = glm::normalize(glm::vec3(heightL - heightR, 1.5f, heightD - heightU));
 			return Norm;
 		}
 
@@ -205,7 +205,7 @@ namespace KooNan
 			float heightR = GetHeightFromMap(x + 1, z, data, nrComponents, vertex_count);
 			float heightD = GetHeightFromMap(x, z - 1, data, nrComponents, vertex_count);
 			float heightU = GetHeightFromMap(x, z + 1, data, nrComponents, vertex_count);
-			glm::vec3 Norm = glm::normalize(glm::vec3(heightL - heightR, 2.0f, heightD - heightU));
+			glm::vec3 Norm = glm::normalize(glm::vec3(heightL - heightR, 1.5f, heightD - heightU));
 			return Norm;
 		}
 		float barryCentric(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2 pos) {

@@ -49,9 +49,9 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec3 inputColor, fl
     float diff = max(dot(normal, lightDir), 0.0);
     // 镜面光着色
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 4.0);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 4.0f);
     // 合并结果
-    vec3 ambient  = light.ambient  * inputColor;
+    vec3 ambient  = light.ambient  * inputColor * 1.3;
     vec3 diffuse  = light.diffuse  * diff * inputColor;
     vec3 specular = light.specular * spec * inputColor;
     return (ambient + (diffuse + specular) * (1.0f - shadow));
@@ -127,7 +127,7 @@ void main()
 	vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
     float shadow = ShadowCaculation(FragPosInLightSpace);
-	vec3 result = CalcDirLight(dirLight, norm, viewDir, vec3(totalColor), shadow) * 1.2f;
+	vec3 result = CalcDirLight(dirLight, norm, viewDir, vec3(totalColor), shadow*1.5f) * 1.2f;
     for(int i = 0; i < NR_POINT_LIGHTS; i++)
         result += CalcPointLight(pointLights[i], norm, FragPos, viewDir, vec3(totalColor));  
     FragColor = vec4(result, 1.0);

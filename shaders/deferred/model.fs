@@ -6,10 +6,7 @@ in vec3 FragPos;
 in vec3 Normal;
 
 uniform sampler2D texture_diffuse1;
-uniform sampler2D texture_diffuse2;
-uniform sampler2D texture_diffuse3;
 uniform sampler2D texture_specular1;
-uniform sampler2D texture_specular2;
 
 
 struct PointLight {
@@ -67,7 +64,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     float distance = length(light.position - fragPos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
     // combine results
-    vec3 ambient = light.ambient * vec3(texture(texture_diffuse1, TexCoord));
+    vec3 ambient = light.ambient * vec3(tex ture(texture_diffuse1, TexCoord));
     vec3 diffuse = light.diffuse * diff * vec3(texture(texture_diffuse1, TexCoord));
     vec3 specular = light.specular * spec * vec3(texture(texture_specular1, TexCoord));
     ambient *= attenuation;

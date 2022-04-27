@@ -53,6 +53,9 @@ namespace KooNan
 			return refractionDepthTexture;
 		}
 
+		unsigned int getReflectionFrameBuffer() { return reflectionFrameBuffer;  }
+		unsigned int getRefractionFrameBuffer() { return refractionFrameBuffer; }
+
 		void initialiseReflectionFrameBuffer() {
 			reflectionFrameBuffer = createFrameBuffer();
 			reflectionTexture = createTextureAttachment(REFLECTION_WIDTH, REFLECTION_HEIGHT);

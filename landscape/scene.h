@@ -7,14 +7,14 @@
 
 #include <vector>
 
-#include <GameController.h>
-#include <common.h>
-#include <Shader.h>
-#include <Camera.h>
-#include <terrain.h>
-#include <water.h>
-#include <skybox.h>
-#include <Texture.h>
+#include "GameController.h"
+#include "common.h"
+#include "Shader.h"
+#include "Camera.h"
+#include "terrain.h"
+#include "water.h"
+#include "skybox.h"
+#include "Texture.h"
 
 
 namespace KooNan
@@ -81,14 +81,38 @@ namespace KooNan
 		{
 			shadowMap = textID;
 		}
-		void Draw(float deltaTime, Camera& cam, glm::vec4 clippling_plane, bool draw_water, bool draw_shadow = false)
+		//Draw sky(Skybox doesn't need to be lit)
+		void DrawSky(Camera& cam)
+		{
+			SkyShader.use();
+			glm::mat4 projection = glm::perspective(glm::radians(cam.Zoom), (float)Common::SCR_WIDTH / (float)Common::SCR_HEIGHT, 0.1f, 1000.0f);
+			skybox.Draw(SkyShader, glm::scale(glm::mat4(1.0f), glm::vec3(500.0f)), cam.GetViewMatrix(), projection);
+		}
+		//Draw scene without shading(Used in deferred shading geometry pass)
+		void DrawSceneWithoutShading(float deltaTime, Camera& cam, glm::vec4 clippling_plane, bool draw_water)
+		{
+			glm::mat4 projection = glm::perspective(glm::radians(cam.Zoom), (float)Common::SCR_WIDTH / (float)Common::SCR_HEIGHT, 0.1f, 1000.0f);
+			glm::mat4 view = cam.GetViewMatrix();
+			glm::vec3 viewPos = cam.Position;
+			TerrainShader.use();
+			TerrainShader.setMat4("model", glm::identity<glm::mat4>());//identity model matrix
+			TerrainShader.setMat4("projection", projection);
+			TerrainShader.setMat4("view", view);
+			TerrainShader.setVec4("plane", clippling_plane);
+			for (int i = 0; i < all_terrain_chunks.size(); i++)
+			{
+				all_terrain_chunks[i].Draw(TerrainShader);
+			}
+
+		}
+		//Draw all scene with shading (ground and water) (Used in forward shading)
+		void DrawSceneWithShading(float deltaTime, Camera& cam, glm::vec4 clippling_plane, bool draw_water, bool draw_shadow = false)
 		{
 			glm::mat4 projection = glm::perspective(glm::radians(cam.Zoom), (float)Common::SCR_WIDTH / (float)Common::SCR_HEIGHT, 0.1f, 1000.0f);
 			glm::mat4 view = cam.GetViewMatrix();
 			glm::vec3 viewPos = cam.Position;
 
-			SkyShader.use();
-			skybox.Draw(SkyShader, glm::scale(glm::mat4(1.0f), glm::vec3(500.0f)), view, projection);
+			
 			if(draw_shadow)
 			{
 				TerrainShader.use();
