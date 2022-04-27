@@ -4,3 +4,7 @@
 3. Shader中uniform变量的设置位置不统一（容易导致错误）
 4. Framebuffer的管理不统一（gbuffer waterframebuffer shadowframebuffer）
 5. gl函数的调用位置不统一 在渲染类中和物体类中均有调用 最好在主渲染类中不调用gl函数
+
+## 22-04-27 commit d0322c8
+1. macOS宏定义应该是`__APPLE__` （前后各有两个'_'）
+2. 解决了一个macOS Retina显示器上初始化窗口显示比例异常的问题，需要在调用glViewPort前使用`Common::setWidthAndHeight`
