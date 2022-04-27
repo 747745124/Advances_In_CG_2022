@@ -2,7 +2,7 @@
 ## Style Guidance:
 * Function Name: Either Lower Camel Case or using '_'
 * Class Name: Upper Camel Case
-* avoid `using namespace std` in global scope;
+* Avoid `using namespace std` in global scope;
 * Using standard libraries(e.g. smart pointers) properly for safety.
 * Avoid nested `if-else`, using if return instead.
 * Using `nullptr` instead of `NULL`
