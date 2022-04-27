@@ -18,7 +18,11 @@ namespace KooNan
 			char* cmd = new char[200];
 			sprintf(cmd, "ffmpeg -r %u -f rawvideo -pix_fmt rgba -s %ux%u -i - "
 				"-threads 0 -preset fast -y -pix_fmt yuv420p -crf 21 -vf vflip %s", framerate, width, height, output_name.c_str());
-			ffmpeg = popen(cmd, "wb");
+#ifdef _WIN64
+            ffmpeg = _popen(cmd, "wb");
+#elif _APPLE_
+            ffmpeg = popen(cmd, "wb");
+#endif
 			delete[] cmd;
 			recbuffer = new int[Common::SCR_WIDTH*Common::SCR_HEIGHT];
         }
@@ -31,7 +35,12 @@ namespace KooNan
         static void EndRecord()
         {
             delete[] recbuffer;
+#ifdef _WIN64
+            _pclose(ffmpeg);
+#elif _APPLE_
 	        pclose(ffmpeg);
+#endif
+
         }
     };
 	FILE* VideoRecord::ffmpeg = NULL;

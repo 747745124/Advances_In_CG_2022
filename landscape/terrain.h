@@ -9,13 +9,14 @@
 
 #ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#include "stb_image.h"
 #endif
 
-#include <mesh.h>
-#include <terrain_random.h>
 #include <vector>
 #include <string>
+#include "FileSystem.h"
+#include "terrain_random.h"
+#include "mesh.h"
 
 namespace KooNan
 {
@@ -119,6 +120,10 @@ namespace KooNan
 		{
 			int width, height, nrComponents;
 			unsigned char *data = stbi_load(heightmap_path.c_str(), &width, &height, &nrComponents, 0);
+			if(!data)
+			{
+				throw runtime_error("Open terrain map failed!");
+			}
 			assert(width == height);//width of heightmap must be equal to height
 			this->vertex_count = width;
 			this->land_heights.resize(vertex_count*vertex_count);
@@ -190,7 +195,7 @@ namespace KooNan
 			float heightR = generator.heightsGeneration(x + 1, z);
 			float heightD = generator.heightsGeneration(x, z - 1);
 			float heightU = generator.heightsGeneration(x, z + 1);
-			glm::vec3 Norm = glm::normalize(glm::vec3(heightL - heightR, 2.0f, heightD - heightU));
+			glm::vec3 Norm = glm::normalize(glm::vec3(heightL - heightR, 1.5f, heightD - heightU));
 			return Norm;
 		}
 
@@ -200,7 +205,7 @@ namespace KooNan
 			float heightR = GetHeightFromMap(x + 1, z, data, nrComponents, vertex_count);
 			float heightD = GetHeightFromMap(x, z - 1, data, nrComponents, vertex_count);
 			float heightU = GetHeightFromMap(x, z + 1, data, nrComponents, vertex_count);
-			glm::vec3 Norm = glm::normalize(glm::vec3(heightL - heightR, 2.0f, heightD - heightU));
+			glm::vec3 Norm = glm::normalize(glm::vec3(heightL - heightR, 1.5f, heightD - heightU));
 			return Norm;
 		}
 		float barryCentric(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2 pos) {

@@ -9,3 +9,5 @@
 /bin
 glad.c
 /.idea
+.DS_Store
+.vs
