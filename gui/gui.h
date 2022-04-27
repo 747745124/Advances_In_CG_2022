@@ -16,14 +16,15 @@ namespace KooNan
 	class GUI
 	{
 	public:
-		// init: ³õÊ¼»¯GUI»·¾³
-		//   ÔÚGLFW³õÊ¼»¯ºÍ´°¿Ú´´½¨ºóµ÷ÓÃ
-		//   ÔÚ»æÖÆGUIÇ°µ÷ÓÃ
-		static void initEnv(GLFWwindow* window) {
+		// init: ï¿½ï¿½Ê¼ï¿½ï¿½GUIï¿½ï¿½ï¿½ï¿½
+		//   ï¿½ï¿½GLFWï¿½ï¿½Ê¼ï¿½ï¿½ï¿½Í´ï¿½ï¿½Ú´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		//   ï¿½Ú»ï¿½ï¿½ï¿½GUIÇ°ï¿½ï¿½ï¿½ï¿½
+		static void initEnv(GLFWwindow *window)
+		{
 			// Setup Dear ImGui context
 			IMGUI_CHECKVERSION();
 			ImGui::CreateContext();
-			ImGuiIO& io = ImGui::GetIO();
+			ImGuiIO &io = ImGui::GetIO();
 
 			// Setup Platform/Renderer bindings
 			ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -34,18 +35,20 @@ namespace KooNan
 		}
 
 		// Use preview.png instead.
-		static void updateModelTextures(Shader& shader) {
+		static void updateModelTextures(Shader &shader)
+		{
 			modelTextures.clear();
 			int ntextures = Model::modelList.size();
-			GLuint* textures = new GLuint[ntextures];
-			GLuint* framebuffers = new GLuint[ntextures];
+			GLuint *textures = new GLuint[ntextures];
+			GLuint *framebuffers = new GLuint[ntextures];
 			glGenTextures(ntextures, textures);
 			glGenFramebuffers(ntextures, framebuffers);
 			modelTextures.resize(ntextures);
 			frameBuffers.resize(ntextures);
 
 			int i = 0;
-			for (pair<const string, Model*> p : Model::modelList) {
+			for (pair<const string, Model *> p : Model::modelList)
+			{
 				GLuint curTexture = textures[i], curFrameBuffer = framebuffers[i];
 				modelTextures[i] = curTexture;
 				frameBuffers[i] = curFrameBuffer;
@@ -63,22 +66,25 @@ namespace KooNan
 			}
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			// glfwGetFramebufferSize(window, &width, &height);
 			glViewport(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT);
 			delete[] textures, framebuffers;
 		}
 
-		// newFrame: »æÖÆÇ°µÄ×¼±¸
-		//   Ã¿´Î»æÖÆÑ­»·¶¼ÐèÒªµ÷ÓÃ
-		static void newFrame() {
+		// newFrame: ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½×¼ï¿½ï¿½
+		//   Ã¿ï¿½Î»ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½
+		static void newFrame()
+		{
 			// feed inputs to dear imgui, start new frame
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 		}
 
-		// setWidgets: »æÖÆËùÓÐ¿Ø¼þ
-		//   ÔÚinitEnvºóµ÷ÓÃ
-		static void drawWidgets() {
+		// setWidgets: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¿Ø¼ï¿½
+		//   ï¿½ï¿½initEnvï¿½ï¿½ï¿½ï¿½ï¿½
+		static void drawWidgets()
+		{
 			static ImVec2 menuButtonSize(buttonWidth1, buttonHeight1);
 			static ImVec2 shotcutButtonSize(buttonWidth2, buttonHeight2);
 			ImVec2 maxpos;
@@ -88,13 +94,15 @@ namespace KooNan
 			{
 			case GameMode::Title:
 				ImGui::SetWindowPos(ImVec2((Common::SCR_WIDTH - menuWidth) / 2, Common::SCR_HEIGHT * 2 / 3));
-				if (ImGui::Button("Start a New Game", menuButtonSize)) {
+				if (ImGui::Button("Start a New Game", menuButtonSize))
+				{
 					GameController::changeGameModeTo(GameMode::Wandering);
 				}
-				if (ImGui::Button("Load a Game", menuButtonSize)) {
-
+				if (ImGui::Button("Load a Game", menuButtonSize))
+				{
 				}
-				if (ImGui::Button("Exit", menuButtonSize)) {
+				if (ImGui::Button("Exit", menuButtonSize))
+				{
 					exit(0);
 				}
 				break;
@@ -102,22 +110,28 @@ namespace KooNan
 				ImGui::SetWindowPos(ImVec2(0, 0));
 				maxpos.x = ImGui::GetWindowSize().x + ImGui::GetWindowPos().x;
 				maxpos.y = ImGui::GetWindowSize().y + ImGui::GetWindowPos().y;
-				if (ImGui::IsMouseHoveringRect(ImGui::GetWindowPos(),maxpos)) GameController::isCursorOnGui = true;
-				if (!hideGui && ImGui::Button("Pause", shotcutButtonSize)) {
+				if (ImGui::IsMouseHoveringRect(ImGui::GetWindowPos(), maxpos))
+					GameController::isCursorOnGui = true;
+				if (!hideGui && ImGui::Button("Pause", shotcutButtonSize))
+				{
 					GameController::changeGameModeTo(GameMode::Pause);
 				}
 				if ((!hideGui && !GameController::isRecording && ImGui::Button("Begin Record", shotcutButtonSize)) ||
-					(!hideGui && GameController::isRecording && ImGui::Button("End Record", shotcutButtonSize))) {
+					(!hideGui && GameController::isRecording && ImGui::Button("End Record", shotcutButtonSize)))
+				{
 					GameController::isRecording = !GameController::isRecording;
 				}
 				if ((!hideGui && ImGui::Button("Hide UI", shotcutButtonSize)) ||
-					(hideGui && ImGui::Button("Show UI", shotcutButtonSize))) {
+					(hideGui && ImGui::Button("Show UI", shotcutButtonSize)))
+				{
 					hideGui = !hideGui;
 				}
-				if (!hideGui && ImGui::Button("Edit Scene", shotcutButtonSize)) {
+				if (!hideGui && ImGui::Button("Edit Scene", shotcutButtonSize))
+				{
 					GameController::changeGameModeTo(GameMode::Creating);
 				}
-				else;
+				else
+					;
 				break;
 				/*
 			case KooNan::GUIState::Recording:
@@ -129,10 +143,12 @@ namespace KooNan
 				break;*/
 			case GameMode::Creating:
 				ImGui::SetWindowPos(ImVec2(0, 0));
-				if (ImGui::Button("Pause", shotcutButtonSize)) {
+				if (ImGui::Button("Pause", shotcutButtonSize))
+				{
 					GameController::changeGameModeTo(GameMode::Pause);
 				}
-				if (ImGui::Button("Save", shotcutButtonSize)) {
+				if (ImGui::Button("Save", shotcutButtonSize))
+				{
 					GameController::SaveGameToFile();
 				}
 				if (GameController::creatingMode == CreatingMode::Placing)
@@ -140,40 +156,51 @@ namespace KooNan
 						ImGui::Button("Basic Voxel", shotcutButtonSize))
 						GameController::modelType = Model::ModelType::BasicVoxel;
 					else if (GameController::modelType == Model::ModelType::BasicVoxel &&
-						ImGui::Button("Complex Model", shotcutButtonSize))
+							 ImGui::Button("Complex Model", shotcutButtonSize))
 						GameController::modelType = Model::ModelType::ComplexModel;
-					else;
-				if (GameController::creatingMode == CreatingMode::Selecting && ImGui::Button("Place", shotcutButtonSize)) {
+					else
+						;
+				if (GameController::creatingMode == CreatingMode::Selecting && ImGui::Button("Place", shotcutButtonSize))
+				{
 					GameController::creatingMode = CreatingMode::Placing;
 				}
-				else if (GameController::creatingMode == CreatingMode::Placing && ImGui::Button("Select", shotcutButtonSize)) {
+				else if (GameController::creatingMode == CreatingMode::Placing && ImGui::Button("Select", shotcutButtonSize))
+				{
 					GameController::creatingMode = CreatingMode::Selecting;
 				}
-				if (GameController::creatingMode == CreatingMode::Selecting && ImGui::Button("Edit Light", shotcutButtonSize)) {
+				if (GameController::creatingMode == CreatingMode::Selecting && ImGui::Button("Edit Light", shotcutButtonSize))
+				{
 					GameController::creatingMode = CreatingMode::EditingLight;
 				}
-				else if (GameController::creatingMode == CreatingMode::EditingLight&& ImGui::Button("Select", shotcutButtonSize)) {
+				else if (GameController::creatingMode == CreatingMode::EditingLight && ImGui::Button("Select", shotcutButtonSize))
+				{
 					GameController::creatingMode = CreatingMode::Selecting;
 				}
-				if (ImGui::Button("Wander", shotcutButtonSize)) {
-					// ¼ì²éµ±Ç°ÊÇ·ñÑ¡ÖÐÁË½¨ÖþÇÒÎ»ÖÃ²»ºÏ·¨
-					if (1) {
+				if (ImGui::Button("Wander", shotcutButtonSize))
+				{
+					// ï¿½ï¿½éµ±Ç°ï¿½Ç·ï¿½Ñ¡ï¿½ï¿½ï¿½Ë½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã²ï¿½ï¿½Ï·ï¿½
+					if (1)
+					{
 						GameController::changeGameModeTo(GameMode::Wandering);
 					}
 				}
-				if (ImGui::Button("Back Home", shotcutButtonSize)) {
+				if (ImGui::Button("Back Home", shotcutButtonSize))
+				{
 					GameController::mainCamera = GameController::oriCreatingCamera;
 				}
 				break;
 			case GameMode::Pause:
 				ImGui::SetWindowPos(ImVec2((Common::SCR_WIDTH - menuWidth) / 2, Common::SCR_HEIGHT * 2 / 3));
-				if (ImGui::Button("Continue", menuButtonSize)) {
+				if (ImGui::Button("Continue", menuButtonSize))
+				{
 					GameController::revertGameMode();
 				}
-				if (ImGui::Button("Save and Quit to Title", menuButtonSize)) {
-					// todo£º¼ì²éµ±Ç°ÊÇ·ñÑ¡ÖÐÁË½¨ÖþÇÒÎ»ÖÃ²»ºÏ·¨
+				if (ImGui::Button("Save and Quit to Title", menuButtonSize))
+				{
+					// todoï¿½ï¿½ï¿½ï¿½éµ±Ç°ï¿½Ç·ï¿½Ñ¡ï¿½ï¿½ï¿½Ë½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã²ï¿½ï¿½Ï·ï¿½
 					GameController::SaveGameToFile();
-					if (1) {
+					if (1)
+					{
 						GameController::changeGameModeTo(GameMode::Title);
 					}
 				}
@@ -184,14 +211,16 @@ namespace KooNan
 			checkMouseOnGui();
 			ImGui::End();
 
-			if (GameController::gameMode == GameMode::Creating) {
-				if (GameController::creatingMode == CreatingMode::Placing) {
+			if (GameController::gameMode == GameMode::Creating)
+			{
+				if (GameController::creatingMode == CreatingMode::Placing)
+				{
 					int pageHeight = Common::SCR_HEIGHT / 8;
 					pageHeight = pageHeight < 150 ? 150 : pageHeight;
 					ImVec2 selectButtonSize((pageHeight - 30) / 3 * 4, pageHeight - 30);
 					ImGui::Begin("Select Page", 0, selectPageFlags);
-					ImGui::SetWindowPos(ImVec2(10, Common::SCR_HEIGHT/2 - 10 - pageHeight));
-					ImGui::SetWindowSize(ImVec2((Common::SCR_WIDTH - 20)/2, pageHeight));
+					ImGui::SetWindowPos(ImVec2(10, Common::SCR_HEIGHT / 2 - 10 - pageHeight));
+					ImGui::SetWindowSize(ImVec2((Common::SCR_WIDTH - 20) / 2, pageHeight));
 
 					/*
 					int i = 0;
@@ -208,20 +237,24 @@ namespace KooNan
 					*/
 
 					int i = 0;
-					for (pair<const string, Model*> p : 
-						(GameController::modelType == Model::ModelType::ComplexModel ?
-							Model::modelList :
-							Model::basicVoxelList)) {
-						if (i) ImGui::SameLine();
+					for (pair<const string, Model *> p :
+						 (GameController::modelType == Model::ModelType::ComplexModel ? Model::modelList : Model::basicVoxelList))
+					{
+						if (i)
+							ImGui::SameLine();
 
-						if (p.second->previewImage) {
-							if (ImGui::ImageButton((void*)(p.second->previewImage->id), selectButtonSize)) {
+						if (p.second->previewImage)
+						{
+							if (ImGui::ImageButton((void *)(p.second->previewImage->id), selectButtonSize))
+							{
 								GameController::selectedModel = p.first;
 								GameController::creatingMode = CreatingMode::Placing;
 							}
 						}
-						else {
-							if (ImGui::Button("Preview Image not Found", selectButtonSize)) {
+						else
+						{
+							if (ImGui::Button("Preview Image not Found", selectButtonSize))
+							{
 								GameController::selectedModel = p.first;
 								GameController::creatingMode = CreatingMode::Placing;
 							}
@@ -237,9 +270,9 @@ namespace KooNan
 					cout << "area: " << ImGui::GetWindowSize().x << " " << Common::SCR_HEIGHT - ImGui::GetWindowPos().y << endl;
 					 */
 					ImGui::End();
-
 				}
-				else if (GameController::creatingMode == CreatingMode::EditingLight) {
+				else if (GameController::creatingMode == CreatingMode::EditingLight)
+				{
 					int pageHeight = Common::SCR_HEIGHT / 4;
 					pageHeight = pageHeight < 250 ? 250 : pageHeight;
 					ImVec2 selectButtonSize((pageHeight - 30) * 2, pageHeight);
@@ -247,21 +280,25 @@ namespace KooNan
 					ImGui::SetWindowPos(ImVec2(10, Common::SCR_HEIGHT - 10 - pageHeight));
 					ImGui::SetWindowSize(ImVec2(Common::SCR_WIDTH - 20, pageHeight));
 
-					static vector<PointLight*> pls;
-					static DirLight* dl = NULL;
-					if (GameController::mainLight) {
+					static vector<PointLight *> pls;
+					static DirLight *dl = NULL;
+					if (GameController::mainLight)
+					{
 						unsigned int num = GameController::mainLight->numOfPointLight();
-						if (pls.size() != num) {
+						if (pls.size() != num)
+						{
 							pls.clear();
 							for (unsigned int i = 0; i < num; i++)
 								pls.push_back(GameController::mainLight->getPointLightAt(i));
 						}
 						if (dl == NULL)
 							dl = GameController::mainLight->getDirectionLight();
-						
+
 						unsigned int i = 0;
-						for (i = 0; i < num; i++) {
-							if (i)ImGui::SameLine();
+						for (i = 0; i < num; i++)
+						{
+							if (i)
+								ImGui::SameLine();
 							ImGui::BeginChild(i + 1, ImVec2(selectButtonSize.x, selectButtonSize.y));
 							ImGui::SliderFloat("X", &pls[i]->position.x, -100.f, 100.f);
 							ImGui::SliderFloat("Y", &pls[i]->position.y, -100.f, 100.f);
@@ -277,7 +314,8 @@ namespace KooNan
 							ImGui::SliderFloat("B Specular", &pls[i]->specular.b, 0.f, 1.f);
 							ImGui::EndChild();
 						}
-						if (i)ImGui::SameLine();
+						if (i)
+							ImGui::SameLine();
 						ImGui::BeginChild(i + 1, ImVec2(selectButtonSize.x, selectButtonSize.y));
 						ImGui::SliderFloat("X", &dl->direction.x, -100.f, 100.f);
 						ImGui::SliderFloat("Y", &dl->direction.y, -100.f, 100.f);
@@ -297,18 +335,21 @@ namespace KooNan
 					checkMouseOnGui();
 					ImGui::End();
 				}
-				else if (GameController::creatingMode == CreatingMode::Editing) {
+				else if (GameController::creatingMode == CreatingMode::Editing)
+				{
 					ImGui::Begin("Edit Menu", 0, menuFlags & ~ImGuiWindowFlags_NoBackground);
-					//ImGui::SetWindowPos(ImVec2(Common::SCR_WIDTH - shotcutButtonSize.x - 10, 0));
-					// °Ñ²Ëµ¥ÒÆ¶¯µ½Ñ¡ÖÐ½¨ÖþÖÜÎ§
+					// ImGui::SetWindowPos(ImVec2(Common::SCR_WIDTH - shotcutButtonSize.x - 10, 0));
+					//  ï¿½Ñ²Ëµï¿½ï¿½Æ¶ï¿½ï¿½ï¿½Ñ¡ï¿½Ð½ï¿½ï¿½ï¿½ï¿½ï¿½Î§
 
 					ImGui::SetWindowPos(ImVec2(GameController::lastCursorX, GameController::lastCursorY));
-					if (ImGui::Button("Transform", shotcutButtonSize)) {
+					if (ImGui::Button("Transform", shotcutButtonSize))
+					{
 						GameController::helperGameObj = GameController::selectedGameObj;
 						GameController::selectedGameObj = NULL;
 						GameController::creatingMode = CreatingMode::Placing;
 					}
-					if (ImGui::Button("Delete", shotcutButtonSize)) {
+					if (ImGui::Button("Delete", shotcutButtonSize))
+					{
 						auto itr = GameObject::gameObjList.begin();
 						for (; itr != GameObject::gameObjList.end(); ++itr)
 							if (*itr == GameController::selectedGameObj)
@@ -318,7 +359,8 @@ namespace KooNan
 						GameController::selectedGameObj = NULL;
 						GameController::creatingMode = CreatingMode::Selecting;
 					}
-					if (ImGui::Button("OK", shotcutButtonSize)) {
+					if (ImGui::Button("OK", shotcutButtonSize))
+					{
 						GameController::selectedGameObj = NULL;
 						GameController::creatingMode = CreatingMode::Selecting;
 					}
@@ -339,6 +381,7 @@ namespace KooNan
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		}
+
 	private:
 		static bool hideGui;
 		static vector<GLuint> modelTextures, frameBuffers;
@@ -353,9 +396,10 @@ namespace KooNan
 			miy = miny >= 0.f ? miny : ImGui::GetWindowPos().y;
 			max = maxx >= 0.f ? maxx : ImGui::GetWindowPos().x + ImGui::GetWindowSize().x;
 			may = maxy >= 0.f ? maxy : ImGui::GetWindowPos().y + ImGui::GetWindowSize().y;
-			//cout << mix << "," << miy << endl << max << "," << may << endl;
-			if (ImGui::IsMouseHoveringRect(ImVec2(mix, miy), ImVec2(max, may), false)) GameController::isCursorOnGui = true;
-			//if (ImGui::IsMouseHoveringRect(ImVec2(0, 0), ImGui::GetWindowSize())) GameController::isCursorOnGui = true;
+			// cout << mix << "," << miy << endl << max << "," << may << endl;
+			if (ImGui::IsMouseHoveringRect(ImVec2(mix, miy), ImVec2(max, may), false))
+				GameController::isCursorOnGui = true;
+			// if (ImGui::IsMouseHoveringRect(ImVec2(0, 0), ImGui::GetWindowSize())) GameController::isCursorOnGui = true;
 		}
 	};
 	bool GUI::hideGui = false;

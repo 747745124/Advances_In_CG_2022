@@ -13,7 +13,7 @@
 ## Style Guidance:
 * Function Name: Either Lower Camel Case or using '_'
 * Class Name: Upper Camel Case
-* avoid `using namespace std` in global scope;(Instead use "using std::vector;" in your own function!)
+* Avoid `using namespace std` in global scope;(Instead use "using std::vector;" in your own function!)
 * Using standard libraries(e.g. smart pointers) properly for safety.(RAII design is better)
 * Avoid nested `if-else`, using if return instead.(nested if-elses code may be substitude by switch-cases code, which runs much faster)
 * Using `nullptr` instead of `NULL`

@@ -103,6 +103,7 @@ namespace KooNan
 	public:
 		static void initGameController(GLFWwindow *window)
 		{
+			Common::setWindow(window);
 			glfwMakeContextCurrent(window);
 			glfwSetFramebufferSizeCallback(window, GameController::framebuffer_size_callback);
 			glfwSetCursorPosCallback(window, GameController::cursor_callback);
@@ -110,6 +111,7 @@ namespace KooNan
 		}
 		static void updateGameController(GLFWwindow *window)
 		{
+			Common::setWindow(window);
 			float currentFrame = glfwGetTime();
 			GameController::deltaTime = currentFrame - GameController::lastFrame;
 			GameController::lastFrame = currentFrame;
@@ -422,6 +424,7 @@ namespace KooNan
 	// ��������
 	void GameController::framebuffer_size_callback(GLFWwindow *window, int width, int height)
 	{
+		glfwGetFramebufferSize(window, &width, &height);
 		glViewport(0, 0, width, height);
 		Common::SCR_HEIGHT = height;
 		Common::SCR_WIDTH = width;

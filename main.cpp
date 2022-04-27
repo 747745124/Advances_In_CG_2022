@@ -25,45 +25,42 @@
 #include "Render.h"
 #include <iostream>
 
-
 using namespace KooNan;
 using namespace glm;
 
-
-//Define four point lights position
+// Define four point lights position
 glm::vec3 pointLightPositions[] = {
-		glm::vec3(2.0f,  3.0f,  2.0f),
-		glm::vec3(2.3f, 2.0f, -5.0f),
-		glm::vec3(-4.0f,  2.5f, -8.0f),
-		glm::vec3(0.0f,  1.5f, -3.0f)
-};//This should match up with the macro NR_POINT_LIGHTS in fragment shader
+	glm::vec3(2.0f, 3.0f, 2.0f),
+	glm::vec3(2.3f, 2.0f, -5.0f),
+	glm::vec3(-4.0f, 2.5f, -8.0f),
+	glm::vec3(0.0f, 1.5f, -3.0f)}; // This should match up with the macro NR_POINT_LIGHTS in fragment shader
 
 // Define positions of cubes
 glm::vec3 cubePositions[] = {
-		glm::vec3(-9.0f,  0.0f,  0.0f),
-		glm::vec3(-10.0f,  0.0f, 0.0f),
-		glm::vec3(-9.0f, 0.0f, -3.0f),
-		glm::vec3(-10.5f, 0.0f, 0.0f),
-		glm::vec3(-9.0f, 0.0f, -3.7f),
-		glm::vec3(-10.5f, 0.0f, 0.0f),
-		glm::vec3(-9.0f, 0.0f, -4.7f),
-		glm::vec3(-11.0f, 0.0f, 0.0f),
-		glm::vec3(-15.0f, 0.0f, -6.7f),
-		glm::vec3(-16.0f, 0.0f, 0.0f),
+	glm::vec3(-9.0f, 0.0f, 0.0f),
+	glm::vec3(-10.0f, 0.0f, 0.0f),
+	glm::vec3(-9.0f, 0.0f, -3.0f),
+	glm::vec3(-10.5f, 0.0f, 0.0f),
+	glm::vec3(-9.0f, 0.0f, -3.7f),
+	glm::vec3(-10.5f, 0.0f, 0.0f),
+	glm::vec3(-9.0f, 0.0f, -4.7f),
+	glm::vec3(-11.0f, 0.0f, 0.0f),
+	glm::vec3(-15.0f, 0.0f, -6.7f),
+	glm::vec3(-16.0f, 0.0f, 0.0f),
 };
 
 // Define paths of sky box textures
 std::vector<std::string> skyboxPaths = {
-		FileSystem::getPath("landscape/resources/textures/skybox/TropicalSunnyDay_px.jpg"),
-		FileSystem::getPath("landscape/resources/textures/skybox/TropicalSunnyDay_nx.jpg"),
-		FileSystem::getPath("landscape/resources/textures/skybox/TropicalSunnyDay_py.jpg"),
-		FileSystem::getPath("landscape/resources/textures/skybox/TropicalSunnyDay_ny.jpg"),
-		FileSystem::getPath("landscape/resources/textures/skybox/TropicalSunnyDay_pz.jpg"),
-		FileSystem::getPath("landscape/resources/textures/skybox/TropicalSunnyDay_nz.jpg"),
+	FileSystem::getPath("landscape/resources/textures/skybox/TropicalSunnyDay_px.jpg"),
+	FileSystem::getPath("landscape/resources/textures/skybox/TropicalSunnyDay_nx.jpg"),
+	FileSystem::getPath("landscape/resources/textures/skybox/TropicalSunnyDay_py.jpg"),
+	FileSystem::getPath("landscape/resources/textures/skybox/TropicalSunnyDay_ny.jpg"),
+	FileSystem::getPath("landscape/resources/textures/skybox/TropicalSunnyDay_pz.jpg"),
+	FileSystem::getPath("landscape/resources/textures/skybox/TropicalSunnyDay_nz.jpg"),
 };
 
 // Define paths of ground and water textures
-//Format:(1).groundheightmap (2~size-2).groundtexture (size-1).waterdudvmap (size).waternormalmap
+// Format:(1).groundheightmap (2~size-2).groundtexture (size-1).waterdudvmap (size).waternormalmap
 std::vector<std::string> groundPaths = {
 	FileSystem::getPath("landscape/resources/textures/heightmap.png"),
 	FileSystem::getPath("landscape/resources/textures/blendermap.jpg"),
@@ -72,13 +69,12 @@ std::vector<std::string> groundPaths = {
 	FileSystem::getPath("landscape/resources/textures/groundG.png"),
 	FileSystem::getPath("landscape/resources/textures/groundB.jpg"),
 	FileSystem::getPath("landscape/resources/textures/waterDUDV.png"),
-	FileSystem::getPath("landscape/resources/textures/normal.png")
-};
+	FileSystem::getPath("landscape/resources/textures/normal.png")};
 
-void addlights(Light& light);
+void addlights(Light &light);
 
-Shader* DeferredShading::lightingShader = nullptr;
-
+Shader *DeferredShading::lightingShader = nullptr;
+GLFWwindow *Common::gWindow = nullptr;
 int main()
 {
 	// glfw: initialize and configure
@@ -90,7 +86,7 @@ int main()
 #ifndef DEFERRED_SHADING
 	glfwWindowHint(GLFW_SAMPLES, 4);
 #endif // !DEFERRED_SHADING
-	
+
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
@@ -98,7 +94,8 @@ int main()
 	// glfw window creation
 	// --------------------
 
-    GLFWwindow* window = glfwCreateWindow(Common::SCR_WIDTH, Common::SCR_HEIGHT, "Koonan", NULL, NULL);
+	GLFWwindow *window = glfwCreateWindow(Common::SCR_WIDTH, Common::SCR_HEIGHT, "Koonan", NULL, NULL);
+
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -106,7 +103,6 @@ int main()
 		return -1;
 	}
 	GameController::initGameController(window);
-
 
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
@@ -118,10 +114,10 @@ int main()
 
 	// configure global opengl state
 	// -----------------------------
-	//glEnable(GL_MULTISAMPLE);
+	// glEnable(GL_MULTISAMPLE);
 
-    // build and compile our shader program
-    // ------------------------------------
+	// build and compile our shader program
+	// ------------------------------------
 #ifdef DEFERRED_SHADING
 	Shader terrainShader(FileSystem::getPath("shaders/deferred/gbuffer.vs").c_str(), FileSystem::getPath("shaders/deferred/terrain.fs").c_str());
 	Shader waterShader(FileSystem::getPath("shaders/deferred/water.vs").c_str(), FileSystem::getPath("shaders/deferred/water.fs").c_str());
@@ -142,20 +138,17 @@ int main()
 	Shader shadowShader(FileSystem::getPath("shaders/forward/shadow.vs").c_str(), FileSystem::getPath("shaders/forward/shadow.fs").c_str());
 #endif
 
-
 	// Instantiate the main_scene
 	Scene main_scene(256.0f, 1, 1, -0.7f, terrainShader, waterShader, skyShader, groundPaths, skyboxPaths);
 	GameController::mainScene = &main_scene; // 这个设计实在是不行
 
-
-
-    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    // -------------------------------------------------------------------------------------------
+	// tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
+	// -------------------------------------------------------------------------------------------
 	// Model
 	// ------------------------------------
 
-	//Model::loadModelsFromPath("model/rsc/", Model::ModelType::ComplexModel);
-	//Model::loadModelsFromPath("model/basic voxel/", Model::ModelType::BasicVoxel);
+	// Model::loadModelsFromPath("model/rsc/", Model::ModelType::ComplexModel);
+	// Model::loadModelsFromPath("model/basic voxel/", Model::ModelType::BasicVoxel);
 
 	// Instantiate the light(with only "parallel" light component)
 	// ------------------------------------
@@ -163,16 +156,16 @@ int main()
 		glm::vec3(0.3f, -0.7f, 1.0f),
 		glm::vec3(0.45f, 0.45f, 0.45f),
 		glm::vec3(0.35f, 0.35f, 0.35f),
-		glm::vec3(0.2f, 0.2f, 0.2f)
-	};
+		glm::vec3(0.2f, 0.2f, 0.2f)};
 	Light main_light(parallel, lightShader);
 	GameController::mainLight = &main_light; // 这个设计实在不行
 
-	if (!GameController::LoadGameFromFile()) {
-		addlights(main_light);// Add four point lights
+	if (!GameController::LoadGameFromFile())
+	{
+		addlights(main_light); // Add four point lights
 
-		GameObject* p3 = new GameObject("model/rsc/Temple1/Temple1.obj",
-			scale(translate(mat4(1.0f), vec3(-7.0f, main_scene.getTerrainHeight(-7.0f, -7.0f), -7.0f)), vec3(0.2f, 0.2f, 0.2f)), true);
+		GameObject *p3 = new GameObject("model/rsc/Temple1/Temple1.obj",
+										scale(translate(mat4(1.0f), vec3(-7.0f, main_scene.getTerrainHeight(-7.0f, -7.0f), -7.0f)), vec3(0.2f, 0.2f, 0.2f)), true);
 	}
 
 	// GUI
@@ -185,15 +178,13 @@ int main()
 	Shadow_Frame_Buffer shadowfb;
 	Render main_renderer(main_scene, *GameController::mainLight, waterfb, mouse_picking, shadowfb);
 
-	
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
 	{
-        // per-frame time logic
-        // --------------------
+		// per-frame time logic
+		// --------------------
 		GameController::updateGameController(window);
-
 
 		//需要渲染三次 前两次不渲染水面 最后一次渲染水面
 
@@ -206,32 +197,31 @@ int main()
 #endif // !DEFERRED_SHADING
 
 		main_renderer.DrawAll(pickingShader, modelShader, shadowShader);
-		
+
 		/*
 		Render the else you need to render here!! Remember to set the clipping plane!!!
 		*/
-		
+
 		glDisable(GL_DEPTH_TEST);
 
-        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        // -------------------------------------------------------------------------------
-		//for (GameObject* obj : GameObject::gameObjList)
+		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+		// -------------------------------------------------------------------------------
+		// for (GameObject* obj : GameObject::gameObjList)
 		//	obj->Draw(ourShader, projection, view);
 
 		GUI::newFrame();
 		GUI::drawWidgets();
-		
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-	
+
 	// GameObject clear
-	for (GameObject* obj : GameObject::gameObjList)
+	for (GameObject *obj : GameObject::gameObjList)
 		delete obj;
 	GameObject::gameObjList.clear();
 
-	for (auto & itr : Model::modelList)
+	for (auto &itr : Model::modelList)
 		delete itr.second;
 
 	Model::modelList.clear();
@@ -242,12 +232,11 @@ int main()
 	return 0;
 }
 
-void addlights(Light& light)
+void addlights(Light &light)
 {
 	for (int i = 0; i < 4; i++)
 	{
-		PointLight l
-		{
+		PointLight l{
 			glm::vec3(pointLightPositions[i]),
 			1.0f,
 			0.09f,
@@ -258,7 +247,4 @@ void addlights(Light& light)
 		};
 		light.AddPointLight(l);
 	}
-
 }
-
-
