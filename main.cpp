@@ -1,14 +1,12 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#ifndef STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-#endif
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 
 #include "GameController.h"
 #include "terrain.h"
@@ -23,7 +21,7 @@
 #include "light.h"
 #include "Texture.h"
 #include "Render.h"
-#include <iostream>
+
 
 using namespace KooNan;
 using namespace glm;

@@ -8,10 +8,11 @@ namespace KooNan {
     public:
         DeferredShading() = delete;
         static Shader* lightingShader;
-        static void DrawQuad(const Camera& cam)
+        static void DrawQuad()
 		{
 			static GLuint quadVAO = 0;
             static GLuint quadVBO;
+            const Camera& cam = GameController::mainCamera;
             lightingShader->use();
             lightingShader->setVec3("viewPos", cam.Position);
             lightingShader->setInt("gPosition", 0);

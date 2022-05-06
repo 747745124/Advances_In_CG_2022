@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+
 #include "scene.h"
 #include "light.h"
 #include "vector"
@@ -53,13 +54,13 @@ namespace KooNan
 			GameController::mainCamera.Position.y -= distance;
 			GameController::mainCamera.Pitch = -GameController::mainCamera.Pitch;
 
-			DrawObjectsWithShading(modelShader, clipping_plane, false);
+			DrawObjects(modelShader, &clipping_plane, false, true);
 
 			// we now draw as many light bulbs as we have point lights.
-			main_light.Draw(GameController::mainCamera, clipping_plane);
+			main_light.Draw(&clipping_plane);
 			// render the main scene
-			main_scene.DrawSceneWithShading(GameController::deltaTime, GameController::mainCamera, clipping_plane, false);
-			main_scene.DrawSky(GameController::mainCamera);
+			main_scene.DrawScene(GameController::deltaTime, &clipping_plane, false);
+			main_scene.DrawSky();
 
 			// Restore the main camera
 			GameController::mainCamera.Position.y += distance;
@@ -86,11 +87,11 @@ namespace KooNan
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			DrawObjectsWithShading(modelShader, clipping_plane, false);
+			DrawObjects(modelShader, &clipping_plane, false, true);
 
 			// render the main scene
-			main_scene.DrawSceneWithShading(GameController::deltaTime, GameController::mainCamera, clipping_plane, false);
-			main_scene.DrawSky(GameController::mainCamera);
+			main_scene.DrawScene(GameController::deltaTime, &clipping_plane, false);
+			main_scene.DrawSky();
 
 			waterfb.unbindCurrentFrameBuffer();
 #endif
@@ -100,32 +101,28 @@ namespace KooNan
 		{
 #ifdef DEFERRED_SHADING
 			// Geometry pass
-			glm::vec4 clipping_plane = glm::vec4(0.0, -1.0, 0.0, 99999.0f);
-
-			glDisable(GL_BLEND);
 			gbuf.bindToWrite();
 
 			glEnable(GL_DEPTH_TEST);
-			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			main_scene.DrawSceneWithoutShading(GameController::deltaTime, GameController::mainCamera, clipping_plane, false);
-			DrawObjectsWithoutShading(modelShader, clipping_plane, false);
+			main_scene.DrawScene(GameController::deltaTime, nullptr, false);
+			DrawObjects(modelShader, nullptr, false, false);
 
 			// Lighting pass
 			DeferredShading::lightingShader->use();
 
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			gbuf.bindTexture();
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			InitLighting(*DeferredShading::lightingShader);
 
-			DeferredShading::DrawQuad(GameController::mainCamera);
+			DeferredShading::DrawQuad();
 			// Copy zbuffer to default framebuffer
 			gbuf.bindToRead();
 			glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 			// Draw things that do not need to be lit
-			main_scene.DrawSky(GameController::mainCamera);
-			main_light.Draw(GameController::mainCamera, clipping_plane);
+			main_scene.DrawSky();
+			main_light.Draw(nullptr);
 
 #else
 			InitLighting(main_scene.WaterShader);
@@ -156,8 +153,8 @@ namespace KooNan
 
 			DrawShadowMap(shadowShader);
 
-			DrawObjectsWithShading(modelShader, clipping_plane, true);
-			main_light.Draw(GameController::mainCamera, clipping_plane);
+			DrawObjects(modelShader, &clipping_plane, true, true);
+			main_light.Draw(&clipping_plane);
 
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -169,8 +166,8 @@ namespace KooNan
 			main_scene.TerrainShader.use();
 			main_scene.TerrainShader.setMat4("lightProjection", shadowfb.lightProjection); // Bad implementation
 			main_scene.TerrainShader.setMat4("lightView", shadowfb.lightView);			   // Bad implementation
-			main_scene.DrawSceneWithShading(GameController::deltaTime, GameController::mainCamera, clipping_plane, true, true);
-			main_scene.DrawSky(GameController::mainCamera);
+			main_scene.DrawScene(GameController::deltaTime, &clipping_plane, true, true);
+			main_scene.DrawSky();
 
 			glDisable(GL_BLEND);
 #endif
@@ -182,22 +179,10 @@ namespace KooNan
 			main_light.SetLight(shader);
 		}
 
-		void DrawObjectsWithoutShading(Shader &modelShader, glm::vec4 clippling_plane, bool IsAfterPicking)
+		void DrawObjects(Shader &modelShader, const glm::vec4 *clippling_plane, bool IsAfterPicking, bool IsWithShading)
 		{
-			glEnable(GL_CULL_FACE);
-			auto itr = GameObject::gameObjList.begin();
-			for (int i = 0; i < GameObject::gameObjList.size(); i++, ++itr)
-			{
-				(*itr)->Draw(modelShader, GameController::mainCamera.Position,
-							 Common::GetPerspectiveMat(GameController::mainCamera), GameController::mainCamera.GetViewMatrix(),
-							 clippling_plane,
-							 false);
-			}
-			glDisable(GL_CULL_FACE);
-		}
-		void DrawObjectsWithShading(Shader &modelShader, glm::vec4 clippling_plane, bool IsAfterPicking)
-		{
-			InitLighting(modelShader);
+			if(IsWithShading)
+				InitLighting(modelShader);
 			glEnable(GL_CULL_FACE);
 			bool enablePicking = GameController::gameMode == GameMode::Creating &&
 								 GameController::creatingMode == CreatingMode::Selecting &&
@@ -221,10 +206,15 @@ namespace KooNan
 						intersected = true;
 					}
 				}
+				if (clippling_plane)
+				{
+					modelShader.use();
+					modelShader.setVec4("plane", *clippling_plane);
+				}
 				(*itr)->Draw(modelShader, GameController::mainCamera.Position,
-							 Common::GetPerspectiveMat(GameController::mainCamera), GameController::mainCamera.GetViewMatrix(),
-							 clippling_plane,
-							 intersected);
+					Common::GetPerspectiveMat(GameController::mainCamera), GameController::mainCamera.GetViewMatrix(),
+					intersected);
+			
 			}
 			glDisable(GL_CULL_FACE);
 		}

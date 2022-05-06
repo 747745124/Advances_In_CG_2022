@@ -1,11 +1,7 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#ifndef STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-#endif
-
 #include <glad/glad.h>
 #include <mesh.h>
 #include <string>
@@ -33,10 +29,10 @@ namespace KooNan
 				textureID,type,texture_path
 			};
 		}
-		vector<Texture> LoadTexture(vector<string> texture_paths, vector<string> types)
+		std::vector<Texture> LoadTexture(std::vector<std::string> texture_paths, std::vector<std::string> types)
 		{
 			assert(texture_paths.size() == types.size());
-			vector<Texture> textures;
+			std::vector<Texture> textures;
 			for (int i = 0; i < texture_paths.size(); i++)
 			{
 				textures.push_back(

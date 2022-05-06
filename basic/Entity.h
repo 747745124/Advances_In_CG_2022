@@ -5,7 +5,10 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <Shader.h>
+
+#include "Shader.h"
+#include "common.h"
+#include "mesh.h"
 
 namespace KooNan
 {
@@ -15,7 +18,7 @@ namespace KooNan
 		Shader& EntityShader;
 	public:
 		Entity(Shader& SomeShader):EntityShader(SomeShader){}
-		void Draw(Mesh& mesh,Camera& cam, glm::vec4 clippling_plane, glm::mat4 model, bool if_hit = false)
+		void Draw(Mesh& mesh,Camera& cam, glm::mat4 model, bool if_hit = false)
 		{
 			EntityShader.use();
 			if (if_hit)
@@ -25,7 +28,6 @@ namespace KooNan
 			glm::mat4 projection = Common::GetPerspectiveMat(cam);
 			EntityShader.setMat4("projection", projection);
 			EntityShader.setMat4("view", cam.GetViewMatrix());
-			EntityShader.setVec4("plane", clippling_plane);
 			EntityShader.setVec3("viewPos", cam.Position);
 			EntityShader.setMat4("model", model);
 			mesh.Draw(&EntityShader);
