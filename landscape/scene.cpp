@@ -109,34 +109,60 @@ namespace KooNan
 		{
 			waterMoveFactor += deltaTime * 0.1f;
 			waterMoveFactor = waterMoveFactor - (int)waterMoveFactor;
-			WaterShader.use();
-
-			WaterShader.setMat4("projection", projection);
-			WaterShader.setMat4("view", view);
-			WaterShader.setVec3("viewPos", viewPos);
-			WaterShader.setInt("reflection", 0);
-			WaterShader.setInt("refraction", 1);
-			WaterShader.setInt("dudvMap", 2);
-			WaterShader.setInt("normalMap", 3);
-			WaterShader.setInt("depthMap", 4);
-			WaterShader.setFloat("chunk_size", chunk_size);
-			WaterShader.setFloat("moveOffset", waterMoveFactor);
-			WaterShader.setVec3("skyColor", glm::vec3(0.527f, 0.805f, 0.918f));
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, reflect_text);
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, refract_text);
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, dudvMap);
-			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, normalMap);
-			glActiveTexture(GL_TEXTURE4);
-			glBindTexture(GL_TEXTURE_2D, depthMap);
-			for (int j = 0; j < all_water_chunks.size(); j++)
+			if (clippling_plane)//Forward rendering
 			{
-				all_water_chunks[j].Draw(WaterShader);
+				WaterShader.use();
+				WaterShader.setMat4("projection", projection);
+				WaterShader.setMat4("view", view);
+				WaterShader.setVec3("viewPos", viewPos);
+				WaterShader.setInt("reflection", 0);
+				WaterShader.setInt("refraction", 1);
+				WaterShader.setInt("dudvMap", 2);
+				WaterShader.setInt("normalMap", 3);
+				WaterShader.setInt("depthMap", 4);
+				WaterShader.setFloat("chunk_size", chunk_size);
+				WaterShader.setFloat("moveOffset", waterMoveFactor);
+				WaterShader.setVec3("skyColor", glm::vec3(0.527f, 0.805f, 0.918f));
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, reflect_text);
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, refract_text);
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_2D, dudvMap);
+				glActiveTexture(GL_TEXTURE3);
+				glBindTexture(GL_TEXTURE_2D, normalMap);
+				glActiveTexture(GL_TEXTURE4);
+				glBindTexture(GL_TEXTURE_2D, depthMap);
+				for (int j = 0; j < all_water_chunks.size(); j++)
+				{
+					all_water_chunks[j].Draw(WaterShader);
+				}
 			}
+			else//Deferred rendering
+			{
+				WaterShader.use();
+				WaterShader.setMat4("view", view);
+				WaterShader.setMat4("projection", projection);
+				WaterShader.setFloat("chunk_size", chunk_size);
+				WaterShader.setFloat("moveOffset", waterMoveFactor);
+				WaterShader.setInt("dudvMap", 0);
+				WaterShader.setInt("normalMap", 1);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, dudvMap);
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, normalMap);
+
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_ONE, GL_ONE);
+				for (int j = 0; j < all_water_chunks.size(); j++)
+				{
+					all_water_chunks[j].Draw(WaterShader);
+				}
+				glDisable(GL_BLEND);
+			}
+			
 		}
+		
 	}
 
 	float Scene::getTerrainHeight(float x, float z)

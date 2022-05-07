@@ -105,7 +105,7 @@ namespace KooNan
 
 			glEnable(GL_DEPTH_TEST);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			main_scene.DrawScene(GameController::deltaTime, nullptr, false);
+			main_scene.DrawScene(GameController::deltaTime, nullptr, true);
 			DrawObjects(modelShader, nullptr, false, false);
 
 			// Lighting pass
@@ -115,7 +115,7 @@ namespace KooNan
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			InitLighting(*DeferredShading::lightingShader);
-
+			glDisable(GL_BLEND);
 			DeferredShading::DrawQuad();
 			// Copy zbuffer to default framebuffer
 			gbuf.bindToRead();

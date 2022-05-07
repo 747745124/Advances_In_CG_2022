@@ -154,7 +154,7 @@ int main()
 		glm::vec3(0.3f, -0.7f, 1.0f),
 		glm::vec3(0.45f, 0.45f, 0.45f),
 		glm::vec3(0.35f, 0.35f, 0.35f),
-		glm::vec3(0.2f, 0.2f, 0.2f)};
+		glm::vec3(0.1f, 0.1f, 0.1f)};
 	Light main_light(parallel, lightShader);
 	GameController::mainLight = &main_light; // 这个设计实在不行
 
@@ -241,7 +241,7 @@ void addlights(Light &light)
 			0.032f,
 			glm::vec3(0.05f, 0.05f, 0.05f),
 			glm::vec3(0.8f, 0.8f, 0.8f),
-			glm::vec3(1.0f, 1.0f, 1.0f),
+			glm::vec3(0.15f, 0.15f, 0.15f),
 		};
 		light.AddPointLight(l);
 	}
