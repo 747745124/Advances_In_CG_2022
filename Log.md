@@ -13,3 +13,9 @@
 1. 将./include目录中的自定义头文件移动到了basic中，现在./include目录中的头文件都应该是只读的
 2. 将渲染过程中Draw的接口加以简化，传统渲染方式下传入clipping plane的指针(可以为nullptr)
 3. 为解决交叉include的问题，将./basic和./landscape中的部分头文件分开为.cpp和.h
+
+## 22-05-07 commit 477d03e
+
+添加了deferred rendering 默认的水面效果
+
+现在暂时可以通过新建分支来添加feature
