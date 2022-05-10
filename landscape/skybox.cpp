@@ -71,7 +71,7 @@ namespace KooNan
 		glDepthMask(GL_FALSE);
 		glBindVertexArray(VAO);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glDepthMask(GL_TRUE);
 	}

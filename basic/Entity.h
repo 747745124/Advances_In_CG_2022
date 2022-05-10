@@ -23,8 +23,10 @@ namespace KooNan
 			EntityShader.use();
 			if (if_hit)
 				EntityShader.setVec3("selected_color", glm::vec3(0.5f, 0.5f, 0.5f));
+#ifndef DEFERRED_SHADING
 			else
 				EntityShader.setVec3("selected_color", glm::vec3(0.0f, 0.0f, 0.0f));
+#endif
 			glm::mat4 projection = Common::GetPerspectiveMat(cam);
 			EntityShader.setMat4("projection", projection);
 			EntityShader.setMat4("view", cam.GetViewMatrix());

@@ -13,6 +13,7 @@
 #include "GameController.h"
 #include "gbuffer.h"
 #include "deferredshading.h"
+#include "reflectionbuffer.h"
 
 namespace KooNan
 {
@@ -25,12 +26,18 @@ namespace KooNan
 		PickingTexture &mouse_picking;
 		Shadow_Frame_Buffer &shadowfb;
 		GBuffer gbuf;
-
+		ReflectionBuffer rbuf;
 	public:
 		Render(Scene &main_scene, Light &main_light, Water_Frame_Buffer &waterfb, PickingTexture &mouse_picking, Shadow_Frame_Buffer &shadowfb) : main_scene(main_scene), main_light(main_light), waterfb(waterfb), mouse_picking(mouse_picking), shadowfb(shadowfb)
 		{
+			if (glGetError() == GL_INVALID_OPERATION)
+			{
+				//throw std::runtime_error("Oopps!");
+			}
+#ifndef DEFERRED_SHADING
 			InitLighting(main_scene.TerrainShader);
 			InitLighting(main_scene.WaterShader);
+#endif
 		}
 
 		void DrawReflection(Shader &modelShader)
@@ -102,27 +109,55 @@ namespace KooNan
 #ifdef DEFERRED_SHADING
 			// Geometry pass
 			gbuf.bindToWrite();
-
+			
 			glEnable(GL_DEPTH_TEST);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			
 			main_scene.DrawScene(GameController::deltaTime, nullptr, true);
 			DrawObjects(modelShader, nullptr, false, false);
-
-			// Lighting pass
-			DeferredShading::lightingShader->use();
-
-			gbuf.bindTexture();
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			InitLighting(*DeferredShading::lightingShader);
-			glDisable(GL_BLEND);
-			DeferredShading::DrawQuad();
-			// Copy zbuffer to default framebuffer
-			gbuf.bindToRead();
-			glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 			// Draw things that do not need to be lit
 			main_scene.DrawSky();
 			main_light.Draw(nullptr);
+
+			//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			//gbuf.bindToRead();
+			//glReadBuffer(GL_COLOR_ATTACHMENT2);
+			//glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+			
+			// Render with lighting
+			gbuf.bindTexture();
+			rbuf.bindToWrite();
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			InitLighting(*DeferredShading::lightingShader);
+			glDisable(GL_BLEND);
+			DeferredShading::setLightingPassShader();
+			DeferredShading::DrawQuad();
+			// Copy zbuffer to reflect framebuffer
+			gbuf.bindToRead();
+			glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+			
+			
+
+			// Draw reflected uv
+			rbuf.bindToWrite();
+			gbuf.bindTexture();
+			DeferredShading::setSSRShader();
+			DeferredShading::DrawQuad();
+
+			//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			//rbuf.bindToRead();
+			//glReadBuffer(GL_COLOR_ATTACHMENT0);
+			//glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			rbuf.bindTexture();
+			DeferredShading::setFinalShader();
+			DeferredShading::DrawQuad();
+			
+			
 
 #else
 			InitLighting(main_scene.WaterShader);

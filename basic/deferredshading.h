@@ -2,22 +2,24 @@
 #define DEFERREDSHADING
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include "Camera.h"
 
 namespace KooNan {
 	class DeferredShading {
     public:
         DeferredShading() = delete;
         static Shader* lightingShader;
+        static Shader* ssrShader;
+        static Shader* finalShader;
         static void DrawQuad()
 		{
 			static GLuint quadVAO = 0;
             static GLuint quadVBO;
             const Camera& cam = GameController::mainCamera;
-            lightingShader->use();
-            lightingShader->setVec3("viewPos", cam.Position);
-            lightingShader->setInt("gPosition", 0);
-            lightingShader->setInt("gNormal", 1);
-            lightingShader->setInt("gAlbedoSpec", 2);
+            
             if (quadVAO == 0)
             {
                 GLfloat quadVertices[] = {
@@ -42,7 +44,36 @@ namespace KooNan {
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             glBindVertexArray(0);
 		}
+        static void setLightingPassShader()
+        {
+            lightingShader->use();
+            lightingShader->setVec3("viewPos", GameController::mainCamera.Position);
+            lightingShader->setInt("gPosition", 0);
+            lightingShader->setInt("gNormal", 1);
+            lightingShader->setInt("gAlbedoSpec", 2);
+            lightingShader->setInt("gReflect_mask", 3);
+        }
+        static void setSSRShader()
+        {
+            ssrShader->use();
+            Camera& cam = GameController::mainCamera;
+            ssrShader->setMat4("projection", Common::GetPerspectiveMat(cam));
+            ssrShader->setMat4("view", cam.GetViewMatrix());
+            ssrShader->setInt("gPosition", 0);
+            ssrShader->setInt("gNormal", 1);
+            ssrShader->setInt("gReflect_mask", 3);
+            ssrShader->setVec3("viewPos", GameController::mainCamera.Position);
+
+        }
+        static void setFinalShader()
+        {
+            finalShader->use();
+            finalShader->setInt("rColor", 0);
+            finalShader->setInt("rTexcoord", 1);
+            
+        }
 	};
+    
 }
 
 #endif // !DEFERREDSHADING

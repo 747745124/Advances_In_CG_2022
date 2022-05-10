@@ -19,3 +19,9 @@
 添加了deferred rendering 默认的水面效果
 
 现在暂时可以通过新建分支来添加feature
+
+## 22-05-10 commit e3e4850
+
+完成了基本的SSR水面反射
+
+修改shader类使得它在给shader内变量赋值后检查错误

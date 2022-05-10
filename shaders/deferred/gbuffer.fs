@@ -3,6 +3,7 @@
 layout (location = 0) out vec3 gPosition;
 layout (location = 1) out vec3 gNormal;
 layout (location = 2) out vec4 gAlbedoSpec;
+layout (location = 3) out vec3 gReflect_mask;
 
 in vec2 TexCoord;
 in vec3 Normal;
@@ -21,5 +22,6 @@ void main()
     gNormal = normalize(Normal);
     gAlbedoSpec.xyz = texture(texture_diffuse1, TexCoord).rgb;
     gAlbedoSpec.w = texture(texture_specular1, TexCoord).r;
+    gReflect_mask = vec3(0.0);
 
 }

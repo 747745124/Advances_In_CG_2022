@@ -6,9 +6,10 @@ uniform mat4 view;
 uniform mat4 projection;
 uniform vec4 plane;
 
+out vec3 FragPos;
+
 void main()
 {
-    vec4 World_Pos =  model * vec4(aPos, 1.0f);
-    gl_ClipDistance[0] = dot(World_Pos , plane);
-    gl_Position = projection * view * World_Pos;
+    FragPos = vec3(model * vec4(aPos, 1.0f));
+    gl_Position = projection * view * vec4(FragPos, 1.0);
 }

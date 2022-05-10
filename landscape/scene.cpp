@@ -22,6 +22,7 @@ namespace KooNan
 		{
 			types.push_back("texture_diffuse");
 		}
+		
 		TextureManager texman(GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 		std::vector<Texture> textures = texman.LoadTexture(ground_path, types);
 		std::vector<Texture> ground_textures;
@@ -47,21 +48,28 @@ namespace KooNan
 					all_water_chunks.push_back(water_surface);
 				}
 			}
+		
 		WaterShader.use();
+		
+#ifndef DEFERRED_SHADING
 		WaterShader.setVec3("material.diffuse", glm::vec3(0.2, 0.2, 0.2));
 		WaterShader.setVec3("material.specular", glm::vec3(1.0, 1.0, 1.0));
 		WaterShader.setFloat("material.shininess", 128.0f);
+#endif // !DEFERRED_SHADING
 		setDudvMap(textures[textures.size() - 2].id);
 		setNormalMap(textures[textures.size() - 1].id);
+
+		
 
 	}
 
 	void Scene::DrawSky()
 	{
 		SkyShader.use();
+		
 		Camera& cam = GameController::mainCamera;
 		glm::mat4 projection = glm::perspective(glm::radians(cam.Zoom), (float)Common::SCR_WIDTH / (float)Common::SCR_HEIGHT, 0.1f, 1000.0f);
-		skybox.Draw(SkyShader, glm::scale(glm::mat4(1.0f), glm::vec3(500.0f)), cam.GetViewMatrix(), projection);
+		skybox.Draw(SkyShader, glm::scale(glm::mat4(1.0f), glm::vec3(150.0f)), cam.GetViewMatrix(), projection);
 	}
 
 	void Scene::DrawScene(float deltaTime, const glm::vec4* clippling_plane, bool draw_water, bool draw_shadow)
@@ -75,7 +83,6 @@ namespace KooNan
 		if (draw_shadow)
 		{
 			TerrainShader.use();
-			TerrainShader.setMat4("model", glm::identity<glm::mat4>());//identity model matrix
 			TerrainShader.setMat4("projection", projection);
 			TerrainShader.setMat4("view", view);
 			if (clippling_plane)
@@ -93,18 +100,17 @@ namespace KooNan
 		else
 		{
 			TerrainShader.use();
-			TerrainShader.setMat4("model", glm::identity<glm::mat4>());//identity model matrix
 			TerrainShader.setMat4("projection", projection);
 			TerrainShader.setMat4("view", view);
+			TerrainShader.setMat4("model", glm::mat4(1.0f));
 			if (clippling_plane)
 				TerrainShader.setVec4("plane", *clippling_plane);
-			TerrainShader.setVec3("viewPos", viewPos);
-			TerrainShader.setVec3("skyColor", glm::vec3(0.527f, 0.805f, 0.918f));
 			for (int i = 0; i < all_terrain_chunks.size(); i++)
 			{
 				all_terrain_chunks[i].Draw(TerrainShader);
 			}
 		}
+		
 		if (draw_water)
 		{
 			waterMoveFactor += deltaTime * 0.1f;
@@ -151,17 +157,14 @@ namespace KooNan
 				glBindTexture(GL_TEXTURE_2D, dudvMap);
 				glActiveTexture(GL_TEXTURE1);
 				glBindTexture(GL_TEXTURE_2D, normalMap);
-
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_ONE, GL_ONE);
 				for (int j = 0; j < all_water_chunks.size(); j++)
 				{
 					all_water_chunks[j].Draw(WaterShader);
 				}
-				glDisable(GL_BLEND);
+				
 			}
-			
 		}
+		
 		
 	}
 

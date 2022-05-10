@@ -72,6 +72,8 @@ std::vector<std::string> groundPaths = {
 void addlights(Light &light);
 
 Shader *DeferredShading::lightingShader = nullptr;
+Shader* DeferredShading::ssrShader = nullptr;
+Shader* DeferredShading::finalShader = nullptr;
 GLFWwindow *Common::gWindow = nullptr;
 int main()
 {
@@ -81,6 +83,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 #ifndef DEFERRED_SHADING
 	glfwWindowHint(GLFW_SAMPLES, 4);
 #endif // !DEFERRED_SHADING
@@ -101,7 +104,7 @@ int main()
 		return -1;
 	}
 	GameController::initGameController(window);
-
+	
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -109,6 +112,8 @@ int main()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
+	//There is an error but I don't exactly know why
+	glGetError();//!!!!!!!!!!!!!!!!!!!!!!!Clear it
 
 	// configure global opengl state
 	// -----------------------------
@@ -125,7 +130,11 @@ int main()
 	Shader modelShader(FileSystem::getPath("shaders/deferred/gbuffer.vs").c_str(), FileSystem::getPath("shaders/deferred/gbuffer.fs").c_str());
 	Shader shadowShader(FileSystem::getPath("shaders/deferred/shadow.vs").c_str(), FileSystem::getPath("shaders/deferred/shadow.fs").c_str());
 	Shader lightingShader(FileSystem::getPath("shaders/deferred/light.vs").c_str(), FileSystem::getPath("shaders/deferred/light.fs").c_str());
+	Shader ssrShader(FileSystem::getPath("shaders/deferred/ssr.vs").c_str(), FileSystem::getPath("shaders/deferred/ssr.fs").c_str());
+	Shader finalShader(FileSystem::getPath("shaders/deferred/mixcolor.vs").c_str(), FileSystem::getPath("shaders/deferred/mixcolor.fs").c_str());
 	DeferredShading::lightingShader = &lightingShader;
+	DeferredShading::ssrShader = &ssrShader;
+	DeferredShading::finalShader = &finalShader;
 #else
 	Shader terrainShader(FileSystem::getPath("shaders/forward/terrain.vs").c_str(), FileSystem::getPath("shaders/forward/terrain.fs").c_str());
 	Shader waterShader(FileSystem::getPath("shaders/forward/water.vs").c_str(), FileSystem::getPath("shaders/forward/water.fs").c_str());
@@ -135,7 +144,7 @@ int main()
 	Shader modelShader(FileSystem::getPath("shaders/forward/model.vs").c_str(), FileSystem::getPath("shaders/forward/model.fs").c_str());
 	Shader shadowShader(FileSystem::getPath("shaders/forward/shadow.vs").c_str(), FileSystem::getPath("shaders/forward/shadow.fs").c_str());
 #endif
-
+	
 	// Instantiate the main_scene
 	Scene main_scene(256.0f, 1, 1, -0.7f, terrainShader, waterShader, skyShader, groundPaths, skyboxPaths);
 	GameController::mainScene = &main_scene; // 这个设计实在是不行
@@ -152,9 +161,9 @@ int main()
 	// ------------------------------------
 	DirLight parallel{
 		glm::vec3(0.3f, -0.7f, 1.0f),
-		glm::vec3(0.45f, 0.45f, 0.45f),
+		glm::vec3(0.3f, 0.3f, 0.3f),
 		glm::vec3(0.35f, 0.35f, 0.35f),
-		glm::vec3(0.1f, 0.1f, 0.1f)};
+		glm::vec3(0.4f, 0.4f, 0.4f)};
 	Light main_light(parallel, lightShader);
 	GameController::mainLight = &main_light; // 这个设计实在不行
 
@@ -193,6 +202,7 @@ int main()
 		main_renderer.DrawRefraction(modelShader);
 
 #endif // !DEFERRED_SHADING
+		
 
 		main_renderer.DrawAll(pickingShader, modelShader, shadowShader);
 
@@ -246,3 +256,4 @@ void addlights(Light &light)
 		light.AddPointLight(l);
 	}
 }
+
