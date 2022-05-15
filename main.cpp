@@ -72,8 +72,10 @@ std::vector<std::string> groundPaths = {
 void addlights(Light &light);
 
 Shader *DeferredShading::lightingShader = nullptr;
-Shader* DeferredShading::ssrShader = nullptr;
-Shader* DeferredShading::finalShader = nullptr;
+Shader *DeferredShading::ssrShader = nullptr;
+Shader *DeferredShading::finalShader = nullptr;
+Shader *DeferredShading::ssaoShader = nullptr;
+Shader* DeferredShading::simpleBlurShader = nullptr;
 GLFWwindow *Common::gWindow = nullptr;
 int main()
 {
@@ -132,9 +134,13 @@ int main()
 	Shader lightingShader(FileSystem::getPath("shaders/deferred/light.vs").c_str(), FileSystem::getPath("shaders/deferred/light.fs").c_str());
 	Shader ssrShader(FileSystem::getPath("shaders/deferred/ssr.vs").c_str(), FileSystem::getPath("shaders/deferred/ssr.fs").c_str());
 	Shader finalShader(FileSystem::getPath("shaders/deferred/mixcolor.vs").c_str(), FileSystem::getPath("shaders/deferred/mixcolor.fs").c_str());
+	Shader ssaoShader(FileSystem::getPath("shaders/deferred/ssao.vs").c_str(), FileSystem::getPath("shaders/deferred/ssao.fs").c_str());
+	Shader simpleblurShader(FileSystem::getPath("shaders/deferred/simpleblur.vs").c_str(), FileSystem::getPath("shaders/deferred/simpleblur.fs").c_str());
 	DeferredShading::lightingShader = &lightingShader;
 	DeferredShading::ssrShader = &ssrShader;
 	DeferredShading::finalShader = &finalShader;
+	DeferredShading::ssaoShader = &ssaoShader;
+	DeferredShading::simpleBlurShader = &simpleblurShader;
 #else
 	Shader terrainShader(FileSystem::getPath("shaders/forward/terrain.vs").c_str(), FileSystem::getPath("shaders/forward/terrain.fs").c_str());
 	Shader waterShader(FileSystem::getPath("shaders/forward/water.vs").c_str(), FileSystem::getPath("shaders/forward/water.fs").c_str());

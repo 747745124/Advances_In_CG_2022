@@ -13,7 +13,9 @@
 #include "GameController.h"
 #include "gbuffer.h"
 #include "deferredshading.h"
-#include "reflectionbuffer.h"
+#include "ssrbuffer.h"
+#include "ssaobuffer.h"
+#include "ssaoblurbuffer.h"
 
 namespace KooNan
 {
@@ -26,7 +28,9 @@ namespace KooNan
 		PickingTexture &mouse_picking;
 		Shadow_Frame_Buffer &shadowfb;
 		GBuffer gbuf;
-		ReflectionBuffer rbuf;
+		SSRBuffer rbuf;
+		SSAOBuffer aobuf;
+		SSAOBlurBuffer aoblurbuf;
 	public:
 		Render(Scene &main_scene, Light &main_light, Water_Frame_Buffer &waterfb, PickingTexture &mouse_picking, Shadow_Frame_Buffer &shadowfb) : main_scene(main_scene), main_light(main_light), waterfb(waterfb), mouse_picking(mouse_picking), shadowfb(shadowfb)
 		{
@@ -119,14 +123,25 @@ namespace KooNan
 			main_scene.DrawSky();
 			main_light.Draw(nullptr);
 
+			gbuf.bindTexture();
+			aobuf.bindToWrite();
+			glClear(GL_COLOR_BUFFER_BIT);
+			DeferredShading::setSSAOShader();
+			DeferredShading::DrawQuad();
+
+			aobuf.bindTexture();
+			aoblurbuf.bindToWrite();
+			DeferredShading::setSimpleBlurShader();
+			DeferredShading::DrawQuad();
+
 			//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-			//gbuf.bindToRead();
-			//glReadBuffer(GL_COLOR_ATTACHMENT2);
+			//aoblurbuf.bindToRead();
 			//glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 			
 			// Render with lighting
 			gbuf.bindTexture();
+			aoblurbuf.bindTexture();
 			rbuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			InitLighting(*DeferredShading::lightingShader);
@@ -145,11 +160,6 @@ namespace KooNan
 			DeferredShading::setSSRShader();
 			DeferredShading::DrawQuad();
 
-			//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			//rbuf.bindToRead();
-			//glReadBuffer(GL_COLOR_ATTACHMENT0);
-			//glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 			
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

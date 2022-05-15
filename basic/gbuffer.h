@@ -7,11 +7,13 @@ namespace KooNan {
 	class GBuffer {
 	public:
 		GBuffer() { gbuffer_init(); }
+		~GBuffer() { cleanUp(); }
 		void bindToRead();
 		void bindToWrite();
 		void bindTexture();
 	private:
 		void gbuffer_init();
+		void cleanUp();
 		GLuint gbuffer;
 		GLuint gPos_text, gNorm_text, gAlbeSpec_text, gDepth_buf, gReflect_mask;
 	};
@@ -62,9 +64,6 @@ namespace KooNan {
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, gDepth_buf);
 
-		
-
-		
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			std::cout << "Framebuffer not complete!" << std::endl;
@@ -72,6 +71,14 @@ namespace KooNan {
 		
 		//Restore to default
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void GBuffer::cleanUp()
+	{
+		glDeleteFramebuffers(1, &gbuffer);
+		GLuint texts[] = { gPos_text ,gNorm_text ,gAlbeSpec_text,gReflect_mask };
+		glDeleteTextures(sizeof(texts) / sizeof(GLuint), texts);
+		glDeleteRenderbuffers(1, &gDepth_buf);
 	}
 
 	void GBuffer::bindToRead()

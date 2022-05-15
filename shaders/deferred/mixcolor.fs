@@ -10,7 +10,7 @@ void main()
 {
     vec4 origin_color = texture(rColor, aTexCoords);
 
-    int scan_size = 5;
+    int scan_size = 8;
     float separation = 2.0;
     vec4 uv = texture(rTexcoord, aTexCoords);
     if(uv.z<=0.0)
@@ -25,6 +25,6 @@ void main()
         uv.xyz/=count;
     }
     if (uv.z <= 0.0) { FragColor = origin_color; return;}
-    FragColor = mix(origin_color, texture(rColor, uv.xy), 0.75);
+    FragColor = texture(rColor, uv.xy);
     
 }

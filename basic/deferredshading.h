@@ -14,6 +14,8 @@ namespace KooNan {
         static Shader* lightingShader;
         static Shader* ssrShader;
         static Shader* finalShader;
+        static Shader* ssaoShader;
+        static Shader* simpleBlurShader;
         static void DrawQuad()
 		{
 			static GLuint quadVAO = 0;
@@ -51,7 +53,8 @@ namespace KooNan {
             lightingShader->setInt("gPosition", 0);
             lightingShader->setInt("gNormal", 1);
             lightingShader->setInt("gAlbedoSpec", 2);
-            lightingShader->setInt("gReflect_mask", 3);
+            lightingShader->setInt("gMask", 3);
+            lightingShader->setInt("SSAOMask", 4);
         }
         static void setSSRShader()
         {
@@ -63,15 +66,92 @@ namespace KooNan {
             ssrShader->setInt("gNormal", 1);
             ssrShader->setInt("gReflect_mask", 3);
             ssrShader->setVec3("viewPos", GameController::mainCamera.Position);
-
         }
         static void setFinalShader()
         {
             finalShader->use();
             finalShader->setInt("rColor", 0);
             finalShader->setInt("rTexcoord", 1);
-            
         }
+        static void setSSAOShader()
+        {
+            
+            static std::vector<glm::vec3> ssaoKernel;
+            if (ssaoKernel.empty())
+            {
+                //Kernel data initialization
+                SSAOKernalInit(ssaoKernel);
+            }
+            static GLuint noiseTexture = 0;
+            if (!noiseTexture)
+            {
+                //Generate noise map
+                SSAONoiseTextureInit(noiseTexture);
+            }
+            glActiveTexture(GL_TEXTURE4);
+            glBindTexture(GL_TEXTURE_2D, noiseTexture);
+
+            ssaoShader->use();
+            Camera& cam = GameController::mainCamera;
+            ssaoShader->setInt("gPosition", 0);
+            ssaoShader->setInt("gNormal", 1);
+            ssaoShader->setInt("gMask", 3);
+            ssaoShader->setInt("texNoise", 4);
+            ssaoShader->setMat4("projection", Common::GetPerspectiveMat(cam));
+            ssaoShader->setMat4("view", cam.GetViewMatrix());
+            for (int i = 0; i < ssaoKernel.size(); i++)
+            {
+                ssaoShader->setVec3("samples[" + std::to_string(i) + "]", ssaoKernel[i]);
+            }
+        }
+        static void setSimpleBlurShader()
+        {
+            simpleBlurShader->use();
+            simpleBlurShader->setInt("Input", 4);
+        }
+    private:
+        static void SSAOKernalInit(std::vector<glm::vec3>& ssaoKernel)
+        {
+            std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0);
+            std::default_random_engine generator;
+            for (GLuint i = 0; i < 64; ++i)
+            {
+                glm::vec3 sample(
+                    randomFloats(generator) * 2.0 - 1.0,
+                    randomFloats(generator) * 2.0 - 1.0,
+                    randomFloats(generator)
+                );
+                sample = glm::normalize(sample);
+                sample *= randomFloats(generator);
+                GLfloat scale = GLfloat(i) / 64.0;
+                scale = 0.1f + scale * scale * 0.9;
+                sample *= scale;
+                ssaoKernel.push_back(sample);
+            }
+        }
+        static void SSAONoiseTextureInit(GLuint& noiseTexture)
+        {
+            std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0);
+            std::default_random_engine generator;
+            std::vector<glm::vec3> ssaoNoise;
+            for (GLuint i = 0; i < 16; i++)
+            {
+                glm::vec3 noise(
+                    randomFloats(generator) * 2.0 - 1.0,
+                    randomFloats(generator) * 2.0 - 1.0,
+                    0.0f);
+                ssaoNoise.push_back(noise);
+            }
+
+            glGenTextures(1, &noiseTexture);
+            glBindTexture(GL_TEXTURE_2D, noiseTexture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 4, 4, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        }
+
 	};
     
 }

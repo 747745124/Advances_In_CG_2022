@@ -1,23 +1,25 @@
-#ifndef REFLECTION_BUFFER_H
-#define REFLECTION_BUFFER_H
+#ifndef SSRBUFFER_H
+#define SSRBUFFER_H
 
 #include <glad/glad.h>
 #include "common.h"
 
 namespace KooNan {
-	class ReflectionBuffer {
+	class SSRBuffer {
 	public:
-		ReflectionBuffer() { reflectionbuffer_init(); }
+		SSRBuffer() { reflectionbuffer_init(); }
+		~SSRBuffer() { cleanUp(); }
 		void bindToWrite();
 		void bindToRead();
 		void bindTexture();
 	private:
 		void reflectionbuffer_init();
+		void cleanUp();
 		GLuint refbuffer;
 		GLuint rColor_text, rTexcoord_text, rDepth_buf;
 	};
 
-	void ReflectionBuffer::reflectionbuffer_init()
+	void SSRBuffer::reflectionbuffer_init()
 	{
 		unsigned SCR_WIDTH = Common::SCR_WIDTH;
 		unsigned SCR_HEIGHT = Common::SCR_HEIGHT;
@@ -53,17 +55,25 @@ namespace KooNan {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	}
-	void ReflectionBuffer::bindToWrite()
+	void SSRBuffer::cleanUp()
+	{
+		glDeleteFramebuffers(1, &refbuffer);
+		GLuint texts[] = { rColor_text ,rTexcoord_text };
+		glDeleteTextures(sizeof(texts) / sizeof(GLuint), texts);
+		glDeleteRenderbuffers(1, &rDepth_buf);
+	}
+
+	void SSRBuffer::bindToWrite()
 	{
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, refbuffer);
 	}
 
-	void ReflectionBuffer::bindToRead()
+	void SSRBuffer::bindToRead()
 	{
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, refbuffer);
 	}
 
-	void ReflectionBuffer::bindTexture()
+	void SSRBuffer::bindTexture()
 	{
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, rColor_text);
