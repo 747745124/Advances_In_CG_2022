@@ -25,3 +25,9 @@
 完成了基本的SSR水面反射
 
 修改shader类使得它在给shader内变量赋值后检查错误
+
+## 22-05-15 commit 49640f1
+
+增加了基本的SSAO计算
+
+将SSR计算中的thickness改为根据距离确定的值，以便于消除水面上近处物体造成的artifact
