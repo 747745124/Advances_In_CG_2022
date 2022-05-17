@@ -11,6 +11,7 @@ namespace KooNan
 		SomeEntities.setVec3("dirLight.ambient", parallel_light.ambient);
 		SomeEntities.setVec3("dirLight.diffuse", parallel_light.diffuse);
 		SomeEntities.setVec3("dirLight.specular", parallel_light.specular);
+		SomeEntities.setMat4("view", GameController::mainCamera.GetViewMatrix());
 
 		std::string s_lights = "pointLights[";
 		std::string s_position = "].position";

@@ -14,6 +14,7 @@ uniform float moveOffset;
 
 const float distStrength = 0.004;
 
+in mat4 trans_inv_view;
 
 void main()
 {
@@ -24,8 +25,8 @@ void main()
 
     vec4 normalMapColor = texture(normalMap, distortedTexCoords);
     //Get normals in world space
-    vec3 normal = vec3(normalMapColor.r * 2.0 - 1.0, normalMapColor.b * 5.0, normalMapColor.g * 2.0 - 1.0);
-    gNormal = normalize(normal);
+    vec3 normal = vec3(normalMapColor.r * 2.0 - 1.0, normalMapColor.b * 8.0, normalMapColor.g * 2.0 - 1.0);
+    gNormal = mat3(trans_inv_view)*normalize(normal);
     //gAlbedoSpec = vec4(0.0f, 0.0f, 0.0f, 0.2f);
-    gReflect_mask = vec3(0.5f, 0.0f, 0.0f);
+    gReflect_mask = vec3(0.99f, 0.0f, 0.0f);
 }

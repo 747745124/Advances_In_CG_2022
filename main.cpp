@@ -73,9 +73,11 @@ void addlights(Light &light);
 
 Shader *DeferredShading::lightingShader = nullptr;
 Shader *DeferredShading::ssrShader = nullptr;
-Shader *DeferredShading::finalShader = nullptr;
+Shader *DeferredShading::reflectDrawShader = nullptr;
 Shader *DeferredShading::ssaoShader = nullptr;
-Shader* DeferredShading::simpleBlurShader = nullptr;
+Shader *DeferredShading::simpleBlurShader = nullptr;
+Shader *DeferredShading::kuwaharaBlurShader = nullptr;
+Shader *DeferredShading::combineColorShader = nullptr;
 GLFWwindow *Common::gWindow = nullptr;
 int main()
 {
@@ -133,14 +135,18 @@ int main()
 	Shader shadowShader(FileSystem::getPath("shaders/deferred/shadow.vs").c_str(), FileSystem::getPath("shaders/deferred/shadow.fs").c_str());
 	Shader lightingShader(FileSystem::getPath("shaders/deferred/light.vs").c_str(), FileSystem::getPath("shaders/deferred/light.fs").c_str());
 	Shader ssrShader(FileSystem::getPath("shaders/deferred/ssr.vs").c_str(), FileSystem::getPath("shaders/deferred/ssr.fs").c_str());
-	Shader finalShader(FileSystem::getPath("shaders/deferred/mixcolor.vs").c_str(), FileSystem::getPath("shaders/deferred/mixcolor.fs").c_str());
+	Shader reflectDrawShader(FileSystem::getPath("shaders/deferred/reflectdraw.vs").c_str(), FileSystem::getPath("shaders/deferred/reflectdraw.fs").c_str());
 	Shader ssaoShader(FileSystem::getPath("shaders/deferred/ssao.vs").c_str(), FileSystem::getPath("shaders/deferred/ssao.fs").c_str());
 	Shader simpleblurShader(FileSystem::getPath("shaders/deferred/simpleblur.vs").c_str(), FileSystem::getPath("shaders/deferred/simpleblur.fs").c_str());
+	Shader kuwaharaBlurShader(FileSystem::getPath("shaders/deferred/kuwaharablur.vs").c_str(), FileSystem::getPath("shaders/deferred/kuwaharablur.fs").c_str());
+	Shader combineColorShader(FileSystem::getPath("shaders/deferred/combinecolor.vs").c_str(), FileSystem::getPath("shaders/deferred/combinecolor.fs").c_str());
 	DeferredShading::lightingShader = &lightingShader;
 	DeferredShading::ssrShader = &ssrShader;
-	DeferredShading::finalShader = &finalShader;
+	DeferredShading::reflectDrawShader = &reflectDrawShader;
 	DeferredShading::ssaoShader = &ssaoShader;
 	DeferredShading::simpleBlurShader = &simpleblurShader;
+	DeferredShading::kuwaharaBlurShader = &kuwaharaBlurShader;
+	DeferredShading::combineColorShader = &combineColorShader;
 #else
 	Shader terrainShader(FileSystem::getPath("shaders/forward/terrain.vs").c_str(), FileSystem::getPath("shaders/forward/terrain.fs").c_str());
 	Shader waterShader(FileSystem::getPath("shaders/forward/water.vs").c_str(), FileSystem::getPath("shaders/forward/water.fs").c_str());

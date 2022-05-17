@@ -35,11 +35,13 @@ struct DirLight {
 uniform DirLight dirLight;
 uniform PointLight pointLights[NR_POINT_LIGHTS];
 
+uniform mat4 view;
+
 uniform vec3 viewPos;
 
 vec3 CalcDirLight(DirLight light, vec3 color, float spec, vec3 normal, vec3 viewDir, float water_mask, float ambient_mask)
 {
-    vec3 lightDir = normalize(-light.direction);
+    vec3 lightDir = mat3(view)*normalize(-light.direction);
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
     // specular shading
@@ -56,14 +58,14 @@ vec3 CalcDirLight(DirLight light, vec3 color, float spec, vec3 normal, vec3 view
 
 vec3 CalcPointLight(PointLight light, vec3 color, float spec, vec3 normal, vec3 fragPos, vec3 viewDir, float water_mask, float ambient_mask)
 {
-    vec3 lightDir = normalize(light.position - fragPos);
+    vec3 lightDir = normalize(vec3(view*vec4(light.position,1.0)) - fragPos);
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
     // specular shading
     vec3 half_vec = normalize(lightDir+viewDir);
     float specCalc = pow(clamp(dot(half_vec, normal), 0.0f, 1.0f), 256.0f);
     // attenuation
-    float distance = length(light.position - fragPos);
+    float distance = length(vec3(view*vec4(light.position,1.0)) - fragPos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
     // combine results
     vec3 ambient = light.ambient * color * ambient_mask;
@@ -86,11 +88,11 @@ void main()
     vec3 mask = texture(gMask, TexCoord).rgb;
     float ssao = texture(SSAOMask, TexCoord).r;
     float spec = texture(gAlbedoSpec, TexCoord).w;
-    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 viewDir = normalize(FragPos);
     float ref_mask = mask.x>0.f?0.:1.; 
 	vec3 result = CalcDirLight(dirLight, Color, spec, Norm, viewDir, ref_mask, ssao);
 	for(int i = 0; i < NR_POINT_LIGHTS; i++)
         result += CalcPointLight(pointLights[i], Color, spec, Norm, FragPos, viewDir, ref_mask, ssao);    
 
-	FragColor = mask.y>=0.1f?Color:result;
+	FragColor = (mask.x+mask.y)>=0.1f?Color:result;
 }

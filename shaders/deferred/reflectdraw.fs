@@ -10,7 +10,7 @@ void main()
 {
     vec4 origin_color = texture(rColor, aTexCoords);
 
-    int scan_size = 8;
+    int scan_size = 3;
     float separation = 2.0;
     vec4 uv = texture(rTexcoord, aTexCoords);
     if(uv.z<=0.0)
@@ -19,12 +19,14 @@ void main()
         for(int i=-scan_size;i<=scan_size;i++)
             for(int j=-scan_size;j<=scan_size;j++)
             {
-                uv+=texture(rTexcoord, aTexCoords+vec2(i,j)*separation);
-                count++;
+                vec4 sampled_uv=texture(rTexcoord, aTexCoords+vec2(i,j)*separation);
+                uv+=sampled_uv;
+                count+=(sampled_uv.z>=0.0?1:0);
             }
+        count = max(1,count);
         uv.xyz/=count;
     }
-    if (uv.z <= 0.0) { FragColor = origin_color; return;}
+    if (uv.z <= 0.0) { FragColor = vec4(0.0); return;}
     FragColor = texture(rColor, uv.xy);
     
 }

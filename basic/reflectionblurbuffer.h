@@ -1,35 +1,35 @@
-#ifndef SSAOBLURBUFFER_H
-#define SSAOBLURBUFFER_H
+#ifndef REFLECTIONBLURBUFFER_H
+#define REFLECTIONBLURBUFFER_H
 
 #include <glad/glad.h>
 #include "common.h"
 
 namespace KooNan {
-	class SSAOBlurBuffer {
+	class ReflectionBlurBuffer {
 	public:
-		SSAOBlurBuffer() { aoblurbuffer_init(); }
-		~SSAOBlurBuffer() { cleanUp(); }
+		ReflectionBlurBuffer() { refblurbuffer_init(); }
+		~ReflectionBlurBuffer() { cleanUp(); }
 		void bindToWrite();
 		void bindToRead();
 		void bindTexture();
 	private:
-		void aoblurbuffer_init();
+		void refblurbuffer_init();
 		void cleanUp();
-		GLuint aoblurbuffer;
+		GLuint refblurbuffer;
 		GLuint blurred_text;
 	};
 
-	void SSAOBlurBuffer::aoblurbuffer_init()
+	void ReflectionBlurBuffer::refblurbuffer_init()
 	{
 		unsigned SCR_WIDTH = Common::SCR_WIDTH;
 		unsigned SCR_HEIGHT = Common::SCR_HEIGHT;
 
-		glGenFramebuffers(1, &aoblurbuffer);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, aoblurbuffer);
+		glGenFramebuffers(1, &refblurbuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, refblurbuffer);
 
 		glGenTextures(1, &blurred_text);
 		glBindTexture(GL_TEXTURE_2D, blurred_text);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, blurred_text, 0);
@@ -40,28 +40,26 @@ namespace KooNan {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void SSAOBlurBuffer::cleanUp()
+	void ReflectionBlurBuffer::cleanUp()
 	{
-		glDeleteFramebuffers(1, &aoblurbuffer);
+		glDeleteFramebuffers(1, &refblurbuffer);
 		glDeleteTextures(1, &blurred_text);
 	}
 
-	void SSAOBlurBuffer::bindToWrite()
+	void ReflectionBlurBuffer::bindToWrite()
 	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, aoblurbuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, refblurbuffer);
 	}
 
-	void SSAOBlurBuffer::bindToRead()
+	void ReflectionBlurBuffer::bindToRead()
 	{
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, aoblurbuffer);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, refblurbuffer);
 	}
 
-	void SSAOBlurBuffer::bindTexture()
+	void ReflectionBlurBuffer::bindTexture()
 	{
-		//GL_TEXTURE0-GL_TEXTURE3 is used by gbuffer
-		glActiveTexture(GL_TEXTURE4);
+		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, blurred_text);
 	}
 }
-
-#endif
+#endif // !REFLECTIONBLUR_H

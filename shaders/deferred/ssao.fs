@@ -22,12 +22,10 @@ out float FragColor;
 
 void main()
 {
-    //fragpos in world space
+    //fragpos in view space
     vec4 FragPos = vec4(texture(gPosition, aTexCoords).xyz, 1.0);
-    FragPos = view * FragPos;
-    //normal in world space
+    //normal in view space
     vec3 normal = texture(gNormal, aTexCoords).xyz;
-    normal = mat3(transpose(inverse(view))) * normal;
     vec2 texSize = textureSize(gPosition, 0).xy;
     vec2 texNoiseScale = texSize/4.0f;
     vec3 randomSpin = texture(texNoise, aTexCoords*texNoiseScale).xyz;
@@ -45,7 +43,7 @@ void main()
         vec4 sampleScreenCoord = projection*vec4(sample, 1.0);
         sampleScreenCoord.xyz /= sampleScreenCoord.w;
         sampleScreenCoord.xyz = sampleScreenCoord.xyz*0.5+0.5;
-        float sampleScreenZ = (view*vec4(texture(gPosition, sampleScreenCoord.xy).xyz,1.0)).z;
+        float sampleScreenZ = vec4(texture(gPosition, sampleScreenCoord.xy).xyz,1.0).z;
 
         float rangeCheck = smoothstep(0.0,1.0,radius/abs(FragPos.z-sampleScreenZ));
         visibility += (abs(sample.z)>=abs(sampleScreenZ)?1.0:0.0)*rangeCheck;

@@ -13,9 +13,11 @@ namespace KooNan {
         DeferredShading() = delete;
         static Shader* lightingShader;
         static Shader* ssrShader;
-        static Shader* finalShader;
+        static Shader* reflectDrawShader;
         static Shader* ssaoShader;
         static Shader* simpleBlurShader;
+        static Shader* kuwaharaBlurShader;
+        static Shader* combineColorShader;
         static void DrawQuad()
 		{
 			static GLuint quadVAO = 0;
@@ -67,11 +69,11 @@ namespace KooNan {
             ssrShader->setInt("gReflect_mask", 3);
             ssrShader->setVec3("viewPos", GameController::mainCamera.Position);
         }
-        static void setFinalShader()
+        static void setReflectDrawShader()
         {
-            finalShader->use();
-            finalShader->setInt("rColor", 0);
-            finalShader->setInt("rTexcoord", 1);
+            reflectDrawShader->use();
+            reflectDrawShader->setInt("rColor", 0);
+            reflectDrawShader->setInt("rTexcoord", 1);
         }
         static void setSSAOShader()
         {
@@ -108,6 +110,20 @@ namespace KooNan {
         {
             simpleBlurShader->use();
             simpleBlurShader->setInt("Input", 4);
+        }
+        static void setKuwaharaBlurShader()
+        {
+            kuwaharaBlurShader->use();
+            kuwaharaBlurShader->setInt("Input", 1);
+            kuwaharaBlurShader->setInt("Mask", 3);
+            kuwaharaBlurShader->setVec2("parameters", glm::vec2(1.0f));
+        }
+        static void setCombineColorShader()
+        {
+            combineColorShader->use();
+            combineColorShader->setInt("Tcolor", 0);
+            combineColorShader->setInt("Treflection", 1);
+            combineColorShader->setInt("gMask", 3);
         }
     private:
         static void SSAOKernalInit(std::vector<glm::vec3>& ssaoKernel)

@@ -18,18 +18,16 @@ layout (location = 1) out vec3 reflected_uv;
 void main()
 {
     //parameters
-    float maxDistance = 500;
+    float maxDistance = 250;
     float resolution = 0.8;
-    int   steps = 16;
-    float min_thickness = 0.2;
+    int   steps = 32;
+    float min_thickness = 0.01;
     float max_thickness = 15;
 
     vec2 texSize  = textureSize(gPosition, 0).xy;
 
-    //frag position in world space
-    vec4 positionWorld = vec4(texture(gPosition, aTexCoords).xyz, 1.0);
-    //convert to view space
-    vec4 positionFrom = view * positionWorld;
+    //frag position in view space
+    vec4 positionFrom = vec4(texture(gPosition, aTexCoords).xyz, 1.0);
     vec4 unitpositionFrom = normalize(positionFrom);
     //get reflection mask
     float mask = texture(gReflect_mask, aTexCoords).x;
@@ -40,14 +38,14 @@ void main()
         return;
     }
 
-    //normal in world space
+    //normal in view space
     vec3 normal = normalize(texture(gNormal, aTexCoords).xyz);
-    //ray in world space
-    vec3 viewRay = positionWorld.xyz-viewPos;
-    //reflect ray in world space
-    vec4 pivotWorld = vec4(reflect(viewRay, normal), 0.0);
+    //ray in view space
+    vec3 viewRay = positionFrom.xyz;
+    //reflect ray in view space
+    vec4 pivotView = vec4(reflect(viewRay, normal), 0.0);
     //convert reflected ray to view space
-    vec3 pivot = normalize(vec3(view * pivotWorld));
+    vec3 pivot = normalize(vec3(pivotView));
 
     vec4 positionTo = positionFrom;
     //start and end point in view space
@@ -97,14 +95,14 @@ void main()
             break;
         }
         //get view space position of current pixel
-        positionTo = view * vec4(texture(gPosition, uv.xy).xyz, 1.0);
+        positionTo = vec4(texture(gPosition, uv.xy).xyz, 1.0);
         search1 = mix((frag.y-startFrag.y)/deltaY, (frag.x-startFrag.x)/deltaX, useX);
         search1 = clamp(search1, 0., 1.);
         //Perform perspective correct intrapolation
         currentZ = (startView.z * endView.z)/mix(endView.z, startView.z, search1);
         depth = abs(currentZ) - abs(positionTo.z);
         //curr_thickness is determined by current search position, the further the thicker
-        curr_thickness = min_thickness + i/int(delta)*(max_thickness-min_thickness);
+        curr_thickness = min_thickness + smoothstep(0,1,i/int(delta))*(max_thickness-min_thickness);
         //check if intersected
         if (depth>0 && depth<curr_thickness) 
         {
@@ -132,7 +130,7 @@ void main()
             break;
         }
         //get view space position of current pixel
-        positionTo = view * vec4(texture(gPosition, uv.xy).xyz, 1.0);
+        positionTo = vec4(texture(gPosition, uv.xy).xyz, 1.0);
         //Perform perspective correct intrapolation
         currentZ = (startView.z * endView.z)/mix(endView.z, startView.z, search1);
         depth = abs(currentZ) - abs(positionTo.z);

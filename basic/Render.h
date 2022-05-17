@@ -16,6 +16,8 @@
 #include "ssrbuffer.h"
 #include "ssaobuffer.h"
 #include "ssaoblurbuffer.h"
+#include "reflectionblurbuffer.h"
+#include "reflectiondrawbuffer.h"
 
 namespace KooNan
 {
@@ -28,9 +30,11 @@ namespace KooNan
 		PickingTexture &mouse_picking;
 		Shadow_Frame_Buffer &shadowfb;
 		GBuffer gbuf;
-		SSRBuffer rbuf;
+		SSRBuffer ssrbuf;
 		SSAOBuffer aobuf;
 		SSAOBlurBuffer aoblurbuf;
+		ReflectionDrawBuffer reflectdrawbuf;
+		ReflectionBlurBuffer reflectblurbuf;
 	public:
 		Render(Scene &main_scene, Light &main_light, Water_Frame_Buffer &waterfb, PickingTexture &mouse_picking, Shadow_Frame_Buffer &shadowfb) : main_scene(main_scene), main_light(main_light), waterfb(waterfb), mouse_picking(mouse_picking), shadowfb(shadowfb)
 		{
@@ -133,16 +137,11 @@ namespace KooNan
 			aoblurbuf.bindToWrite();
 			DeferredShading::setSimpleBlurShader();
 			DeferredShading::DrawQuad();
-
-			//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-			//aoblurbuf.bindToRead();
-			//glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
 			
 			// Render with lighting
 			gbuf.bindTexture();
 			aoblurbuf.bindTexture();
-			rbuf.bindToWrite();
+			ssrbuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			InitLighting(*DeferredShading::lightingShader);
 			glDisable(GL_BLEND);
@@ -152,22 +151,25 @@ namespace KooNan
 			gbuf.bindToRead();
 			glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 			
-			
-
 			// Draw reflected uv
-			rbuf.bindToWrite();
 			gbuf.bindTexture();
+			ssrbuf.bindToWrite();
 			DeferredShading::setSSRShader();
 			DeferredShading::DrawQuad();
 
+			// Draw reflection
+			ssrbuf.bindTexture();
+			reflectdrawbuf.bindToWrite();
+			DeferredShading::setReflectDrawShader();
+			DeferredShading::DrawQuad();
 			
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			rbuf.bindTexture();
-			DeferredShading::setFinalShader();
+			ssrbuf.bindTexture();
+			reflectdrawbuf.bindTexture();
+			DeferredShading::setCombineColorShader();
 			DeferredShading::DrawQuad();
-			
-			
+
 
 #else
 			InitLighting(main_scene.WaterShader);
