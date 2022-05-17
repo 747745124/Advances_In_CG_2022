@@ -75,14 +75,14 @@ namespace KooNan
 		static Scene *mainScene;
 		static Light *mainLight;
 
-		static string selectedModel;		// ��ǰѡ���ģ��
+		static string selectedModel;		// ��ǰѡ���ģ��?
 		static GameObject *helperGameObj;	// ������Ϸ����
-		static GameObject *selectedGameObj; // ����ƶ�������ѡ�е���Ϸ����
+		static GameObject *selectedGameObj; // ����ƶ�������ѡ�е���Ϸ����?
 
 		static MousePicker mousePicker;
 		static int RECURSION_COUNT;
 
-		// ȫ���źţ���GUIģ����������д�룬������ģ���ȡ
+		// ȫ���źţ���GUIģ����������д�룬������ģ����?
 	public:
 		static GameMode gameMode; // ��Ϸģʽ
 		static GameMode lastGameMode;
@@ -99,7 +99,7 @@ namespace KooNan
 		static bool firstMouse;		   // �Ƿ��ǵ�һ�ε������������ƶ��¼���
 		static bool ctrlPressedLast;   // ��һ��ѭ���Ƿ���ctrl��
 		static bool altPressedLast;	   // ��һ��ѭ���Ƿ���alt��
-		static bool midBtnPressedLast; // ��һ��ѭ���Ƿ�������м�
+		static bool midBtnPressedLast; // ��һ��ѭ���Ƿ�������м�?
 	public:
 		static void initGameController(GLFWwindow *window)
 		{
@@ -120,7 +120,7 @@ namespace KooNan
 
 			GameController::processInput(window);
 
-			// ����ģʽ��ʹ���������ƶ����
+			// ����ģʽ��ʹ���������ƶ����?
 			if (gameMode == GameMode::Creating && !isCursorOnGui)
 			{
 
@@ -134,7 +134,7 @@ namespace KooNan
 					mainCamera.ProcessKeyboard(deltaTime, SOUTH);
 			}
 
-			// �������Ƿ���ڵ��Σ�����
+			// �������Ƿ���ڵ��Σ�����?
 			if (mainScene)
 			{
 				static float border = 0.5f;
@@ -158,7 +158,7 @@ namespace KooNan
 				}
 			}
 
-			// ����ƶ�ʱ������ģ��ѡ�У���ʾ��������
+			// ����ƶ�ʱ������ģ��ѡ�У���ʾ��������?
 			if (gameMode == GameMode::Creating && creatingMode == CreatingMode::Placing && !isCursorOnGui)
 			{
 				glm::vec3 t = findFocusInScene();
@@ -446,7 +446,7 @@ namespace KooNan
 		float xoffset = xpos - lastX;
 		float yoffset = lastY - ypos;
 
-		// �����겻��ʾʱ�㵽GUI�ϵİ�ť�����ֹ��λ������Ļ����
+		// �����겻��ʾʱ�㵽GUI�ϵİ�ť�����ֹ��λ������Ļ����?
 		lastX = Common::SCR_WIDTH / 2.0f;
 		lastY = Common::SCR_HEIGHT / 2.0f;
 		glfwSetCursorPos(window, lastX, lastY);
