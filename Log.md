@@ -31,3 +31,9 @@
 增加了基本的SSAO计算
 
 将SSR计算中的thickness改为根据距离确定的值，以便于消除水面上近处物体造成的artifact
+
+## 22-05-17 commit 4f40ed0
+
+将gbuffer中存储的position和normal更改为view space的
+
+减少了不必要的矩阵计算
