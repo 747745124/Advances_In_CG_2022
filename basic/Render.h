@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
+#include <limits>
 
 #include "scene.h"
 #include "light.h"
@@ -18,6 +18,7 @@
 #include "ssaoblurbuffer.h"
 #include "reflectionblurbuffer.h"
 #include "reflectiondrawbuffer.h"
+#include "csmbuffer.h"
 
 namespace KooNan
 {
@@ -35,6 +36,12 @@ namespace KooNan
 		SSAOBlurBuffer aoblurbuf;
 		ReflectionDrawBuffer reflectdrawbuf;
 		ReflectionBlurBuffer reflectblurbuf;
+		CSMBuffer csmbuf;
+		static const int NUM_CASCADES = 3;
+		static const float cascade_Z[NUM_CASCADES + 1];
+		struct {
+			float xmin, xmax, ymin, ymax, zmin, zmax;
+		}CSMOrthoProjAABB[NUM_CASCADES];
 	public:
 		Render(Scene &main_scene, Light &main_light, Water_Frame_Buffer &waterfb, PickingTexture &mouse_picking, Shadow_Frame_Buffer &shadowfb) : main_scene(main_scene), main_light(main_light), waterfb(waterfb), mouse_picking(mouse_picking), shadowfb(shadowfb)
 		{
@@ -115,10 +122,25 @@ namespace KooNan
 		void DrawAll(Shader &pickingShader, Shader &modelShader, Shader &shadowShader)
 		{
 #ifdef DEFERRED_SHADING
+			// Shadow pass
+			glm::vec3 DivPos = GameController::mainCamera.Position;
+			glm::mat4 lightView = glm::lookAt(DivPos - main_light.GetDirLightDirection() * 0.2f, DivPos, glm::vec3(0.0f, 1.0f, 0.0f));
+			CSMUpdateOrthoProj();
+			glEnable(GL_DEPTH_TEST);
+			for (int i = 0; i < 3; i++)
+			{
+				csmbuf.bindToWrite(i);
+				glClear(GL_DEPTH_BUFFER_BIT);
+				DeferredShading::setCSMShader(lightView, GetCSMProjection(i));
+				glViewport(0, 0, csmbuf.viewPortSize[i * 2 + 0], csmbuf.viewPortSize[i * 2 + 1]);
+				main_scene.DrawSceneShadowPass(*DeferredShading::csmShader);
+				DrawObjectsShadowPass(*DeferredShading::csmShader);
+			}
+			glViewport(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT);
+			
+			
 			// Geometry pass
 			gbuf.bindToWrite();
-			
-			glEnable(GL_DEPTH_TEST);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			
 			main_scene.DrawScene(GameController::deltaTime, nullptr, true);
@@ -138,14 +160,20 @@ namespace KooNan
 			DeferredShading::setSimpleBlurShader();
 			DeferredShading::DrawQuad();
 			
+			glm::mat4 lightMVP[NUM_CASCADES];
+			for (int i = 0; i < NUM_CASCADES; i++)
+			{
+				lightMVP[i] = GetCSMProjection(i) * lightView;
+			}
 			// Render with lighting
 			gbuf.bindTexture();
 			aoblurbuf.bindTexture();
+			csmbuf.bindTexture();
 			ssrbuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			InitLighting(*DeferredShading::lightingShader);
 			glDisable(GL_BLEND);
-			DeferredShading::setLightingPassShader();
+			DeferredShading::setLightingPassShader(lightMVP, cascade_Z);
 			DeferredShading::DrawQuad();
 			// Copy zbuffer to reflect framebuffer
 			gbuf.bindToRead();
@@ -169,7 +197,7 @@ namespace KooNan
 			reflectdrawbuf.bindTexture();
 			DeferredShading::setCombineColorShader();
 			DeferredShading::DrawQuad();
-
+			
 
 #else
 			InitLighting(main_scene.WaterShader);
@@ -220,6 +248,11 @@ namespace KooNan
 #endif
 		}
 
+		glm::mat4 GetCSMProjection(int index) const
+		{
+			assert(index < NUM_CASCADES);
+			return glm::ortho(CSMOrthoProjAABB[index].xmin, CSMOrthoProjAABB[index].xmax, CSMOrthoProjAABB[index].ymin, CSMOrthoProjAABB[index].ymax, CSMOrthoProjAABB[index].zmin, CSMOrthoProjAABB[index].zmax);
+		}
 	private:
 		void InitLighting(Shader &shader)
 		{
@@ -266,6 +299,17 @@ namespace KooNan
 			glDisable(GL_CULL_FACE);
 		}
 
+		void DrawObjectsShadowPass(Shader& shadowPassShader)
+		{
+			glEnable(GL_CULL_FACE);
+			auto itr = GameObject::gameObjList.begin();
+			for (int i = 0; i < GameObject::gameObjList.size(); i++, itr++)
+			{
+				(*itr)->DrawShadowPass(shadowPassShader);
+			}
+			glDisable(GL_CULL_FACE);
+		}
+
 		void PickObjects(Shader &modelShader)
 		{
 			glEnable(GL_CULL_FACE);
@@ -305,6 +349,61 @@ namespace KooNan
 			Common::setWidthAndHeight();
 			glViewport(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		}
+
+		
+
+		void CSMUpdateOrthoProj()
+		{
+			glm::vec3 DivPos = GameController::mainCamera.Position;
+			glm::mat4 lightView = glm::lookAt(DivPos - main_light.GetDirLightDirection() * 0.2f, DivPos, glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::mat4 camView = GameController::mainCamera.GetViewMatrix();
+			glm::mat4 inv_camView = glm::inverse(camView);
+			float tanHalfFOVY = glm::tan(glm::radians(GameController::mainCamera.Zoom) / 2.0f);
+			float aspectRatio = (float)Common::SCR_WIDTH / (float)Common::SCR_HEIGHT;
+			for (int i = 0; i < NUM_CASCADES; i++)
+			{
+				float yNear = cascade_Z[i] * tanHalfFOVY;
+				float yFar = cascade_Z[i+1] * tanHalfFOVY;
+				float xNear = yNear * aspectRatio;
+				float xFar = yFar * aspectRatio;
+				glm::vec4 frustumVertices[8] = {
+					glm::vec4(xNear,yNear,-cascade_Z[i],1.0f),
+					glm::vec4(-xNear,yNear,-cascade_Z[i],1.0f),
+					glm::vec4(xNear,-yNear,-cascade_Z[i],1.0f),
+					glm::vec4(-xNear,-yNear,-cascade_Z[i],1.0f),
+					glm::vec4(xFar,yFar,-cascade_Z[i+1],1.0f),
+					glm::vec4(-xFar,yFar,-cascade_Z[i+1],1.0f),
+					glm::vec4(xFar,-yFar,-cascade_Z[i+1],1.0f),
+					glm::vec4(-xFar,-yFar,-cascade_Z[i+1],1.0f)
+				};
+
+				float minX = std::numeric_limits<float>::max();
+				float maxX = std::numeric_limits<float>::min();
+				float minY = std::numeric_limits<float>::max();
+				float maxY = std::numeric_limits<float>::min();
+				float minZ = std::numeric_limits<float>::max();
+				float maxZ = std::numeric_limits<float>::min();
+				for (int j = 0; j < 8; j++)
+				{
+					glm::vec4 worldPos = inv_camView * frustumVertices[j];
+					frustumVertices[j] = lightView * worldPos;
+					minX = minX < frustumVertices[j].x ? minX : frustumVertices[j].x;
+					maxX = maxX > frustumVertices[j].x ? maxX : frustumVertices[j].x;
+					minY = minY < frustumVertices[j].y ? minY : frustumVertices[j].y;
+					maxY = maxY > frustumVertices[j].y ? maxY : frustumVertices[j].y;
+					minZ = minZ < -frustumVertices[j].z ? minZ : -frustumVertices[j].z;
+					maxZ = maxZ > -frustumVertices[j].z ? maxZ : -frustumVertices[j].z;
+				}
+				CSMOrthoProjAABB[i].xmin = minX;
+				CSMOrthoProjAABB[i].xmax = maxX;
+				CSMOrthoProjAABB[i].ymin = minY;
+				CSMOrthoProjAABB[i].ymax = maxY;
+				CSMOrthoProjAABB[i].zmin = minZ;
+				CSMOrthoProjAABB[i].zmax = maxZ;
+			}
+
+
 		}
 	};
 }

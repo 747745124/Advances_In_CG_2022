@@ -30,6 +30,12 @@ namespace KooNan
         model->Draw(&shader);
     }
 
+    void GameObject::DrawShadowPass(Shader& shadowPassShader)
+    {
+        shadowPassShader.setMat4("model", modelMat);
+        model->Draw(&shadowPassShader);
+    }
+
     void GameObject::Draw(Mesh &mesh, Shader &shader,
 						 const glm::vec3 viewPos,
 						 const glm::mat4 &projectionMat,

@@ -55,6 +55,7 @@ namespace KooNan
 				  const glm::mat4 &viewMat = glm::mat4(1.0f),
 				  bool isHit = false);
 
+		void DrawShadowPass(Shader& shadowPassShader);
 
 		static void Draw(Mesh &mesh, Shader &shader,
 						 const glm::vec3 viewPos,

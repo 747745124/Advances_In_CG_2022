@@ -78,6 +78,8 @@ Shader *DeferredShading::ssaoShader = nullptr;
 Shader *DeferredShading::simpleBlurShader = nullptr;
 Shader *DeferredShading::kuwaharaBlurShader = nullptr;
 Shader *DeferredShading::combineColorShader = nullptr;
+Shader *DeferredShading::csmShader = nullptr;
+const float Render::cascade_Z[NUM_CASCADES + 1] = { 0.1f,30.0f,100.0f,1000.0f };
 GLFWwindow *Common::gWindow = nullptr;
 int main()
 {
@@ -140,6 +142,7 @@ int main()
 	Shader simpleblurShader(FileSystem::getPath("shaders/deferred/simpleblur.vs").c_str(), FileSystem::getPath("shaders/deferred/simpleblur.fs").c_str());
 	Shader kuwaharaBlurShader(FileSystem::getPath("shaders/deferred/kuwaharablur.vs").c_str(), FileSystem::getPath("shaders/deferred/kuwaharablur.fs").c_str());
 	Shader combineColorShader(FileSystem::getPath("shaders/deferred/combinecolor.vs").c_str(), FileSystem::getPath("shaders/deferred/combinecolor.fs").c_str());
+	Shader csmShader(FileSystem::getPath("shaders/deferred/csm.vs").c_str(), FileSystem::getPath("shaders/deferred/csm.fs").c_str());
 	DeferredShading::lightingShader = &lightingShader;
 	DeferredShading::ssrShader = &ssrShader;
 	DeferredShading::reflectDrawShader = &reflectDrawShader;
@@ -147,6 +150,7 @@ int main()
 	DeferredShading::simpleBlurShader = &simpleblurShader;
 	DeferredShading::kuwaharaBlurShader = &kuwaharaBlurShader;
 	DeferredShading::combineColorShader = &combineColorShader;
+	DeferredShading::csmShader = &csmShader;
 #else
 	Shader terrainShader(FileSystem::getPath("shaders/forward/terrain.vs").c_str(), FileSystem::getPath("shaders/forward/terrain.fs").c_str());
 	Shader waterShader(FileSystem::getPath("shaders/forward/water.vs").c_str(), FileSystem::getPath("shaders/forward/water.fs").c_str());

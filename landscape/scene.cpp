@@ -59,7 +59,6 @@ namespace KooNan
 		setDudvMap(textures[textures.size() - 2].id);
 		setNormalMap(textures[textures.size() - 1].id);
 
-		
 
 	}
 
@@ -165,6 +164,15 @@ namespace KooNan
 			}
 		}
 		
+		
+	}
+
+	void Scene::DrawSceneShadowPass(Shader& shadowPassShader)
+	{
+		for (int i = 0; i < all_terrain_chunks.size(); i++)
+		{
+			all_terrain_chunks[i].Draw(shadowPassShader);
+		}
 		
 	}
 

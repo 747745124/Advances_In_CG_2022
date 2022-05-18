@@ -18,6 +18,7 @@ namespace KooNan {
         static Shader* simpleBlurShader;
         static Shader* kuwaharaBlurShader;
         static Shader* combineColorShader;
+        static Shader* csmShader;
         static void DrawQuad()
 		{
 			static GLuint quadVAO = 0;
@@ -48,15 +49,23 @@ namespace KooNan {
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             glBindVertexArray(0);
 		}
-        static void setLightingPassShader()
+        static void setLightingPassShader(const glm::mat4* lightMVP,const float* endViewSpace)
         {
             lightingShader->use();
-            lightingShader->setVec3("viewPos", GameController::mainCamera.Position);
             lightingShader->setInt("gPosition", 0);
             lightingShader->setInt("gNormal", 1);
             lightingShader->setInt("gAlbedoSpec", 2);
             lightingShader->setInt("gMask", 3);
             lightingShader->setInt("SSAOMask", 4);
+            glm::mat4 view = GameController::mainCamera.GetViewMatrix();
+            lightingShader->setMat4("view", view);
+            lightingShader->setMat4("inv_view", glm::inverse(view));
+            for (int i = 0; i < 3; i++)
+            {
+                lightingShader->setInt("ShadowMap[" + std::to_string(i) + "]", 5 + i);
+                lightingShader->setMat4("lightMVP[" + std::to_string(i) + "]", lightMVP[i]);
+                lightingShader->setFloat("EndViewSpace[" + std::to_string(i) + "]", endViewSpace[i + 1]);
+            }
         }
         static void setSSRShader()
         {
@@ -124,6 +133,13 @@ namespace KooNan {
             combineColorShader->setInt("Tcolor", 0);
             combineColorShader->setInt("Treflection", 1);
             combineColorShader->setInt("gMask", 3);
+        }
+        static void setCSMShader(const glm::mat4& view, const glm::mat4& projection)
+        {
+            csmShader->use();
+            csmShader->setMat4("view", view);
+            csmShader->setMat4("model", glm::mat4(1.0f));
+            csmShader->setMat4("projection", projection);
         }
     private:
         static void SSAOKernalInit(std::vector<glm::vec3>& ssaoKernel)
