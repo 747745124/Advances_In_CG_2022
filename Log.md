@@ -37,3 +37,9 @@
 将gbuffer中存储的position和normal更改为view space的
 
 减少了不必要的矩阵计算
+
+## 22-05-18 commit cd0afe9
+
+增加了基本的Cascade Shadowmap框架，以及PCF
+
+绘制shadowmap的代码部分接口较为混乱，有待refactor
