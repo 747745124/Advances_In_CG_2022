@@ -74,10 +74,9 @@ namespace KooNan
 	void Scene::DrawScene(float deltaTime, const glm::vec4* clippling_plane, bool draw_water, bool draw_shadow)
 	{
 		Camera& cam = GameController::mainCamera;
-		glm::mat4 projection = glm::perspective(glm::radians(cam.Zoom), (float)Common::SCR_WIDTH / (float)Common::SCR_HEIGHT, 0.1f, 1000.0f);
+		glm::mat4 projection = Common::GetPerspectiveMat(cam);
 		glm::mat4 view = cam.GetViewMatrix();
 		glm::vec3 viewPos = cam.Position;
-
 
 		if (draw_shadow)
 		{

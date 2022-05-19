@@ -18,13 +18,15 @@ layout (location = 1) out vec3 reflected_uv;
 void main()
 {
     //parameters
-    float maxDistance = 250;
-    float resolution = 0.8;
-    int   steps = 32;
+    float maxDistance = 300;
+    float resolution = 0.85;
+    int   steps = 16;
     float min_thickness = 0.01;
-    float max_thickness = 15;
+    float max_thickness = 50;
 
     vec2 texSize  = textureSize(gPosition, 0).xy;
+    ivec2 c = ivec2(gl_FragCoord.xy);
+    float jitter = float((c.x+c.y)&1)*0.5;
 
     //frag position in view space
     vec4 positionFrom = vec4(texture(gPosition, aTexCoords).xyz, 1.0);
@@ -83,6 +85,7 @@ void main()
     vec2 frag = startFrag.xy;
     vec3 uv;
 
+    frag += jitter*increment;
     //linear search pass
     for(; i<int(delta); i++)
     {

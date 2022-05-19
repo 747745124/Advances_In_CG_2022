@@ -42,6 +42,7 @@ namespace KooNan
 		struct {
 			float xmin, xmax, ymin, ymax, zmin, zmax;
 		}CSMOrthoProjAABB[NUM_CASCADES];
+		static unsigned cascadeUpdateCounter[NUM_CASCADES];
 	public:
 		Render(Scene &main_scene, Light &main_light, Water_Frame_Buffer &waterfb, PickingTexture &mouse_picking, Shadow_Frame_Buffer &shadowfb) : main_scene(main_scene), main_light(main_light), waterfb(waterfb), mouse_picking(mouse_picking), shadowfb(shadowfb)
 		{
@@ -129,6 +130,7 @@ namespace KooNan
 			glEnable(GL_DEPTH_TEST);
 			for (int i = 0; i < 3; i++)
 			{
+				cascadeUpdateCounter[i] = 1;
 				csmbuf.bindToWrite(i);
 				glClear(GL_DEPTH_BUFFER_BIT);
 				DeferredShading::setCSMShader(lightView, GetCSMProjection(i));
@@ -197,7 +199,6 @@ namespace KooNan
 			reflectdrawbuf.bindTexture();
 			DeferredShading::setCombineColorShader();
 			DeferredShading::DrawQuad();
-			
 
 #else
 			InitLighting(main_scene.WaterShader);

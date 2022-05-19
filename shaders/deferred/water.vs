@@ -10,7 +10,7 @@ uniform float chunk_size;
 
 out mat4 trans_inv_view;
 
-const float tiling = 16;
+const float tiling = 64;
 
 void main()
 {

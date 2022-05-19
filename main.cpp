@@ -80,6 +80,7 @@ Shader *DeferredShading::kuwaharaBlurShader = nullptr;
 Shader *DeferredShading::combineColorShader = nullptr;
 Shader *DeferredShading::csmShader = nullptr;
 const float Render::cascade_Z[NUM_CASCADES + 1] = { 0.1f,30.0f,100.0f,1000.0f };
+unsigned Render::cascadeUpdateCounter[NUM_CASCADES] = { 1,1,1 };
 GLFWwindow *Common::gWindow = nullptr;
 int main()
 {
