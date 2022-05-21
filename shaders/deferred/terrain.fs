@@ -1,9 +1,10 @@
-//Geometry pass fragment shader for terrain
+ //Geometry pass fragment shader for terrain
 #version 330 core
 
 layout (location = 0) out vec3 gPosition;
 layout (location = 1) out vec3 gNormal;
 layout (location = 2) out vec4 gAlbedoSpec;
+layout (location = 3) out vec3 gReflect_mask;
 
 in vec2 TexCoord;
 in vec3 Normal;
@@ -14,8 +15,7 @@ uniform sampler2D texture_diffuse2;//background-1
 uniform sampler2D texture_diffuse3;//r-2
 uniform sampler2D texture_diffuse4;//g-3
 uniform sampler2D texture_diffuse5;//b-4
-//uniform sampler2D .....
-uniform vec3 skyColor;
+
 uniform sampler2D shadowMap;//-5
 
 
@@ -37,5 +37,5 @@ void main()
     gNormal = Normal;
     gAlbedoSpec.xyz = totalColor.rgb;
     gAlbedoSpec.w = 0.f;
-    
+    gReflect_mask = vec3(0.0);
 }

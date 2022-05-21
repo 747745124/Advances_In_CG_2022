@@ -4,13 +4,12 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
-#include <GameController.h>
-#include <Entity.h>
-#include <common.h>
-#include <Camera.h>
-#include <mesh.h>
 #include <vector>
+
+#include "Entity.h"
+#include "common.h"
+#include "mesh.h"
+
 
 
 namespace KooNan
@@ -92,9 +91,9 @@ namespace KooNan
 		{
 			CubeMesh.cleanUp();
 		}
-		void Draw(Camera& cam, glm::vec4 clippling_plane, glm::mat4 model, bool if_hit = false)
+		void Draw(Camera& cam, glm::mat4 model, bool if_hit = false)
 		{
-			Entity::Draw(CubeMesh, cam, clippling_plane, model, if_hit);
+			Entity::Draw(CubeMesh, cam, model, if_hit);
 		}
 		void Pick(Shader& pickingShader, Camera& cam, glm::mat4 model, unsigned int objIndex, unsigned int drawIndex)
 		{

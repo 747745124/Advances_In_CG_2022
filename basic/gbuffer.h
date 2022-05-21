@@ -7,13 +7,15 @@ namespace KooNan {
 	class GBuffer {
 	public:
 		GBuffer() { gbuffer_init(); }
+		~GBuffer() { cleanUp(); }
 		void bindToRead();
 		void bindToWrite();
 		void bindTexture();
 	private:
 		void gbuffer_init();
+		void cleanUp();
 		GLuint gbuffer;
-		GLuint gPos_text, gNorm_text, gAlbeSpec_text, gDepth_buf;
+		GLuint gPos_text, gNorm_text, gAlbeSpec_text, gDepth_buf, gReflect_mask;
 	};
 
 	void GBuffer::gbuffer_init()
@@ -45,8 +47,16 @@ namespace KooNan {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbeSpec_text, 0);
 
-		GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-		glDrawBuffers(3, attachments);
+		//Reflection mask
+		glGenTextures(1, &gReflect_mask);
+		glBindTexture(GL_TEXTURE_2D, gReflect_mask);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, gReflect_mask, 0);
+
+		GLuint attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+		glDrawBuffers(4, attachments);
 
 		//Depth
 		glGenRenderbuffers(1, &gDepth_buf);
@@ -54,7 +64,6 @@ namespace KooNan {
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, gDepth_buf);
 
-		
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			std::cout << "Framebuffer not complete!" << std::endl;
@@ -62,6 +71,14 @@ namespace KooNan {
 		
 		//Restore to default
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void GBuffer::cleanUp()
+	{
+		glDeleteFramebuffers(1, &gbuffer);
+		GLuint texts[] = { gPos_text ,gNorm_text ,gAlbeSpec_text,gReflect_mask };
+		glDeleteTextures(sizeof(texts) / sizeof(GLuint), texts);
+		glDeleteRenderbuffers(1, &gDepth_buf);
 	}
 
 	void GBuffer::bindToRead()
@@ -76,10 +93,12 @@ namespace KooNan {
 		glBindTexture(GL_TEXTURE_2D, gNorm_text);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, gAlbeSpec_text);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, gReflect_mask);
 	}
 	void GBuffer::bindToWrite()
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gbuffer);
 	}
 }
 

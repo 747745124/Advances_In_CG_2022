@@ -14,7 +14,9 @@ ELSEIF (CMAKE_SYSTEM_NAME MATCHES "Windows")
 ENDIF ()
 
 file(GLOB_RECURSE imgui_cpp ${PROJECT_SOURCE_DIR}/include/imgui/*.cpp)
-add_executable(CGFinal main.cpp glad.c ${imgui_cpp})
+file(GLOB basic_cpp ${PROJECT_SOURCE_DIR}/basic/*.cpp)
+file(GLOB landscape_cpp ${PROJECT_SOURCE_DIR}/landscape/*.cpp)
+add_executable(CGFinal main.cpp glad.c ${imgui_cpp} ${basic_cpp} ${landscape_cpp})
 
 IF (CMAKE_SYSTEM_NAME MATCHES "Windows")
 	set_target_properties(CGFinal PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=$(ProjectDir)..\\lib;")

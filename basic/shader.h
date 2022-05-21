@@ -108,63 +108,115 @@ public:
     void setBool(const std::string& name, bool value) const
     {
         glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
+        if(glGetError()==GL_INVALID_OPERATION)
+        {
+            throw std::runtime_error("Bool set failed! Variable name:"+name);
+        }
     }
     // ------------------------------------------------------------------------
     void setInt(const std::string& name, int value) const
     {
         glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
+        if(glGetError()==GL_INVALID_OPERATION)
+        {
+            throw std::runtime_error("Int set failed! Variable name:"+name);
+        }
     }
 	// ------------------------------------------------------------------------
 	void setUint(const std::string& name,unsigned int value) const
 	{
 		glUniform1ui(glGetUniformLocation(ID, name.c_str()), value);
+        if(glGetError()==GL_INVALID_OPERATION)
+        {
+            throw std::runtime_error("Uint set failed! Variable name:"+name);
+        }
 	}
     // ------------------------------------------------------------------------
     void setFloat(const std::string& name, float value) const
     {
         glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+        if(glGetError()==GL_INVALID_OPERATION)
+        {
+            throw std::runtime_error("Float set failed! Variable name:"+name);
+        }
     }
     // ------------------------------------------------------------------------
     void setVec2(const std::string& name, const glm::vec2& value) const
     {
         glUniform2fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
+        if(glGetError()==GL_INVALID_OPERATION)
+        {
+            throw std::runtime_error("Vec2 set failed! Variable name:"+name);
+        }
     }
     void setVec2(const std::string& name, float x, float y) const
     {
         glUniform2f(glGetUniformLocation(ID, name.c_str()), x, y);
+        if(glGetError()==GL_INVALID_OPERATION)
+        {
+            throw std::runtime_error("Vec2 set failed! Variable name:"+name);
+        }
     }
     // ------------------------------------------------------------------------
     void setVec3(const std::string& name, const glm::vec3& value) const
     {
         glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
+        if(glGetError()==GL_INVALID_OPERATION)
+        {
+            throw std::runtime_error("Vec3 set failed! Variable name:"+name);
+        }
     }
     void setVec3(const std::string& name, float x, float y, float z) const
     {
         glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z);
+        if(glGetError()==GL_INVALID_OPERATION)
+        {
+            throw std::runtime_error("Vec3 set failed! Variable name:"+name);
+        }
     }
     // ------------------------------------------------------------------------
     void setVec4(const std::string& name, const glm::vec4& value) const
     {
         glUniform4fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
+        if(glGetError()==GL_INVALID_OPERATION)
+        {
+            throw std::runtime_error("Vec4 set failed! Variable name:"+name);
+        }
     }
     void setVec4(const std::string& name, float x, float y, float z, float w)
     {
         glUniform4f(glGetUniformLocation(ID, name.c_str()), x, y, z, w);
+        if(glGetError()==GL_INVALID_OPERATION)
+        {
+            throw std::runtime_error("Vec4 set failed! Variable name:"+name);
+        }
     }
     // ------------------------------------------------------------------------
     void setMat2(const std::string& name, const glm::mat2& mat) const
     {
         glUniformMatrix2fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+        if(glGetError()==GL_INVALID_OPERATION)
+        {
+            throw std::runtime_error("Mat2 set failed! Variable name:"+name);
+        }
     }
     // ------------------------------------------------------------------------
     void setMat3(const std::string& name, const glm::mat3& mat) const
     {
         glUniformMatrix3fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+        if(glGetError()==GL_INVALID_OPERATION)
+        {
+            throw std::runtime_error("Mat3 set failed! Variable name:"+name);
+        }
     }
     // ------------------------------------------------------------------------
     void setMat4(const std::string& name, const glm::mat4& mat) const
     {
         glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+        if(glGetError()==GL_INVALID_OPERATION)
+        {
+            throw std::runtime_error("Mat4 set failed! Variable name:"+name);
+        }
     }
 
 private:

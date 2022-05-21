@@ -8,3 +8,44 @@
 ## 22-04-27 commit d0322c8
 1. macOS宏定义应该是`__APPLE__` （前后各有两个'_'）
 2. 解决了一个macOS Retina显示器上初始化窗口显示比例异常的问题，需要在调用glViewPort前使用`Common::setWidthAndHeight`
+
+## 22-05-06 commit bc0ac93
+1. 将./include目录中的自定义头文件移动到了basic中，现在./include目录中的头文件都应该是只读的
+2. 将渲染过程中Draw的接口加以简化，传统渲染方式下传入clipping plane的指针(可以为nullptr)
+3. 为解决交叉include的问题，将./basic和./landscape中的部分头文件分开为.cpp和.h
+
+## 22-05-07 commit 477d03e
+
+添加了deferred rendering 默认的水面效果
+
+现在暂时可以通过新建分支来添加feature
+
+## 22-05-10 commit abd47cc
+
+完成了基本的SSR水面反射
+
+修改shader类使得它在给shader内变量赋值后检查错误
+
+## 22-05-15 commit 49640f1
+
+增加了基本的SSAO计算
+
+将SSR计算中的thickness改为根据距离确定的值，以便于消除水面上近处物体造成的artifact
+
+## 22-05-17 commit 4f40ed0
+
+将gbuffer中存储的position和normal更改为view space的
+
+减少了不必要的矩阵计算
+
+## 22-05-18 commit cd0afe9
+
+增加了基本的Cascade Shadowmap框架，以及PCF
+
+绘制shadowmap的代码部分接口较为混乱，有待refactor
+
+## 22-05-21 commit 13646fd
+
+增加了PCSS软阴影近似，有待精调（包括Poisson采样的Kernel，以及bias）
+
+更改了SSR中adaptive thickness的计算方法
