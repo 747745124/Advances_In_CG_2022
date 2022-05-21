@@ -134,10 +134,17 @@ namespace KooNan
 				csmbuf.bindToWrite(i);
 				glClear(GL_DEPTH_BUFFER_BIT);
 				DeferredShading::setCSMShader(lightView, GetCSMProjection(i));
+
+				// Common::setWidthAndHeight();
 				glViewport(0, 0, csmbuf.viewPortSize[i * 2 + 0], csmbuf.viewPortSize[i * 2 + 1]);
+
 				main_scene.DrawSceneShadowPass(*DeferredShading::csmShader);
 				DrawObjectsShadowPass(*DeferredShading::csmShader);
 			}
+
+		// #ifdef __DARWIN__
+			Common::setWidthAndHeight();
+		// #endif
 			glViewport(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT);
 			
 			

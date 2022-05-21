@@ -13,6 +13,8 @@ ELSEIF (CMAKE_SYSTEM_NAME MATCHES "Windows")
 	link_libraries(glfw3.lib assimp-vc142-mt.lib)
 ENDIF ()
 
+add_definitions(-DDEFERRED_SHADING)
+
 file(GLOB_RECURSE imgui_cpp ${PROJECT_SOURCE_DIR}/include/imgui/*.cpp)
 file(GLOB basic_cpp ${PROJECT_SOURCE_DIR}/basic/*.cpp)
 file(GLOB landscape_cpp ${PROJECT_SOURCE_DIR}/landscape/*.cpp)
