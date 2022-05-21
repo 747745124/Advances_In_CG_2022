@@ -105,7 +105,8 @@ void main()
         currentZ = (startView.z * endView.z)/mix(endView.z, startView.z, search1);
         depth = abs(currentZ) - abs(positionTo.z);
         //curr_thickness is determined by current search position, the further the thicker
-        curr_thickness = min_thickness + smoothstep(0,1,i/int(delta))*(max_thickness-min_thickness);
+        float fact = smoothstep(0,1,i/delta);
+        curr_thickness = min_thickness + pow(fact, 3)*(max_thickness-min_thickness);
         //check if intersected
         if (depth>0 && depth<curr_thickness) 
         {

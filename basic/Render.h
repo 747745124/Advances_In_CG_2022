@@ -125,7 +125,7 @@ namespace KooNan
 #ifdef DEFERRED_SHADING
 			// Shadow pass
 			glm::vec3 DivPos = GameController::mainCamera.Position;
-			glm::mat4 lightView = glm::lookAt(DivPos - main_light.GetDirLightDirection() * 0.2f, DivPos, glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::mat4 lightView = glm::lookAt(DivPos - main_light.GetDirLightDirection() * 10.0f, DivPos, glm::vec3(0.0f, 1.0f, 0.0f));
 			CSMUpdateOrthoProj();
 			glEnable(GL_DEPTH_TEST);
 			for (int i = 0; i < 3; i++)
@@ -357,7 +357,7 @@ namespace KooNan
 		void CSMUpdateOrthoProj()
 		{
 			glm::vec3 DivPos = GameController::mainCamera.Position;
-			glm::mat4 lightView = glm::lookAt(DivPos - main_light.GetDirLightDirection() * 0.2f, DivPos, glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::mat4 lightView = glm::lookAt(DivPos - main_light.GetDirLightDirection() * 10.0f, DivPos, glm::vec3(0.0f, 1.0f, 0.0f));
 			glm::mat4 camView = GameController::mainCamera.GetViewMatrix();
 			glm::mat4 inv_camView = glm::inverse(camView);
 			float tanHalfFOVY = glm::tan(glm::radians(GameController::mainCamera.Zoom) / 2.0f);
