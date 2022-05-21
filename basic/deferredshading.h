@@ -108,7 +108,7 @@ namespace KooNan {
             ssrShader->setMat4("view", cam.GetViewMatrix());
             ssrShader->setInt("gPosition", 0);
             ssrShader->setInt("gNormal", 1);
-            ssrShader->setInt("gReflect_mask", 3);
+            ssrShader->setInt("gMask", 3);
             ssrShader->setVec3("viewPos", GameController::mainCamera.Position);
         }
         static void setReflectDrawShader()

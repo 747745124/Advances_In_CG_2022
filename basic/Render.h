@@ -142,9 +142,9 @@ namespace KooNan
 				DrawObjectsShadowPass(*DeferredShading::csmShader);
 			}
 
-		// #ifdef __DARWIN__
+ #ifdef __APPLE__
 			Common::setWidthAndHeight();
-		// #endif
+#endif
 			glViewport(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT);
 			
 			

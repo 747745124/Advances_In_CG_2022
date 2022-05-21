@@ -5,7 +5,7 @@ uniform sampler2D gPosition;
 //Normal in world space
 uniform sampler2D gNormal;
 //Mask for reflection
-uniform sampler2D gReflect_mask;
+uniform sampler2D gMask;
 
 uniform mat4 projection;
 uniform mat4 view;//Use this to convert postion from world space to view space
@@ -32,7 +32,7 @@ void main()
     vec4 positionFrom = vec4(texture(gPosition, aTexCoords).xyz, 1.0);
     vec4 unitpositionFrom = normalize(positionFrom);
     //get reflection mask
-    float mask = texture(gReflect_mask, aTexCoords).x;
+    float mask = texture(gMask, aTexCoords).x;
 
     if(mask<=0.)
     {
