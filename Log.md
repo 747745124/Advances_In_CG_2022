@@ -43,3 +43,9 @@
 增加了基本的Cascade Shadowmap框架，以及PCF
 
 绘制shadowmap的代码部分接口较为混乱，有待refactor
+
+## 22-05-21 commit 13646fd
+
+增加了PCSS软阴影近似，有待精调（包括Poisson采样的Kernel，以及bias）
+
+更改了SSR中adaptive thickness的计算方法
