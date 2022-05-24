@@ -16,7 +16,7 @@ namespace KooNan {
 		void reflectionbuffer_init();
 		void cleanUp();
 		GLuint refbuffer;
-		GLuint rColor_text, rTexcoord_text, rDepth_buf;
+		GLuint rColor_text, rTexcoord_text;
 	};
 
 	void SSRBuffer::reflectionbuffer_init()
@@ -44,10 +44,6 @@ namespace KooNan {
 		GLuint attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 		glDrawBuffers(2, attachments);
 
-		glGenRenderbuffers(1, &rDepth_buf);
-		glBindRenderbuffer(GL_RENDERBUFFER, rDepth_buf);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rDepth_buf);
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			std::cout << "Framebuffer not complete!" << std::endl;
@@ -60,7 +56,6 @@ namespace KooNan {
 		glDeleteFramebuffers(1, &refbuffer);
 		GLuint texts[] = { rColor_text ,rTexcoord_text };
 		glDeleteTextures(sizeof(texts) / sizeof(GLuint), texts);
-		glDeleteRenderbuffers(1, &rDepth_buf);
 	}
 
 	void SSRBuffer::bindToWrite()

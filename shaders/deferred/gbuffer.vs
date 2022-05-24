@@ -10,8 +10,11 @@ out vec3 FragPos;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 jitteredProjection;
+uniform mat4 lastViewProjection;
 
-
+out vec4 lastUV;
+out vec4 currUV;
 
 void main()
 {
@@ -19,5 +22,8 @@ void main()
     FragPos = vec3(view * World_Pos);
     TexCoord = aTexCoords;
     Normal = mat3(transpose(inverse(view * model))) * aNormal;
-    gl_Position = projection * view * World_Pos;
+    gl_Position = jitteredProjection * view * World_Pos;
+
+    lastUV = lastViewProjection * World_Pos;
+    currUV = projection * view * World_Pos;
 }

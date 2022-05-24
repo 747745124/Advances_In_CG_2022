@@ -45,7 +45,7 @@ namespace KooNan
 		{
 			point_lights.push_back(light);
 		}
-		void Draw(const glm::vec4* clipping_plane);
+		void Draw(const glm::mat4* projection, const glm::mat4* jitteredProjection, const glm::mat4* lastViewProjection, const glm::vec4* clipping_plane);
 		//Set the light for shader
 		void SetLight(Shader& SomeEntities);
 

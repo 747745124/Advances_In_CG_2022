@@ -79,8 +79,39 @@ Shader *DeferredShading::simpleBlurShader = nullptr;
 Shader *DeferredShading::kuwaharaBlurShader = nullptr;
 Shader *DeferredShading::combineColorShader = nullptr;
 Shader *DeferredShading::csmShader = nullptr;
+Shader* DeferredShading::taaShader = nullptr;
 const float Render::cascade_Z[NUM_CASCADES + 1] = { 0.1f,30.0f,100.0f,1000.0f };
 unsigned Render::cascadeUpdateCounter[NUM_CASCADES] = { 1,1,1 };
+
+const glm::vec2 Render::haltonSequence[NUM_TAA_SAMPLES] = {
+	glm::vec2(0.500000,0.333333),
+	glm::vec2(0.250000,0.666667),
+	glm::vec2(0.750000,0.111111),
+	glm::vec2(0.125000,0.444444),
+	glm::vec2(0.625000,0.777778),
+	glm::vec2(0.375000,0.222222),
+	glm::vec2(0.875000,0.555556),
+	glm::vec2(0.062500,0.888889),
+	glm::vec2(0.562500,0.037037),
+	glm::vec2(0.312500,0.370370),
+	glm::vec2(0.812500,0.703704),
+	glm::vec2(0.187500,0.148148),
+	glm::vec2(0.687500,0.481481),
+	glm::vec2(0.437500,0.814815),
+	glm::vec2(0.937500,0.259259),
+	glm::vec2(0.031250,0.592593)
+};
+
+/*
+const glm::vec2 Render::haltonSequence[NUM_TAA_SAMPLES] = {
+	glm::vec2(3 / 8.0,1 / 8.0),
+	glm::vec2(7 / 8.0,3 / 8.0),
+	glm::vec2(1 / 8.0,5 / 8.0),
+	glm::vec2(5 / 8.0,7 / 8.0)
+};
+*/
+unsigned Render::haltonIndex = 0;
+glm::mat4 Render::lastViewProjection;
 GLFWwindow *Common::gWindow = nullptr;
 int main()
 {
@@ -144,6 +175,7 @@ int main()
 	Shader kuwaharaBlurShader(FileSystem::getPath("shaders/deferred/kuwaharablur.vs").c_str(), FileSystem::getPath("shaders/deferred/kuwaharablur.fs").c_str());
 	Shader combineColorShader(FileSystem::getPath("shaders/deferred/combinecolor.vs").c_str(), FileSystem::getPath("shaders/deferred/combinecolor.fs").c_str());
 	Shader csmShader(FileSystem::getPath("shaders/deferred/csm.vs").c_str(), FileSystem::getPath("shaders/deferred/csm.fs").c_str());
+	Shader taaShader(FileSystem::getPath("shaders/deferred/taa.vs").c_str(), FileSystem::getPath("shaders/deferred/taa.fs").c_str());
 	DeferredShading::lightingShader = &lightingShader;
 	DeferredShading::ssrShader = &ssrShader;
 	DeferredShading::reflectDrawShader = &reflectDrawShader;
@@ -152,6 +184,7 @@ int main()
 	DeferredShading::kuwaharaBlurShader = &kuwaharaBlurShader;
 	DeferredShading::combineColorShader = &combineColorShader;
 	DeferredShading::csmShader = &csmShader;
+	DeferredShading::taaShader = &taaShader;
 #else
 	Shader terrainShader(FileSystem::getPath("shaders/forward/terrain.vs").c_str(), FileSystem::getPath("shaders/forward/terrain.fs").c_str());
 	Shader waterShader(FileSystem::getPath("shaders/forward/water.vs").c_str(), FileSystem::getPath("shaders/forward/water.fs").c_str());

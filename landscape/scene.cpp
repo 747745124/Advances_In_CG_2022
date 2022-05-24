@@ -62,26 +62,30 @@ namespace KooNan
 
 	}
 
-	void Scene::DrawSky()
+	void Scene::DrawSky(const glm::mat4* projection, const glm::mat4* jitteredProjection, const glm::mat4* lastViewProjection)
 	{
 		SkyShader.use();
 		
 		Camera& cam = GameController::mainCamera;
-		glm::mat4 projection = glm::perspective(glm::radians(cam.Zoom), (float)Common::SCR_WIDTH / (float)Common::SCR_HEIGHT, 0.1f, 1000.0f);
-		skybox.Draw(SkyShader, glm::scale(glm::mat4(1.0f), glm::vec3(150.0f)), cam.GetViewMatrix(), projection);
+		if (jitteredProjection && lastViewProjection)
+		{
+			SkyShader.use();
+			SkyShader.setMat4("jitteredProjection", *jitteredProjection);
+			SkyShader.setMat4("lastViewProjection", *lastViewProjection);
+		}
+		skybox.Draw(SkyShader, glm::scale(glm::mat4(1.0f), glm::vec3(150.0f)), cam.GetViewMatrix(), *projection);
 	}
 
-	void Scene::DrawScene(float deltaTime, const glm::vec4* clippling_plane, bool draw_water, bool draw_shadow)
+	void Scene::DrawScene(float deltaTime, const glm::mat4* projection, const glm::mat4* jitteredProjection, const glm::mat4* lastViewProjection, const glm::vec4* clippling_plane, bool draw_water, bool draw_shadow)
 	{
 		Camera& cam = GameController::mainCamera;
-		glm::mat4 projection = Common::GetPerspectiveMat(cam);
 		glm::mat4 view = cam.GetViewMatrix();
 		glm::vec3 viewPos = cam.Position;
 
 		if (draw_shadow)
 		{
 			TerrainShader.use();
-			TerrainShader.setMat4("projection", projection);
+			TerrainShader.setMat4("projection", *projection);
 			TerrainShader.setMat4("view", view);
 			if (clippling_plane)
 				TerrainShader.setVec4("plane", *clippling_plane);
@@ -98,7 +102,12 @@ namespace KooNan
 		else
 		{
 			TerrainShader.use();
-			TerrainShader.setMat4("projection", projection);
+			TerrainShader.setMat4("projection", *projection);
+			if (jitteredProjection && lastViewProjection)
+			{
+				TerrainShader.setMat4("jitteredProjection", *jitteredProjection);
+				TerrainShader.setMat4("lastViewProjection", *lastViewProjection);
+			}
 			TerrainShader.setMat4("view", view);
 			TerrainShader.setMat4("model", glm::mat4(1.0f));
 			if (clippling_plane)
@@ -116,7 +125,7 @@ namespace KooNan
 			if (clippling_plane)//Forward rendering
 			{
 				WaterShader.use();
-				WaterShader.setMat4("projection", projection);
+				WaterShader.setMat4("projection", *projection);
 				WaterShader.setMat4("view", view);
 				WaterShader.setVec3("viewPos", viewPos);
 				WaterShader.setInt("reflection", 0);
@@ -146,7 +155,9 @@ namespace KooNan
 			{
 				WaterShader.use();
 				WaterShader.setMat4("view", view);
-				WaterShader.setMat4("projection", projection);
+				WaterShader.setMat4("projection", *projection);
+				WaterShader.setMat4("jitteredProjection", *jitteredProjection);
+				WaterShader.setMat4("lastViewProjection", *lastViewProjection);
 				WaterShader.setFloat("chunk_size", chunk_size);
 				WaterShader.setFloat("moveOffset", waterMoveFactor);
 				WaterShader.setInt("dudvMap", 0);

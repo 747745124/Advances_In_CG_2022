@@ -19,6 +19,7 @@
 #include "reflectionblurbuffer.h"
 #include "reflectiondrawbuffer.h"
 #include "csmbuffer.h"
+#include "taabuffer.h"
 
 namespace KooNan
 {
@@ -37,12 +38,18 @@ namespace KooNan
 		ReflectionDrawBuffer reflectdrawbuf;
 		ReflectionBlurBuffer reflectblurbuf;
 		CSMBuffer csmbuf;
+		TAABuffer taabuf;
+
 		static const int NUM_CASCADES = 3;
 		static const float cascade_Z[NUM_CASCADES + 1];
 		struct {
 			float xmin, xmax, ymin, ymax, zmin, zmax;
 		}CSMOrthoProjAABB[NUM_CASCADES];
 		static unsigned cascadeUpdateCounter[NUM_CASCADES];
+		static const int NUM_TAA_SAMPLES = 16;
+		static const glm::vec2 haltonSequence[NUM_TAA_SAMPLES];
+		static unsigned haltonIndex;
+		static glm::mat4 lastViewProjection;
 	public:
 		Render(Scene &main_scene, Light &main_light, Water_Frame_Buffer &waterfb, PickingTexture &mouse_picking, Shadow_Frame_Buffer &shadowfb) : main_scene(main_scene), main_light(main_light), waterfb(waterfb), mouse_picking(mouse_picking), shadowfb(shadowfb)
 		{
@@ -76,14 +83,14 @@ namespace KooNan
 			float distance = 2 * (GameController::mainCamera.Position.y - main_scene.getWaterHeight());
 			GameController::mainCamera.Position.y -= distance;
 			GameController::mainCamera.Pitch = -GameController::mainCamera.Pitch;
-
-			DrawObjects(modelShader, &clipping_plane, false, true);
+			glm::mat4 projection = Common::GetPerspectiveMat(GameController::mainCamera);
+			DrawObjects(modelShader, &projection, nullptr, nullptr, &clipping_plane, false, true);
 
 			// we now draw as many light bulbs as we have point lights.
-			main_light.Draw(&clipping_plane);
+			main_light.Draw(&projection, nullptr, nullptr,&clipping_plane);
 			// render the main scene
-			main_scene.DrawScene(GameController::deltaTime, &clipping_plane, false);
-			main_scene.DrawSky();
+			main_scene.DrawScene(GameController::deltaTime, &projection, nullptr, nullptr, &clipping_plane, false);
+			main_scene.DrawSky(&projection, nullptr, nullptr);
 
 			// Restore the main camera
 			GameController::mainCamera.Position.y += distance;
@@ -109,12 +116,12 @@ namespace KooNan
 			// ------
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			DrawObjects(modelShader, &clipping_plane, false, true);
+			glm::mat4 projection = Common::GetPerspectiveMat(GameController::mainCamera);
+			DrawObjects(modelShader, &projection, nullptr, nullptr, &clipping_plane, false, true);
 
 			// render the main scene
-			main_scene.DrawScene(GameController::deltaTime, &clipping_plane, false);
-			main_scene.DrawSky();
+			main_scene.DrawScene(GameController::deltaTime, &projection, nullptr, nullptr, &clipping_plane, false);
+			main_scene.DrawSky(&projection, nullptr, nullptr);
 
 			waterfb.unbindCurrentFrameBuffer();
 #endif
@@ -128,6 +135,7 @@ namespace KooNan
 			glm::mat4 lightView = glm::lookAt(DivPos - main_light.GetDirLightDirection() * 10.0f, DivPos, glm::vec3(0.0f, 1.0f, 0.0f));
 			CSMUpdateOrthoProj();
 			glEnable(GL_DEPTH_TEST);
+			
 			for (int i = 0; i < 3; i++)
 			{
 				cascadeUpdateCounter[i] = 1;
@@ -147,21 +155,31 @@ namespace KooNan
 #endif
 			glViewport(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT);
 			
-			
+			//Set up jitter in projection(TAA)
+			glm::mat4 projection = Common::GetPerspectiveMat(GameController::mainCamera);
+			glm::mat4 jittered_projection = projection;
+			glm::mat4 jitter = glm::mat4(1.0f);
+			glm::vec2 offset = haltonSequence[haltonIndex];
+			offset = (offset - 0.5f) * 2.0f / glm::vec2(float(Common::SCR_WIDTH), float(Common::SCR_HEIGHT));
+			haltonIndex = (haltonIndex + 1) % NUM_TAA_SAMPLES;
+			jitter[3][0] += offset.x;
+			jitter[3][1] += offset.y;
+			jittered_projection = jitter * projection;
+
 			// Geometry pass
 			gbuf.bindToWrite();
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			
-			main_scene.DrawScene(GameController::deltaTime, nullptr, true);
-			DrawObjects(modelShader, nullptr, false, false);
+			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+			glEnable(GL_DEPTH_TEST);
+			main_scene.DrawScene(GameController::deltaTime, &projection, &jittered_projection, &lastViewProjection, nullptr, true);
+			DrawObjects(modelShader, &projection, &jittered_projection, &lastViewProjection, nullptr, false, false);
 			// Draw things that do not need to be lit
-			main_scene.DrawSky();
-			main_light.Draw(nullptr);
+			main_scene.DrawSky(&projection, &jittered_projection, &lastViewProjection);
+			main_light.Draw(&projection, &jittered_projection, &lastViewProjection, nullptr);
 
 			gbuf.bindTexture();
 			aobuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT);
-			DeferredShading::setSSAOShader();
+			DeferredShading::setSSAOShader(jittered_projection);
 			DeferredShading::DrawQuad();
 
 			aobuf.bindTexture();
@@ -174,24 +192,26 @@ namespace KooNan
 			{
 				lightMVP[i] = GetCSMProjection(i) * lightView;
 			}
+
+			//Drawing quads from now on
+			glDisable(GL_DEPTH_TEST);
+
 			// Render with lighting
 			gbuf.bindTexture();
 			aoblurbuf.bindTexture();
 			csmbuf.bindTexture();
 			ssrbuf.bindToWrite();
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT);
 			InitLighting(*DeferredShading::lightingShader);
 			glDisable(GL_BLEND);
 			DeferredShading::setLightingPassShader(lightMVP, cascade_Z);
 			DeferredShading::DrawQuad();
-			// Copy zbuffer to reflect framebuffer
-			gbuf.bindToRead();
-			glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
 			
 			// Draw reflected uv
 			gbuf.bindTexture();
 			ssrbuf.bindToWrite();
-			DeferredShading::setSSRShader();
+			DeferredShading::setSSRShader(jittered_projection);
 			DeferredShading::DrawQuad();
 
 			// Draw reflection
@@ -200,12 +220,29 @@ namespace KooNan
 			DeferredShading::setReflectDrawShader();
 			DeferredShading::DrawQuad();
 			
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			taabuf.bindToWrite();
+			glClear(GL_COLOR_BUFFER_BIT);
 			ssrbuf.bindTexture();
 			reflectdrawbuf.bindTexture();
 			DeferredShading::setCombineColorShader();
 			DeferredShading::DrawQuad();
+
+			//blit depth from gbuffer to taabuffer
+			taabuf.bindToWrite();
+			gbuf.bindToRead();
+			glClear(GL_DEPTH_BUFFER_BIT);
+			glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+			gbuf.bindTexture();
+			taabuf.bindTexture();
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+			DeferredShading::setTAAShader();
+			DeferredShading::DrawQuad();
+
+			taabuf.copyToLast();
+			lastViewProjection = projection * GameController::mainCamera.GetViewMatrix();
+			
 
 #else
 			InitLighting(main_scene.WaterShader);
@@ -235,9 +272,9 @@ namespace KooNan
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			DrawShadowMap(shadowShader);
-
-			DrawObjects(modelShader, &clipping_plane, true, true);
-			main_light.Draw(&clipping_plane);
+			glm::mat4 projection = Common::GetPerspectiveMat(GameController::mainCamera);
+			DrawObjects(modelShader, &projection,nullptr,nullptr, &clipping_plane, true, true);
+			main_light.Draw(&projection, nullptr, nullptr,&clipping_plane);
 
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -249,8 +286,8 @@ namespace KooNan
 			main_scene.TerrainShader.use();
 			main_scene.TerrainShader.setMat4("lightProjection", shadowfb.lightProjection); // Bad implementation
 			main_scene.TerrainShader.setMat4("lightView", shadowfb.lightView);			   // Bad implementation
-			main_scene.DrawScene(GameController::deltaTime, &clipping_plane, true, true);
-			main_scene.DrawSky();
+			main_scene.DrawScene(GameController::deltaTime, &projection, nullptr, nullptr, &clipping_plane, true, true);
+			main_scene.DrawSky(&projection, nullptr, nullptr);
 
 			glDisable(GL_BLEND);
 #endif
@@ -267,7 +304,7 @@ namespace KooNan
 			main_light.SetLight(shader);
 		}
 
-		void DrawObjects(Shader &modelShader, const glm::vec4 *clippling_plane, bool IsAfterPicking, bool IsWithShading)
+		void DrawObjects(Shader &modelShader, const glm::mat4 *projection, const glm::mat4 *jitteredProjection, const glm::mat4 *lastViewProjection, const glm::vec4 *clippling_plane, bool IsAfterPicking, bool IsWithShading)
 		{
 			if(IsWithShading)
 				InitLighting(modelShader);
@@ -277,7 +314,13 @@ namespace KooNan
 								 IsAfterPicking && !GameController::isCursorOnGui;
 			if (enablePicking)
 				GameController::selectedGameObj = NULL;
-
+			if (jitteredProjection && lastViewProjection)
+			{
+				modelShader.use();
+				modelShader.setMat4("jitteredProjection", *jitteredProjection);
+				modelShader.setMat4("lastViewProjection", *lastViewProjection);
+			}
+			
 			auto itr = GameObject::gameObjList.begin();
 			for (int i = 0; i < GameObject::gameObjList.size(); i++, ++itr)
 			{
@@ -299,8 +342,10 @@ namespace KooNan
 					modelShader.use();
 					modelShader.setVec4("plane", *clippling_plane);
 				}
+				modelShader.use();
+				
 				(*itr)->Draw(modelShader, GameController::mainCamera.Position,
-					Common::GetPerspectiveMat(GameController::mainCamera), GameController::mainCamera.GetViewMatrix(),
+					*projection, GameController::mainCamera.GetViewMatrix(),
 					intersected);
 			
 			}

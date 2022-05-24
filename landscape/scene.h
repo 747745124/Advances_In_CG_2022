@@ -82,10 +82,10 @@ namespace KooNan
 			shadowMap = textID;
 		}
 		//Draw sky(Skybox doesn't need to be lit)
-		void DrawSky();
+		void DrawSky(const glm::mat4* projection, const glm::mat4* jitteredProjection, const glm::mat4* lastViewProjection);
 
 		//Draw all scene with shading (ground and water) (Used in forward shading)
-		void DrawScene(float deltaTime, const glm::vec4* clippling_plane, bool draw_water, bool draw_shadow = false);
+		void DrawScene(float deltaTime, const glm::mat4* projection, const glm::mat4* jitteredProjection, const glm::mat4* lastViewProjection, const glm::vec4* clippling_plane, bool draw_water, bool draw_shadow = false);
 
 		void DrawSceneShadowPass(Shader& shadowPassShader);
 
