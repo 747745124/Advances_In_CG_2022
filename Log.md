@@ -1,4 +1,4 @@
-## 22-04-27 commit 02779899
+## 22-04-27 commit 0277989
 1. 对于Shader类的指针、引用需要统一
 2. 延迟渲染和正向渲染的shader差别较大 所以类的接口需要大量重构（可以考虑std::optional)
 3. Shader中uniform变量的设置位置不统一（容易导致错误）
@@ -49,3 +49,11 @@
 增加了PCSS软阴影近似，有待精调（包括Poisson采样的Kernel，以及bias）
 
 更改了SSR中adaptive thickness的计算方法
+
+## 22-05-24 commit 27f71df
+
+增加了基于velocity buffer的TAA反走样，以及基本的YCoCgR空间的color clamping
+
+水面的velocity buffer有待重新设置，目前SSR在TAA下的效果较模糊
+
+更改了Scene、Objects、Sky、Lightcube的Draw接口，使得能够兼容正向渲染（jitteredProjection和lastViewProjection传入nullptr）
