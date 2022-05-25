@@ -19,6 +19,7 @@ namespace KooNan {
         static Shader* kuwaharaBlurShader;
         static Shader* combineColorShader;
         static Shader* csmShader;
+        static Shader* taaShader;
         static void DrawQuad()
 		{
 			static GLuint quadVAO = 0;
@@ -56,13 +57,13 @@ namespace KooNan {
             lightingShader->setInt("gNormal", 1);
             lightingShader->setInt("gAlbedoSpec", 2);
             lightingShader->setInt("gMask", 3);
-            lightingShader->setInt("SSAOMask", 4);
+            lightingShader->setInt("SSAOMask", 5);
             glm::mat4 view = GameController::mainCamera.GetViewMatrix();
             lightingShader->setMat4("view", view);
             lightingShader->setMat4("inv_view", glm::inverse(view));
             for (int i = 0; i < 3; i++)
             {
-                lightingShader->setInt("ShadowMap[" + std::to_string(i) + "]", 5 + i);
+                lightingShader->setInt("ShadowMap[" + std::to_string(i) + "]", 6 + i);
                 lightingShader->setMat4("lightMVP[" + std::to_string(i) + "]", lightMVP[i]);
                 lightingShader->setFloat("EndViewSpace[" + std::to_string(i) + "]", endViewSpace[i + 1]);
             }
@@ -93,18 +94,18 @@ namespace KooNan {
             {
                 lightingShader->setVec2("poissonDisk[" + std::to_string(i) + "]", poissonDisk[i]);
             }
-            glActiveTexture(GL_TEXTURE8);
+            glActiveTexture(GL_TEXTURE9);
             glBindTexture(GL_TEXTURE_2D, rotationNoise);
-            lightingShader->setInt("rotationNoise", 8);
+            lightingShader->setInt("rotationNoise", 9);
 
 
 
         }
-        static void setSSRShader()
+        static void setSSRShader(const glm::mat4& projection)
         {
             ssrShader->use();
             Camera& cam = GameController::mainCamera;
-            ssrShader->setMat4("projection", Common::GetPerspectiveMat(cam));
+            ssrShader->setMat4("projection", projection);
             ssrShader->setMat4("view", cam.GetViewMatrix());
             ssrShader->setInt("gPosition", 0);
             ssrShader->setInt("gNormal", 1);
@@ -117,7 +118,7 @@ namespace KooNan {
             reflectDrawShader->setInt("rColor", 0);
             reflectDrawShader->setInt("rTexcoord", 1);
         }
-        static void setSSAOShader()
+        static void setSSAOShader(const glm::mat4& projection)
         {
             
             static std::vector<glm::vec3> ssaoKernel;
@@ -141,7 +142,7 @@ namespace KooNan {
             ssaoShader->setInt("gNormal", 1);
             ssaoShader->setInt("gMask", 3);
             ssaoShader->setInt("texNoise", 4);
-            ssaoShader->setMat4("projection", Common::GetPerspectiveMat(cam));
+            ssaoShader->setMat4("projection", projection);
             ssaoShader->setMat4("view", cam.GetViewMatrix());
             for (int i = 0; i < ssaoKernel.size(); i++)
             {
@@ -151,7 +152,7 @@ namespace KooNan {
         static void setSimpleBlurShader()
         {
             simpleBlurShader->use();
-            simpleBlurShader->setInt("Input", 4);
+            simpleBlurShader->setInt("Input", 5);
         }
         static void setKuwaharaBlurShader()
         {
@@ -173,6 +174,16 @@ namespace KooNan {
             csmShader->setMat4("view", view);
             csmShader->setMat4("model", glm::mat4(1.0f));
             csmShader->setMat4("projection", projection);
+        }
+        static void setTAAShader()
+        {
+            taaShader->use();
+            taaShader->setInt("gPosition", 0);
+            taaShader->setInt("currFrame", 1);
+            taaShader->setInt("lastFrame", 2);
+            taaShader->setInt("gDepth", 3);
+            taaShader->setInt("gVelocity", 4);
+            
         }
     private:
         static void SSAOKernalInit(std::vector<glm::vec3>& ssaoKernel)

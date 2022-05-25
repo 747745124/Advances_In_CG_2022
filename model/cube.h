@@ -91,9 +91,9 @@ namespace KooNan
 		{
 			CubeMesh.cleanUp();
 		}
-		void Draw(Camera& cam, glm::mat4 model, bool if_hit = false)
+		void Draw(Camera& cam, const glm::mat4 projection, glm::mat4 model, bool if_hit = false)
 		{
-			Entity::Draw(CubeMesh, cam, model, if_hit);
+			Entity::Draw(CubeMesh, cam, projection, model, if_hit);
 		}
 		void Pick(Shader& pickingShader, Camera& cam, glm::mat4 model, unsigned int objIndex, unsigned int drawIndex)
 		{

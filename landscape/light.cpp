@@ -33,7 +33,7 @@ namespace KooNan
 		}
 	}
 
-	void Light::Draw(const glm::vec4* clipping_plane)
+	void Light::Draw(const glm::mat4* projection, const glm::mat4* jitteredProjection, const glm::mat4* lastViewProjection, const glm::vec4* clipping_plane)
 	{
 		std::vector<Texture> textures;//Load a null texture
 		Cube lightcube(textures, LightboxShader);
@@ -48,7 +48,13 @@ namespace KooNan
 			glm::mat4 model(1.0f);
 			model = glm::translate(model, point_lights[i].position);
 			model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-			lightcube.Draw(cam, model, false);
+			if (jitteredProjection && lastViewProjection)
+			{
+				LightboxShader.use();
+				LightboxShader.setMat4("jitteredProjection", *jitteredProjection);
+				LightboxShader.setMat4("lastViewProjection", *lastViewProjection);
+			}
+			lightcube.Draw(cam, *projection, model, false);
 		}
 	};
 }

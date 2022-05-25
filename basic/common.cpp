@@ -15,7 +15,7 @@ namespace KooNan
     }
 
     unsigned int Common::SCR_WIDTH = 1920;
-	unsigned int Common::SCR_HEIGHT = 1080;
+	unsigned int Common::SCR_HEIGHT = 1060;
 	float Common::perspective_clipping_near = 0.1f;
 	float Common::perspective_clipping_far = 1000.0f;
 	const std::string Common::saveFileName = "Save.json";

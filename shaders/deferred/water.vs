@@ -6,17 +6,25 @@ out vec3 FragPos;
 
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 jitteredProjection;
+uniform mat4 lastViewProjection;
 uniform float chunk_size;
 
 out mat4 trans_inv_view;
 
 const float tiling = 64;
 
+out vec4 lastUV;
+out vec4 currUV;
+
 void main()
 {
     vec4 World_Pos =  vec4(aPos, 1.0f);
 	FragPos = vec3(view * World_Pos);
-    gl_Position = projection * view * World_Pos;
+    gl_Position = jitteredProjection * view * World_Pos;
     trans_inv_view = transpose(inverse(view));
     TexCoord = vec2(aPos.x/chunk_size + 0.5, aPos.z/chunk_size + 0.5) * tiling;
+
+    lastUV = lastViewProjection * World_Pos;
+    currUV = projection * view * World_Pos;
 }

@@ -19,7 +19,7 @@ namespace KooNan {
 		GLuint csmbuffer;
 		//Todo: use a global const int to initialize
 		GLuint shadowMap[3];
-		static const unsigned CASCACDE_SHADOW_TEXTURE_UNIT0 = GL_TEXTURE5;
+		static const unsigned CASCACDE_SHADOW_TEXTURE_UNIT0 = GL_TEXTURE6;
 	};
 	void CSMBuffer::csmbuffer_init()
 	{

@@ -60,8 +60,8 @@ namespace KooNan
 
 	void SSAOBuffer::bindTexture()
 	{
-		//GL_TEXTURE0-GL_TEXTURE3 is used by gbuffer
-		glActiveTexture(GL_TEXTURE4);
+		//GL_TEXTURE0-GL_TEXTURE4 is used by gbuffer
+		glActiveTexture(GL_TEXTURE5);
 		glBindTexture(GL_TEXTURE_2D, ao_text);
 	}
 

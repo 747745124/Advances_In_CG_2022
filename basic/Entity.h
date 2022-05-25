@@ -18,7 +18,7 @@ namespace KooNan
 		Shader& EntityShader;
 	public:
 		Entity(Shader& SomeShader):EntityShader(SomeShader){}
-		void Draw(Mesh& mesh,Camera& cam, glm::mat4 model, bool if_hit = false)
+		void Draw(Mesh& mesh,Camera& cam, const glm::mat4 projection, glm::mat4 model, bool if_hit = false)
 		{
 			EntityShader.use();
 			if (if_hit)
@@ -27,7 +27,6 @@ namespace KooNan
 			else
 				EntityShader.setVec3("selected_color", glm::vec3(0.0f, 0.0f, 0.0f));
 #endif
-			glm::mat4 projection = Common::GetPerspectiveMat(cam);
 			EntityShader.setMat4("projection", projection);
 			EntityShader.setMat4("view", cam.GetViewMatrix());
 			EntityShader.setVec3("viewPos", cam.Position);
