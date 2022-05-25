@@ -22,7 +22,6 @@
 #include "Texture.h"
 #include "Render.h"
 
-
 using namespace KooNan;
 using namespace glm;
 
@@ -79,8 +78,8 @@ Shader *DeferredShading::simpleBlurShader = nullptr;
 Shader *DeferredShading::kuwaharaBlurShader = nullptr;
 Shader *DeferredShading::combineColorShader = nullptr;
 Shader *DeferredShading::csmShader = nullptr;
-const float Render::cascade_Z[NUM_CASCADES + 1] = { 0.1f,30.0f,100.0f,1000.0f };
-unsigned Render::cascadeUpdateCounter[NUM_CASCADES] = { 1,1,1 };
+const float Render::cascade_Z[NUM_CASCADES + 1] = {0.1f, 30.0f, 100.0f, 1000.0f};
+unsigned Render::cascadeUpdateCounter[NUM_CASCADES] = {1, 1, 1};
 GLFWwindow *Common::gWindow = nullptr;
 int main()
 {
@@ -102,7 +101,7 @@ int main()
 	// glfw window creation
 	// --------------------
 
-	GLFWwindow *window = glfwCreateWindow(Common::SCR_WIDTH, Common::SCR_HEIGHT, "Koonan", NULL, NULL);
+	GLFWwindow *window = glfwCreateWindow(Common::SCR_WIDTH / 2, Common::SCR_HEIGHT / 2, "Koonan", NULL, NULL);
 
 	if (window == NULL)
 	{
@@ -111,7 +110,7 @@ int main()
 		return -1;
 	}
 	GameController::initGameController(window);
-	
+
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -119,8 +118,8 @@ int main()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
-	//There is an error but I don't exactly know why
-	glGetError();//!!!!!!!!!!!!!!!!!!!!!!!Clear it
+	// There is an error but I don't exactly know why
+	glGetError(); //!!!!!!!!!!!!!!!!!!!!!!!Clear it
 
 	// configure global opengl state
 	// -----------------------------
@@ -161,7 +160,7 @@ int main()
 	Shader modelShader(FileSystem::getPath("shaders/forward/model.vs").c_str(), FileSystem::getPath("shaders/forward/model.fs").c_str());
 	Shader shadowShader(FileSystem::getPath("shaders/forward/shadow.vs").c_str(), FileSystem::getPath("shaders/forward/shadow.fs").c_str());
 #endif
-	
+
 	// Instantiate the main_scene
 	Scene main_scene(256.0f, 1, 1, -0.7f, terrainShader, waterShader, skyShader, groundPaths, skyboxPaths);
 	GameController::mainScene = &main_scene; // 这个设计实在是不行
@@ -198,14 +197,39 @@ int main()
 	// GUI::updateModelTextures(modelShader);
 
 	PickingTexture mouse_picking;
+
+#ifndef DEFERRED_SHADING
 	Water_Frame_Buffer waterfb;
 	Shadow_Frame_Buffer shadowfb;
 	Render main_renderer(main_scene, *GameController::mainLight, waterfb, mouse_picking, shadowfb);
+#endif
+
+#ifdef DEFERRED_SHADING
+	Render main_renderer(main_scene, *GameController::mainLight, mouse_picking);
+#endif
+
+	// a frame counter
+	double lastTime = glfwGetTime();
+	int nbFrames = 0;
 
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
 	{
+
+#ifdef FRAMECOUNT
+		// frame count
+		double currentTime = glfwGetTime();
+		nbFrames++;
+		if (currentTime - lastTime >= 1.0)
+		{ // If last prinf() was more than 1 sec ago
+			// printf and reset timer
+			printf("%f ms/frame\n", 1000.0 / double(nbFrames));
+			nbFrames = 0;
+			lastTime += 1.0;
+		}
+#endif
+
 		// per-frame time logic
 		// --------------------
 		GameController::updateGameController(window);
@@ -219,7 +243,6 @@ int main()
 		main_renderer.DrawRefraction(modelShader);
 
 #endif // !DEFERRED_SHADING
-		
 
 		main_renderer.DrawAll(pickingShader, modelShader, shadowShader);
 
@@ -250,7 +273,11 @@ int main()
 		delete itr.second;
 
 	Model::modelList.clear();
+
+#ifndef DEFERRED_SHADING
 	waterfb.cleanUp();
+#endif
+
 	// glfw: terminate, clearing all previously allocated GLFW resources.
 	// ------------------------------------------------------------------
 	glfwTerminate();
@@ -273,4 +300,3 @@ void addlights(Light &light)
 		light.AddPointLight(l);
 	}
 }
-

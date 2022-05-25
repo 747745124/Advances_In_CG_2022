@@ -7,7 +7,7 @@
 
 ## 22-04-27 commit d0322c8
 1. macOS宏定义应该是`__APPLE__` （前后各有两个'_'）
-2. 解决了一个macOS Retina显示器上初始化窗口显示比例异常的问题，需要在调用glViewPort前使用`Common::setWidthAndHeight`
+2. 解决了一个macOS Retina显示器上初始化窗口显示比例异常的问题，需要在调用glViewPort前使用（非deferred shading情况下）`Common::setWidthAndHeight`
 
 ## 22-05-06 commit bc0ac93
 1. 将./include目录中的自定义头文件移动到了basic中，现在./include目录中的头文件都应该是只读的

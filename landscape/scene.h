@@ -7,7 +7,6 @@
 
 #include <vector>
 
-
 #include "common.h"
 #include "Shader.h"
 #include "Camera.h"
@@ -16,12 +15,13 @@
 #include "skybox.h"
 #include "Texture.h"
 
-
 namespace KooNan
 {
-	class Scene {
+	class Scene
+	{
 	private:
 		float chunk_size;
+
 	public:
 		vector<Terrain> all_terrain_chunks;
 		vector<Water> all_water_chunks;
@@ -30,11 +30,12 @@ namespace KooNan
 		int width;
 		int height;
 		float water_height;
-		Shader& TerrainShader;
-		Shader& WaterShader;
-		Shader& SkyShader;
+		Shader &TerrainShader;
+		Shader &WaterShader;
+		Shader &SkyShader;
 		float waterMoveFactor;
 		unsigned int reflect_text, refract_text, dudvMap, normalMap, depthMap, shadowMap;
+
 	public:
 		/*
 		float chunk_size: define size of each chunk
@@ -46,13 +47,12 @@ namespace KooNan
 		string ground_textures: Pass a string of ground texture
 		vector<string> skyboxPaths: Pass a string vector contains skybox textures
 		*/
-		Scene(float chunk_size, int scene_width, int scene_height, float water_height, Shader& TerrainShader, Shader& WaterShader, Shader& SkyShader, vector<string> groundPaths, vector<string> skyboxPaths) :
-			chunk_size(chunk_size), skybox(skyboxPaths), groundPaths(groundPaths), width(scene_width), height(scene_height),
-			water_height(water_height), TerrainShader(TerrainShader), WaterShader(WaterShader), SkyShader(SkyShader)
+		Scene(float chunk_size, int scene_width, int scene_height, float water_height, Shader &TerrainShader, Shader &WaterShader, Shader &SkyShader, vector<string> groundPaths, vector<string> skyboxPaths) : chunk_size(chunk_size), skybox(skyboxPaths), groundPaths(groundPaths), width(scene_width), height(scene_height), water_height(water_height), TerrainShader(TerrainShader), WaterShader(WaterShader), SkyShader(SkyShader)
 		{
 			waterMoveFactor = 0.0f;
 			InitScene(groundPaths);
 		}
+
 		float getWaterHeight()
 		{
 			return this->water_height;
@@ -81,13 +81,13 @@ namespace KooNan
 		{
 			shadowMap = textID;
 		}
-		//Draw sky(Skybox doesn't need to be lit)
+		// Draw sky(Skybox doesn't need to be lit)
 		void DrawSky();
 
-		//Draw all scene with shading (ground and water) (Used in forward shading)
-		void DrawScene(float deltaTime, const glm::vec4* clippling_plane, bool draw_water, bool draw_shadow = false);
+		// Draw all scene with shading (ground and water) (Used in forward shading)
+		void DrawScene(float deltaTime, const glm::vec4 *clippling_plane, bool draw_water, bool draw_shadow = false);
 
-		void DrawSceneShadowPass(Shader& shadowPassShader);
+		void DrawSceneShadowPass(Shader &shadowPassShader);
 
 		float getTerrainHeight(float x, float z);
 
