@@ -158,13 +158,11 @@ namespace KooNan
 			//Set up jitter in projection(TAA)
 			glm::mat4 projection = Common::GetPerspectiveMat(GameController::mainCamera);
 			glm::mat4 jittered_projection = projection;
-			glm::mat4 jitter = glm::mat4(1.0f);
 			glm::vec2 offset = haltonSequence[haltonIndex];
 			offset = (offset - 0.5f) * 2.0f / glm::vec2(float(Common::SCR_WIDTH), float(Common::SCR_HEIGHT));
 			haltonIndex = (haltonIndex + 1) % NUM_TAA_SAMPLES;
-			jitter[3][0] += offset.x;
-			jitter[3][1] += offset.y;
-			jittered_projection = jitter * projection;
+			jittered_projection[2][0] += offset.x;
+			jittered_projection[2][1] += offset.y;
 
 			// Geometry pass
 			gbuf.bindToWrite();

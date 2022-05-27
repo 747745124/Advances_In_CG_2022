@@ -30,6 +30,7 @@ void main()
     //Get normals in view space
     vec3 normal = vec3(normalMapColor.r * 2.0 - 1.0, normalMapColor.b * 8.0, normalMapColor.g * 2.0 - 1.0);
     gNormal = mat3(trans_inv_view)*normalize(normal);
+    //gNormal = mat3(trans_inv_view)*vec3(0.0,1.0,0.0); //Plane reflection
     //gAlbedoSpec = vec4(0.0f, 0.0f, 0.0f, 0.2f);
     gReflect_mask = vec3(0.99f, 0.0f, 0.0f);
 

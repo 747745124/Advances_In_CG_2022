@@ -10,8 +10,8 @@ void main()
 {
     vec4 origin_color = texture(rColor, aTexCoords);
 
-    int scan_size = 3;
-    float separation = 2.0;
+    int scan_size = 1;
+    float separation = 1.0;
     vec4 uv = texture(rTexcoord, aTexCoords);
     if(uv.z<=0.0)
     {

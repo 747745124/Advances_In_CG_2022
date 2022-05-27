@@ -19,10 +19,10 @@ void main()
 {
     //parameters
     float maxDistance = 300;
-    float resolution = 0.85;
-    int   steps = 16;
+    float resolution = 0.6;
+    int   steps = 8;
     float min_thickness = 0.01;
-    float max_thickness = 50;
+    float max_thickness = 40;
 
     vec2 texSize  = textureSize(gPosition, 0).xy;
     ivec2 c = ivec2(gl_FragCoord.xy);
@@ -142,6 +142,7 @@ void main()
         if (depth>0 && depth<curr_thickness) 
         {
             hit1 = 1;
+            curr_thickness/=2;
             search1 = search0 + ((search1 - search0) / 2);
         } 
         else 
