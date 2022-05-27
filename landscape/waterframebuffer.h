@@ -5,7 +5,6 @@
 #include <common.h>
 #include <GameController.h>
 
-
 namespace KooNan
 {
 	class Water_Frame_Buffer
@@ -29,48 +28,59 @@ namespace KooNan
 			initialiseReflectionFrameBuffer();
 			initialiseRefractionFrameBuffer();
 		}
-		void bindReflectionFrameBuffer() {//call before rendering to this FBO
+		void bindReflectionFrameBuffer()
+		{ // call before rendering to this FBO
 			bindFrameBuffer(reflectionFrameBuffer, REFLECTION_WIDTH, REFLECTION_HEIGHT);
 		}
 
-		void bindRefractionFrameBuffer() {//call before rendering to this FBO
+		void bindRefractionFrameBuffer()
+		{ // call before rendering to this FBO
 			bindFrameBuffer(refractionFrameBuffer, REFRACTION_WIDTH, REFRACTION_HEIGHT);
 		}
 
-		void unbindCurrentFrameBuffer() {//call to switch to default frame buffer
+		void unbindCurrentFrameBuffer()
+		{ // call to switch to default frame buffer
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			Common::setWidthAndHeight();
 			glViewport(0, 0, (float)Common::SCR_WIDTH, (float)Common::SCR_HEIGHT);
 		}
-		unsigned int getReflectionTexture() {//get the resulting texture
+		unsigned int getReflectionTexture()
+		{ // get the resulting texture
 			return reflectionTexture;
 		}
 
-		unsigned int getRefractionTexture() {//get the resulting texture
+		unsigned int getRefractionTexture()
+		{ // get the resulting texture
 			return refractionTexture;
 		}
 
-		unsigned int getRefractionDepthTexture() {//get the resulting depth texture
+		unsigned int getRefractionDepthTexture()
+		{ // get the resulting depth texture
 			return refractionDepthTexture;
 		}
 
-		unsigned int getReflectionFrameBuffer() { return reflectionFrameBuffer;  }
+		unsigned int getReflectionFrameBuffer() { return reflectionFrameBuffer; }
 		unsigned int getRefractionFrameBuffer() { return refractionFrameBuffer; }
 
-		void initialiseReflectionFrameBuffer() {
+		void initialiseReflectionFrameBuffer()
+		{
 			reflectionFrameBuffer = createFrameBuffer();
 			reflectionTexture = createTextureAttachment(REFLECTION_WIDTH, REFLECTION_HEIGHT);
 			reflectionDepthBuffer = createDepthBufferAttachment(REFLECTION_WIDTH, REFLECTION_HEIGHT);
 			unbindCurrentFrameBuffer();
 		}
 
-		void initialiseRefractionFrameBuffer() {
+		void initialiseRefractionFrameBuffer()
+		{
 			refractionFrameBuffer = createFrameBuffer();
 			refractionTexture = createTextureAttachment(REFRACTION_WIDTH, REFRACTION_HEIGHT);
 			refractionDepthTexture = createDepthTextureAttachment(REFRACTION_WIDTH, REFRACTION_HEIGHT);
 			unbindCurrentFrameBuffer();
 		}
 
-		void cleanUp() {
+		void cleanUp()
+		{
 			glDeleteFramebuffers(1, &reflectionFrameBuffer);
 			glDeleteTextures(1, &reflectionTexture);
 			glDeleteRenderbuffers(1, &reflectionDepthBuffer);
@@ -80,9 +90,12 @@ namespace KooNan
 		}
 
 	private:
-		void bindFrameBuffer(int frameBuffer, int width, int height) {
-			glBindTexture(GL_TEXTURE_2D, 0);//To make sure the texture isn't bound
+		void bindFrameBuffer(int frameBuffer, int width, int height)
+		{
+			glBindTexture(GL_TEXTURE_2D, 0); // To make sure the texture isn't bound
 			glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+
+			Common::setWidthAndHeight();
 			glViewport(0, 0, width, height);
 		}
 
@@ -94,11 +107,12 @@ namespace KooNan
 			glDrawBuffer(GL_COLOR_ATTACHMENT0);
 			return frameBuffer;
 		}
-		unsigned int createTextureAttachment(int width, int height) {
+		unsigned int createTextureAttachment(int width, int height)
+		{
 			unsigned int texture;
 			glGenTextures(1, &texture);
 			glBindTexture(GL_TEXTURE_2D, texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, (void*)nullptr);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, (void *)nullptr);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
@@ -106,11 +120,12 @@ namespace KooNan
 			return texture;
 		}
 
-		unsigned int createDepthTextureAttachment(int width, int height) {
+		unsigned int createDepthTextureAttachment(int width, int height)
+		{
 			unsigned int texture;
 			glGenTextures(1, &texture);
 			glBindTexture(GL_TEXTURE_2D, texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, (void*)nullptr);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, (void *)nullptr);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture, 0);
@@ -118,7 +133,8 @@ namespace KooNan
 			return texture;
 		}
 
-		unsigned int createDepthBufferAttachment(int width, int height) {
+		unsigned int createDepthBufferAttachment(int width, int height)
+		{
 			unsigned int depthBuffer;
 			glGenRenderbuffers(1, &depthBuffer);
 			glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);

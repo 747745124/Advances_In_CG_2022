@@ -28,46 +28,54 @@ namespace KooNan
 	private:
 		Scene &main_scene;
 		Light &main_light;
+
+#ifndef DEFERRED_SHADING
 		Water_Frame_Buffer &waterfb;
-		PickingTexture &mouse_picking;
 		Shadow_Frame_Buffer &shadowfb;
-		GBuffer gbuf;
-		SSRBuffer ssrbuf;
-		SSAOBuffer aobuf;
-		SSAOBlurBuffer aoblurbuf;
-		ReflectionDrawBuffer reflectdrawbuf;
-		ReflectionBlurBuffer reflectblurbuf;
-		CSMBuffer csmbuf;
-		TAABuffer taabuf;
+#endif
+
+		PickingTexture &mouse_picking;
 
 		static const int NUM_CASCADES = 3;
 		static const float cascade_Z[NUM_CASCADES + 1];
-		struct {
+		struct
+		{
 			float xmin, xmax, ymin, ymax, zmin, zmax;
-		}CSMOrthoProjAABB[NUM_CASCADES];
+		} CSMOrthoProjAABB[NUM_CASCADES];
 		static unsigned cascadeUpdateCounter[NUM_CASCADES];
 		static const int NUM_TAA_SAMPLES = 16;
 		static const glm::vec2 haltonSequence[NUM_TAA_SAMPLES];
 		static unsigned haltonIndex;
 		static glm::mat4 lastViewProjection;
+
 	public:
+#ifdef DEFERRED_SHADING
+		Render(Scene &main_scene, Light &main_light, PickingTexture &mouse_picking) : main_scene(main_scene), main_light(main_light), mouse_picking(mouse_picking)
+		{
+			if (glGetError() == GL_INVALID_OPERATION)
+			{
+				// throw std::runtime_error("Oopps!");
+			}
+		}
+#endif
+
+#ifndef DEFERRED_SHADING
 		Render(Scene &main_scene, Light &main_light, Water_Frame_Buffer &waterfb, PickingTexture &mouse_picking, Shadow_Frame_Buffer &shadowfb) : main_scene(main_scene), main_light(main_light), waterfb(waterfb), mouse_picking(mouse_picking), shadowfb(shadowfb)
 		{
 			if (glGetError() == GL_INVALID_OPERATION)
 			{
-				//throw std::runtime_error("Oopps!");
+				// throw std::runtime_error("Oopps!");
 			}
-#ifndef DEFERRED_SHADING
+
 			InitLighting(main_scene.TerrainShader);
 			InitLighting(main_scene.WaterShader);
-#endif
 		}
+#endif
 
 		void DrawReflection(Shader &modelShader)
 		{
-#ifdef DEFERRED_SHADING
+#ifndef DEFERRED_SHADING
 
-#else
 			InitLighting(main_scene.TerrainShader);
 
 			glm::vec4 clipping_plane = glm::vec4(0.0, 1.0, 0.0, -main_scene.getWaterHeight());
@@ -87,7 +95,7 @@ namespace KooNan
 			DrawObjects(modelShader, &projection, nullptr, nullptr, &clipping_plane, false, true);
 
 			// we now draw as many light bulbs as we have point lights.
-			main_light.Draw(&projection, nullptr, nullptr,&clipping_plane);
+			main_light.Draw(&projection, nullptr, nullptr, &clipping_plane);
 			// render the main scene
 			main_scene.DrawScene(GameController::deltaTime, &projection, nullptr, nullptr, &clipping_plane, false);
 			main_scene.DrawSky(&projection, nullptr, nullptr);
@@ -103,9 +111,8 @@ namespace KooNan
 
 		void DrawRefraction(Shader &modelShader)
 		{
-#ifdef DEFERRED_SHADING
+#ifndef DEFERRED_SHADING
 
-#else
 			InitLighting(main_scene.TerrainShader);
 
 			glm::vec4 clipping_plane = glm::vec4(0.0, -1.0, 0.0, main_scene.getWaterHeight());
@@ -130,12 +137,20 @@ namespace KooNan
 		void DrawAll(Shader &pickingShader, Shader &modelShader, Shader &shadowShader)
 		{
 #ifdef DEFERRED_SHADING
+			GBuffer gbuf;
+			SSRBuffer ssrbuf;
+			SSAOBuffer aobuf;
+			SSAOBlurBuffer aoblurbuf;
+			ReflectionDrawBuffer reflectdrawbuf;
+			ReflectionBlurBuffer reflectblurbuf;
+			CSMBuffer csmbuf;
+			TAABuffer taabuf;
 			// Shadow pass
 			glm::vec3 DivPos = GameController::mainCamera.Position;
 			glm::mat4 lightView = glm::lookAt(DivPos - main_light.GetDirLightDirection() * 10.0f, DivPos, glm::vec3(0.0f, 1.0f, 0.0f));
 			CSMUpdateOrthoProj();
 			glEnable(GL_DEPTH_TEST);
-			
+
 			for (int i = 0; i < 3; i++)
 			{
 				cascadeUpdateCounter[i] = 1;
@@ -150,12 +165,9 @@ namespace KooNan
 				DrawObjectsShadowPass(*DeferredShading::csmShader);
 			}
 
- #ifdef __APPLE__
-			Common::setWidthAndHeight();
-#endif
 			glViewport(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT);
-			
-			//Set up jitter in projection(TAA)
+
+			// Set up jitter in projection(TAA)
 			glm::mat4 projection = Common::GetPerspectiveMat(GameController::mainCamera);
 			glm::mat4 jittered_projection = projection;
 			glm::vec2 offset = haltonSequence[haltonIndex];
@@ -166,7 +178,7 @@ namespace KooNan
 
 			// Geometry pass
 			gbuf.bindToWrite();
-			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glEnable(GL_DEPTH_TEST);
 			main_scene.DrawScene(GameController::deltaTime, &projection, &jittered_projection, &lastViewProjection, nullptr, true);
 			DrawObjects(modelShader, &projection, &jittered_projection, &lastViewProjection, nullptr, false, false);
@@ -184,14 +196,14 @@ namespace KooNan
 			aoblurbuf.bindToWrite();
 			DeferredShading::setSimpleBlurShader();
 			DeferredShading::DrawQuad();
-			
+
 			glm::mat4 lightMVP[NUM_CASCADES];
 			for (int i = 0; i < NUM_CASCADES; i++)
 			{
 				lightMVP[i] = GetCSMProjection(i) * lightView;
 			}
 
-			//Drawing quads from now on
+			// Drawing quads from now on
 			glDisable(GL_DEPTH_TEST);
 
 			// Render with lighting
@@ -205,7 +217,6 @@ namespace KooNan
 			DeferredShading::setLightingPassShader(lightMVP, cascade_Z);
 			DeferredShading::DrawQuad();
 
-			
 			// Draw reflected uv
 			gbuf.bindTexture();
 			ssrbuf.bindToWrite();
@@ -217,7 +228,7 @@ namespace KooNan
 			reflectdrawbuf.bindToWrite();
 			DeferredShading::setReflectDrawShader();
 			DeferredShading::DrawQuad();
-			
+
 			taabuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT);
 			ssrbuf.bindTexture();
@@ -225,7 +236,7 @@ namespace KooNan
 			DeferredShading::setCombineColorShader();
 			DeferredShading::DrawQuad();
 
-			//blit depth from gbuffer to taabuffer
+			// blit depth from gbuffer to taabuffer
 			taabuf.bindToWrite();
 			gbuf.bindToRead();
 			glClear(GL_DEPTH_BUFFER_BIT);
@@ -234,13 +245,12 @@ namespace KooNan
 			gbuf.bindTexture();
 			taabuf.bindTexture();
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			DeferredShading::setTAAShader();
 			DeferredShading::DrawQuad();
 
 			taabuf.copyToLast();
 			lastViewProjection = projection * GameController::mainCamera.GetViewMatrix();
-			
 
 #else
 			InitLighting(main_scene.WaterShader);
@@ -271,8 +281,8 @@ namespace KooNan
 
 			DrawShadowMap(shadowShader);
 			glm::mat4 projection = Common::GetPerspectiveMat(GameController::mainCamera);
-			DrawObjects(modelShader, &projection,nullptr,nullptr, &clipping_plane, true, true);
-			main_light.Draw(&projection, nullptr, nullptr,&clipping_plane);
+			DrawObjects(modelShader, &projection, nullptr, nullptr, &clipping_plane, true, true);
+			main_light.Draw(&projection, nullptr, nullptr, &clipping_plane);
 
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -296,6 +306,7 @@ namespace KooNan
 			assert(index < NUM_CASCADES);
 			return glm::ortho(CSMOrthoProjAABB[index].xmin, CSMOrthoProjAABB[index].xmax, CSMOrthoProjAABB[index].ymin, CSMOrthoProjAABB[index].ymax, CSMOrthoProjAABB[index].zmin, CSMOrthoProjAABB[index].zmax);
 		}
+
 	private:
 		void InitLighting(Shader &shader)
 		{
@@ -304,7 +315,7 @@ namespace KooNan
 
 		void DrawObjects(Shader &modelShader, const glm::mat4 *projection, const glm::mat4 *jitteredProjection, const glm::mat4 *lastViewProjection, const glm::vec4 *clippling_plane, bool IsAfterPicking, bool IsWithShading)
 		{
-			if(IsWithShading)
+			if (IsWithShading)
 				InitLighting(modelShader);
 			glEnable(GL_CULL_FACE);
 			bool enablePicking = GameController::gameMode == GameMode::Creating &&
@@ -318,7 +329,7 @@ namespace KooNan
 				modelShader.setMat4("jitteredProjection", *jitteredProjection);
 				modelShader.setMat4("lastViewProjection", *lastViewProjection);
 			}
-			
+
 			auto itr = GameObject::gameObjList.begin();
 			for (int i = 0; i < GameObject::gameObjList.size(); i++, ++itr)
 			{
@@ -341,16 +352,15 @@ namespace KooNan
 					modelShader.setVec4("plane", *clippling_plane);
 				}
 				modelShader.use();
-				
+
 				(*itr)->Draw(modelShader, GameController::mainCamera.Position,
-					*projection, GameController::mainCamera.GetViewMatrix(),
-					intersected);
-			
+							 *projection, GameController::mainCamera.GetViewMatrix(),
+							 intersected);
 			}
 			glDisable(GL_CULL_FACE);
 		}
 
-		void DrawObjectsShadowPass(Shader& shadowPassShader)
+		void DrawObjectsShadowPass(Shader &shadowPassShader)
 		{
 			glEnable(GL_CULL_FACE);
 			auto itr = GameObject::gameObjList.begin();
@@ -375,6 +385,7 @@ namespace KooNan
 			glDisable(GL_CULL_FACE);
 		}
 
+#ifndef DEFERRED_SHADING
 		void DrawShadowMap(Shader &shadowShader)
 		{
 			Camera &cam = GameController::mainCamera;
@@ -401,8 +412,7 @@ namespace KooNan
 			glViewport(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		}
-
-		
+#endif
 
 		void CSMUpdateOrthoProj()
 		{
@@ -415,19 +425,18 @@ namespace KooNan
 			for (int i = 0; i < NUM_CASCADES; i++)
 			{
 				float yNear = cascade_Z[i] * tanHalfFOVY;
-				float yFar = cascade_Z[i+1] * tanHalfFOVY;
+				float yFar = cascade_Z[i + 1] * tanHalfFOVY;
 				float xNear = yNear * aspectRatio;
 				float xFar = yFar * aspectRatio;
 				glm::vec4 frustumVertices[8] = {
-					glm::vec4(xNear,yNear,-cascade_Z[i],1.0f),
-					glm::vec4(-xNear,yNear,-cascade_Z[i],1.0f),
-					glm::vec4(xNear,-yNear,-cascade_Z[i],1.0f),
-					glm::vec4(-xNear,-yNear,-cascade_Z[i],1.0f),
-					glm::vec4(xFar,yFar,-cascade_Z[i+1],1.0f),
-					glm::vec4(-xFar,yFar,-cascade_Z[i+1],1.0f),
-					glm::vec4(xFar,-yFar,-cascade_Z[i+1],1.0f),
-					glm::vec4(-xFar,-yFar,-cascade_Z[i+1],1.0f)
-				};
+					glm::vec4(xNear, yNear, -cascade_Z[i], 1.0f),
+					glm::vec4(-xNear, yNear, -cascade_Z[i], 1.0f),
+					glm::vec4(xNear, -yNear, -cascade_Z[i], 1.0f),
+					glm::vec4(-xNear, -yNear, -cascade_Z[i], 1.0f),
+					glm::vec4(xFar, yFar, -cascade_Z[i + 1], 1.0f),
+					glm::vec4(-xFar, yFar, -cascade_Z[i + 1], 1.0f),
+					glm::vec4(xFar, -yFar, -cascade_Z[i + 1], 1.0f),
+					glm::vec4(-xFar, -yFar, -cascade_Z[i + 1], 1.0f)};
 
 				float minX = std::numeric_limits<float>::max();
 				float maxX = std::numeric_limits<float>::min();
@@ -453,8 +462,6 @@ namespace KooNan
 				CSMOrthoProjAABB[i].zmin = minZ;
 				CSMOrthoProjAABB[i].zmax = maxZ;
 			}
-
-
 		}
 	};
 }

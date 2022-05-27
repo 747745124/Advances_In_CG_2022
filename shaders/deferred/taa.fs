@@ -23,7 +23,7 @@ vec2 getClosestVelocity()
         {
             vec2 newUV = aTexCoords + deltaRes * vec2(i, j);
 
-            float depth = texture2D(gDepth, newUV).x;
+            float depth = texture(gDepth, newUV).x;
 
             if(depth < closestDepth)
             {

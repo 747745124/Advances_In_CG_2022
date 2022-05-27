@@ -22,7 +22,6 @@
 #include "Texture.h"
 #include "Render.h"
 
-
 using namespace KooNan;
 using namespace glm;
 
@@ -79,28 +78,27 @@ Shader *DeferredShading::simpleBlurShader = nullptr;
 Shader *DeferredShading::kuwaharaBlurShader = nullptr;
 Shader *DeferredShading::combineColorShader = nullptr;
 Shader *DeferredShading::csmShader = nullptr;
-Shader* DeferredShading::taaShader = nullptr;
-const float Render::cascade_Z[NUM_CASCADES + 1] = { 0.1f,30.0f,100.0f,1000.0f };
-unsigned Render::cascadeUpdateCounter[NUM_CASCADES] = { 1,1,1 };
+Shader *DeferredShading::taaShader = nullptr;
+const float Render::cascade_Z[NUM_CASCADES + 1] = {0.1f, 30.0f, 100.0f, 1000.0f};
+unsigned Render::cascadeUpdateCounter[NUM_CASCADES] = {1, 1, 1};
 
 const glm::vec2 Render::haltonSequence[NUM_TAA_SAMPLES] = {
-	glm::vec2(0.500000,0.333333),
-	glm::vec2(0.250000,0.666667),
-	glm::vec2(0.750000,0.111111),
-	glm::vec2(0.125000,0.444444),
-	glm::vec2(0.625000,0.777778),
-	glm::vec2(0.375000,0.222222),
-	glm::vec2(0.875000,0.555556),
-	glm::vec2(0.062500,0.888889),
-	glm::vec2(0.562500,0.037037),
-	glm::vec2(0.312500,0.370370),
-	glm::vec2(0.812500,0.703704),
-	glm::vec2(0.187500,0.148148),
-	glm::vec2(0.687500,0.481481),
-	glm::vec2(0.437500,0.814815),
-	glm::vec2(0.937500,0.259259),
-	glm::vec2(0.031250,0.592593)
-};
+	glm::vec2(0.500000, 0.333333),
+	glm::vec2(0.250000, 0.666667),
+	glm::vec2(0.750000, 0.111111),
+	glm::vec2(0.125000, 0.444444),
+	glm::vec2(0.625000, 0.777778),
+	glm::vec2(0.375000, 0.222222),
+	glm::vec2(0.875000, 0.555556),
+	glm::vec2(0.062500, 0.888889),
+	glm::vec2(0.562500, 0.037037),
+	glm::vec2(0.312500, 0.370370),
+	glm::vec2(0.812500, 0.703704),
+	glm::vec2(0.187500, 0.148148),
+	glm::vec2(0.687500, 0.481481),
+	glm::vec2(0.437500, 0.814815),
+	glm::vec2(0.937500, 0.259259),
+	glm::vec2(0.031250, 0.592593)};
 
 /*
 const glm::vec2 Render::haltonSequence[NUM_TAA_SAMPLES] = {
@@ -133,7 +131,7 @@ int main()
 	// glfw window creation
 	// --------------------
 
-	GLFWwindow *window = glfwCreateWindow(Common::SCR_WIDTH, Common::SCR_HEIGHT, "Koonan", NULL, NULL);
+	GLFWwindow *window = glfwCreateWindow(Common::SCR_WIDTH / 2, Common::SCR_HEIGHT / 2, "Koonan", NULL, NULL);
 
 	if (window == NULL)
 	{
@@ -142,7 +140,7 @@ int main()
 		return -1;
 	}
 	GameController::initGameController(window);
-	
+
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -150,8 +148,8 @@ int main()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
-	//There is an error but I don't exactly know why
-	glGetError();//!!!!!!!!!!!!!!!!!!!!!!!Clear it
+	// There is an error but I don't exactly know why
+	glGetError(); //!!!!!!!!!!!!!!!!!!!!!!!Clear it
 
 	// configure global opengl state
 	// -----------------------------
@@ -194,7 +192,7 @@ int main()
 	Shader modelShader(FileSystem::getPath("shaders/forward/model.vs").c_str(), FileSystem::getPath("shaders/forward/model.fs").c_str());
 	Shader shadowShader(FileSystem::getPath("shaders/forward/shadow.vs").c_str(), FileSystem::getPath("shaders/forward/shadow.fs").c_str());
 #endif
-	
+
 	// Instantiate the main_scene
 	Scene main_scene(256.0f, 1, 1, -0.7f, terrainShader, waterShader, skyShader, groundPaths, skyboxPaths);
 	GameController::mainScene = &main_scene; // 这个设计实在是不行
@@ -231,14 +229,39 @@ int main()
 	// GUI::updateModelTextures(modelShader);
 
 	PickingTexture mouse_picking;
+
+#ifndef DEFERRED_SHADING
 	Water_Frame_Buffer waterfb;
 	Shadow_Frame_Buffer shadowfb;
 	Render main_renderer(main_scene, *GameController::mainLight, waterfb, mouse_picking, shadowfb);
+#endif
+
+#ifdef DEFERRED_SHADING
+	Render main_renderer(main_scene, *GameController::mainLight, mouse_picking);
+#endif
+
+	// a frame counter
+	double lastTime = glfwGetTime();
+	int nbFrames = 0;
 
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
 	{
+
+#ifdef FRAMECOUNT
+		// frame count
+		double currentTime = glfwGetTime();
+		nbFrames++;
+		if (currentTime - lastTime >= 1.0)
+		{ // If last prinf() was more than 1 sec ago
+			// printf and reset timer
+			printf("%f ms/frame\n", 1000.0 / double(nbFrames));
+			nbFrames = 0;
+			lastTime += 1.0;
+		}
+#endif
+
 		// per-frame time logic
 		// --------------------
 		GameController::updateGameController(window);
@@ -252,7 +275,6 @@ int main()
 		main_renderer.DrawRefraction(modelShader);
 
 #endif // !DEFERRED_SHADING
-		
 
 		main_renderer.DrawAll(pickingShader, modelShader, shadowShader);
 
@@ -283,7 +305,11 @@ int main()
 		delete itr.second;
 
 	Model::modelList.clear();
+
+#ifndef DEFERRED_SHADING
 	waterfb.cleanUp();
+#endif
+
 	// glfw: terminate, clearing all previously allocated GLFW resources.
 	// ------------------------------------------------------------------
 	glfwTerminate();
@@ -306,4 +332,3 @@ void addlights(Light &light)
 		light.AddPointLight(l);
 	}
 }
-
