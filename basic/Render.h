@@ -34,6 +34,7 @@ namespace KooNan
 		Shadow_Frame_Buffer &shadowfb;
 #endif
 
+		TAABuffer taabuf;
 		PickingTexture &mouse_picking;
 
 		static const int NUM_CASCADES = 3;
@@ -144,14 +145,13 @@ namespace KooNan
 			ReflectionDrawBuffer reflectdrawbuf;
 			ReflectionBlurBuffer reflectblurbuf;
 			CSMBuffer csmbuf;
-			TAABuffer taabuf;
 			// Shadow pass
 			glm::vec3 DivPos = GameController::mainCamera.Position;
 			glm::mat4 lightView = glm::lookAt(DivPos - main_light.GetDirLightDirection() * 10.0f, DivPos, glm::vec3(0.0f, 1.0f, 0.0f));
 			CSMUpdateOrthoProj();
 			glEnable(GL_DEPTH_TEST);
 
-			for (int i = 0; i < 3; i++)
+			for (int i = 0; i < NUM_CASCADES; i++)
 			{
 				cascadeUpdateCounter[i] = 1;
 				csmbuf.bindToWrite(i);

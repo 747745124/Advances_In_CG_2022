@@ -4,14 +4,17 @@
 #include <glad/glad.h>
 #include "common.h"
 
-namespace KooNan {
-	class SSRBuffer {
+namespace KooNan
+{
+	class SSRBuffer
+	{
 	public:
 		SSRBuffer() { reflectionbuffer_init(); }
 		~SSRBuffer() { cleanUp(); }
 		void bindToWrite();
 		void bindToRead();
 		void bindTexture();
+
 	private:
 		void reflectionbuffer_init();
 		void cleanUp();
@@ -41,20 +44,18 @@ namespace KooNan {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, rTexcoord_text, 0);
 
-		GLuint attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+		GLuint attachments[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
 		glDrawBuffers(2, attachments);
-
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			std::cout << "Framebuffer not complete!" << std::endl;
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 	}
 	void SSRBuffer::cleanUp()
 	{
 		glDeleteFramebuffers(1, &refbuffer);
-		GLuint texts[] = { rColor_text ,rTexcoord_text };
+		GLuint texts[] = {rColor_text, rTexcoord_text};
 		glDeleteTextures(sizeof(texts) / sizeof(GLuint), texts);
 	}
 
@@ -76,6 +77,5 @@ namespace KooNan {
 		glBindTexture(GL_TEXTURE_2D, rTexcoord_text);
 	}
 }
-
 
 #endif // !REFLECTION_BUFFER_H
