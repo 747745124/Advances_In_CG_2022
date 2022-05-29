@@ -8,6 +8,7 @@ uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
 uniform sampler2D gMask;
 uniform sampler2D SSAOMask;
+uniform int softShadowType;
 
 const int NUM_CASCADES=3;
 uniform sampler2D ShadowMap[NUM_CASCADES];
@@ -220,19 +221,30 @@ void main()
         FragPosLightClipSpace[i] = lightMVP[i] * FragPosWorld;
     }
     float shadow = 1.0f;
+    
     vec2 texSize = textureSize(gPosition, 0).xy;
     vec2 texNoiseScale = texSize/4.0f;
     ROTATION = texture(rotationNoise, TexCoord*texNoiseScale).xy;
     vec3 lightDir = mat3(view)*normalize(-dirLight.direction);
     float NoL = clamp(dot(lightDir, Norm),0.0,1.0);
+
     for(int i=0;i<NUM_CASCADES;i++)
     {
         if(abs(FragPos.z)<=EndViewSpace[i])
-        {
-            shadow = CalcShadowPCSS(NoL,i,FragPosLightClipSpace[i]);
-            break;
+        {   //PCF
+            if(softShadowType==1)
+            {
+                shadow = CalcShadowPCF(NoL, i, FragPosLightClipSpace[i]);
+                break;
+            }
+            //PCSS
+            else if(softShadowType==2) {
+                shadow = CalcShadowPCSS(NoL,i,FragPosLightClipSpace[i]);
+                break;
+            } 
         }
     }
+    
 	vec3 result = CalcDirLight(dirLight, Color, spec, Norm, viewDir, ref_mask, ssao, shadow);
 	for(int i = 0; i < NR_POINT_LIGHTS; i++)
         result += CalcPointLight(pointLights[i], Color, spec, Norm, FragPos, viewDir, ref_mask, ssao);    

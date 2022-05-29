@@ -21,7 +21,8 @@ using nlohmann::json;
 #define SAVEJSON_LIGHT_LINEAR "linear"
 #define SAVEJSON_LIGHT_QUADRATIC "quadratic"
 
-namespace KooNan {
+namespace KooNan
+{
     void GameController::initGameController(GLFWwindow *window)
     {
         Common::setWindow(window);
@@ -285,269 +286,269 @@ namespace KooNan {
     }
 
     // 锟斤拷锟斤拷锟斤拷锟斤拷
-	void GameController::framebuffer_size_callback(GLFWwindow *window, int width, int height)
-	{
-		glfwGetFramebufferSize(window, &width, &height);
-		glViewport(0, 0, width, height);
-		Common::SCR_HEIGHT = height;
-		Common::SCR_WIDTH = width;
-	}
+    void GameController::framebuffer_size_callback(GLFWwindow *window, int width, int height)
+    {
+        glfwGetFramebufferSize(window, &width, &height);
+        glViewport(0, 0, width, height);
+        Common::SCR_HEIGHT = height;
+        Common::SCR_WIDTH = width;
+    }
 
-	void GameController::cursor_callback(GLFWwindow *window, double xpos, double ypos)
-	{
-		if (mouseMode == MouseMode::GUIMode)
-			return;
+    void GameController::cursor_callback(GLFWwindow *window, double xpos, double ypos)
+    {
+        if (mouseMode == MouseMode::GUIMode)
+            return;
 
-		static float lastX = Common::SCR_WIDTH / 2.0f;
-		static float lastY = Common::SCR_HEIGHT / 2.0f;
-		if (firstMouse)
-		{
-			lastX = xpos;
-			lastY = ypos;
-			firstMouse = false;
-		}
-		float xoffset = xpos - lastX;
-		float yoffset = lastY - ypos;
+        static float lastX = Common::SCR_WIDTH / 2.0f;
+        static float lastY = Common::SCR_HEIGHT / 2.0f;
+        if (firstMouse)
+        {
+            lastX = xpos;
+            lastY = ypos;
+            firstMouse = false;
+        }
+        float xoffset = xpos - lastX;
+        float yoffset = lastY - ypos;
 
-		// 锟斤拷锟斤拷锟疥不锟斤拷示时锟姐到GUI锟较的帮拷钮锟斤拷锟斤拷锟街癸拷锟轿伙拷锟斤拷锟斤拷锟侥伙拷锟斤拷锟�
-		lastX = Common::SCR_WIDTH / 2.0f;
-		lastY = Common::SCR_HEIGHT / 2.0f;
-		glfwSetCursorPos(window, lastX, lastY);
+        // 锟斤拷锟斤拷锟疥不锟斤拷示时锟姐到GUI锟较的帮拷钮锟斤拷锟斤拷锟街癸拷锟轿伙拷锟斤拷锟斤拷锟侥伙拷锟斤拷锟�
+        lastX = Common::SCR_WIDTH / 2.0f;
+        lastY = Common::SCR_HEIGHT / 2.0f;
+        glfwSetCursorPos(window, lastX, lastY);
 
-		if (gameMode == GameMode::Wandering)
-		{
-			mainCamera.ProcessMouseMovement(xoffset, yoffset);
-		}
-		else if (gameMode == GameMode::Creating)
-		{
-			if (creatingMode == CreatingMode::Editing)
-				;
-			else
-			{
-				static float viewDist = 5.0f;
-				mainCamera.ProcessMouseMovement(xoffset, yoffset, mainCamera.Position + viewDist * mainCamera.Front);
-			}
-		}
-	}
+        if (gameMode == GameMode::Wandering)
+        {
+            mainCamera.ProcessMouseMovement(xoffset, yoffset);
+        }
+        else if (gameMode == GameMode::Creating)
+        {
+            if (creatingMode == CreatingMode::Editing)
+                ;
+            else
+            {
+                static float viewDist = 5.0f;
+                mainCamera.ProcessMouseMovement(xoffset, yoffset, mainCamera.Position + viewDist * mainCamera.Front);
+            }
+        }
+    }
 
-	void GameController::scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
-	{
-		if (gameMode == GameMode::Creating)
-			if (creatingMode == CreatingMode::Placing)
-				if (ctrlPressedLast)
-					if (helperGameObj)
-					{
-						helperGameObj->rotY += glm::radians(yoffset);
-					}
-					else
-						;
-				else
-					mainCamera.ProcessMouseScroll(HEIGHT_CHANGE, yoffset);
-			else
-				mainCamera.ProcessMouseScroll(HEIGHT_CHANGE, yoffset);
-		else if (gameMode == GameMode::Wandering)
-			mainCamera.ProcessMouseScroll(FOVY_CHANGE, yoffset);
-	}
+    void GameController::scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+    {
+        if (gameMode == GameMode::Creating)
+            if (creatingMode == CreatingMode::Placing)
+                if (ctrlPressedLast)
+                    if (helperGameObj)
+                    {
+                        helperGameObj->rotY += glm::radians(yoffset);
+                    }
+                    else
+                        ;
+                else
+                    mainCamera.ProcessMouseScroll(HEIGHT_CHANGE, yoffset);
+            else
+                mainCamera.ProcessMouseScroll(HEIGHT_CHANGE, yoffset);
+        else if (gameMode == GameMode::Wandering)
+            mainCamera.ProcessMouseScroll(FOVY_CHANGE, yoffset);
+    }
 
-	void GameController::processInput(GLFWwindow *window)
-	{
-		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-			glfwSetWindowShouldClose(window, true);
+    void GameController::processInput(GLFWwindow *window)
+    {
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+            glfwSetWindowShouldClose(window, true);
 
-		if (gameMode == GameMode::Creating)
-		{
-			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-				mainCamera.ProcessKeyboard(deltaTime, NORTH);
-			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-				mainCamera.ProcessKeyboard(deltaTime, SOUTH);
-			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-				mainCamera.ProcessKeyboard(deltaTime, WEST);
-			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-				mainCamera.ProcessKeyboard(deltaTime, EAST);
+        if (gameMode == GameMode::Creating)
+        {
+            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+                mainCamera.ProcessKeyboard(deltaTime, NORTH);
+            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+                mainCamera.ProcessKeyboard(deltaTime, SOUTH);
+            if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+                mainCamera.ProcessKeyboard(deltaTime, WEST);
+            if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+                mainCamera.ProcessKeyboard(deltaTime, EAST);
 
-			ctrlPressedLast = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
+            ctrlPressedLast = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
 
-			bool midBtnPressed = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
-			if (midBtnPressed != midBtnPressedLast)
-			{
-				midBtnPressedLast = midBtnPressed;
-				updateCursorMode(window);
-			}
+            bool midBtnPressed = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
+            if (midBtnPressed != midBtnPressedLast)
+            {
+                midBtnPressedLast = midBtnPressed;
+                updateCursorMode(window);
+            }
 
-			if (creatingMode == CreatingMode::Placing)
-			{
-				static float scalStepWise = 1.1f;
-				if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-					if (helperGameObj)
-						helperGameObj->sca.z *= scalStepWise;
-				if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-					if (helperGameObj)
-						helperGameObj->sca.z /= scalStepWise;
-				if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-					if (helperGameObj)
-						helperGameObj->sca.x /= scalStepWise;
-				if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-					if (helperGameObj)
-						helperGameObj->sca.x *= scalStepWise;
-				if (glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS)
-					if (helperGameObj)
-						helperGameObj->sca.y *= scalStepWise;
-				if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS)
-					if (helperGameObj)
-						helperGameObj->sca.y /= scalStepWise;
+            if (creatingMode == CreatingMode::Placing)
+            {
+                static float scalStepWise = 1.1f;
+                if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+                    if (helperGameObj)
+                        helperGameObj->sca.z *= scalStepWise;
+                if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+                    if (helperGameObj)
+                        helperGameObj->sca.z /= scalStepWise;
+                if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+                    if (helperGameObj)
+                        helperGameObj->sca.x /= scalStepWise;
+                if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+                    if (helperGameObj)
+                        helperGameObj->sca.x *= scalStepWise;
+                if (glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS)
+                    if (helperGameObj)
+                        helperGameObj->sca.y *= scalStepWise;
+                if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS)
+                    if (helperGameObj)
+                        helperGameObj->sca.y /= scalStepWise;
 
-				if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-					if (helperGameObj) // 确锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷
-						helperGameObj = NULL;
-				if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
-					if (helperGameObj) // 锟狡筹拷锟斤拷锟斤拷锟斤拷锟斤拷
-					{
-						auto itr = GameObject::gameObjList.begin();
-						for (; itr != GameObject::gameObjList.end(); ++itr)
-							if (*itr == helperGameObj)
-								break;
-						GameObject::gameObjList.erase(itr);
-						delete helperGameObj;
-						helperGameObj = NULL;
-					}
-			}
-			else if (creatingMode == CreatingMode::Selecting)
-				if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-					if (selectedGameObj)
-					{
-						lastCursorX = cursorX;
-						lastCursorY = cursorY;
-						creatingMode = CreatingMode::Editing;
-					}
-		}
-		else if (gameMode == GameMode::Wandering)
-		{
-			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-				mainCamera.ProcessKeyboard(deltaTime, FORWARD);
-			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-				mainCamera.ProcessKeyboard(deltaTime, BACKWARD);
-			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-				mainCamera.ProcessKeyboard(deltaTime, LEFT);
-			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-				mainCamera.ProcessKeyboard(deltaTime, RIGHT);
+                if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+                    if (helperGameObj) // 确锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷
+                        helperGameObj = NULL;
+                if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+                    if (helperGameObj) // 锟狡筹拷锟斤拷锟斤拷锟斤拷锟斤拷
+                    {
+                        auto itr = GameObject::gameObjList.begin();
+                        for (; itr != GameObject::gameObjList.end(); ++itr)
+                            if (*itr == helperGameObj)
+                                break;
+                        GameObject::gameObjList.erase(itr);
+                        delete helperGameObj;
+                        helperGameObj = NULL;
+                    }
+            }
+            else if (creatingMode == CreatingMode::Selecting)
+                if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+                    if (selectedGameObj)
+                    {
+                        lastCursorX = cursorX;
+                        lastCursorY = cursorY;
+                        creatingMode = CreatingMode::Editing;
+                    }
+        }
+        else if (gameMode == GameMode::Wandering)
+        {
+            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+                mainCamera.ProcessKeyboard(deltaTime, FORWARD);
+            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+                mainCamera.ProcessKeyboard(deltaTime, BACKWARD);
+            if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+                mainCamera.ProcessKeyboard(deltaTime, LEFT);
+            if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+                mainCamera.ProcessKeyboard(deltaTime, RIGHT);
 
-			bool altPressed = glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS;
-			if (altPressed != altPressedLast)
-			{
-				altPressedLast = altPressed;
-				updateCursorMode(window);
-			}
-		}
-	}
+            bool altPressed = glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS;
+            if (altPressed != altPressedLast)
+            {
+                altPressedLast = altPressed;
+                updateCursorMode(window);
+            }
+        }
+    }
 
-	void GameController::updateCursorMode(GLFWwindow *window)
-	{
-		if (gameMode == GameMode::Wandering)
-			if (altPressedLast)
-			{
-				mouseMode = MouseMode::GUIMode;
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-				GameController::firstMouse = true;
-			}
-			else
-			{
-				mouseMode = MouseMode::CameraMode;
-				glfwSetCursorPos(window, Common::SCR_WIDTH / 2.0f, Common::SCR_HEIGHT / 2.0f);
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-			}
-		else if (gameMode == GameMode::Creating)
-			if (midBtnPressedLast)
-			{
-				mouseMode = MouseMode::CameraMode;
-				glfwSetCursorPos(window, Common::SCR_WIDTH / 2.0f, Common::SCR_HEIGHT / 2.0f);
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-			}
-			else
-			{
-				mouseMode = MouseMode::GUIMode;
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-				GameController::firstMouse = true;
-			}
-	}
-	glm::vec3 GameController::findFocusInScene()
-	{
-		if (mainScene == NULL)
-			return mainCamera.Position;
+    void GameController::updateCursorMode(GLFWwindow *window)
+    {
+        if (gameMode == GameMode::Wandering)
+            if (altPressedLast)
+            {
+                mouseMode = MouseMode::GUIMode;
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                GameController::firstMouse = true;
+            }
+            else
+            {
+                mouseMode = MouseMode::CameraMode;
+                glfwSetCursorPos(window, Common::SCR_WIDTH / 2.0f, Common::SCR_HEIGHT / 2.0f);
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            }
+        else if (gameMode == GameMode::Creating)
+            if (midBtnPressedLast)
+            {
+                mouseMode = MouseMode::CameraMode;
+                glfwSetCursorPos(window, Common::SCR_WIDTH / 2.0f, Common::SCR_HEIGHT / 2.0f);
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            }
+            else
+            {
+                mouseMode = MouseMode::GUIMode;
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                GameController::firstMouse = true;
+            }
+    }
+    glm::vec3 GameController::findFocusInScene()
+    {
+        if (mainScene == NULL)
+            return mainCamera.Position;
 
-		// 锟斤拷止锟斤拷锟较凤拷锟矫ｏ拷锟斤拷止getTerrainHeight锟侥讹拷锟斤拷锟届常
-		if (mainCamera.Front.y >= 0)
-			return mainCamera.Position;
+        // 锟斤拷止锟斤拷锟较凤拷锟矫ｏ拷锟斤拷止getTerrainHeight锟侥讹拷锟斤拷锟届常
+        if (mainCamera.Front.y >= 0)
+            return mainCamera.Position;
 
-		mousePicker.update(cursorX, cursorY);
-		glm::vec3 d3 = mousePicker.getCurrentRay();
-		float MAX_PICKING_DISTANCE = 1000.0f;
-		return GameController::binarySearch(0, 0, MAX_PICKING_DISTANCE, d3);
-	}
-	glm::vec3 GameController::binarySearch(int count, float start, float finish, glm::vec3 ray)
-	{
-		float half = start + ((finish - start) / 2.0f);
-		if (count >= RECURSION_COUNT)
-		{
-			glm::vec3 endPoint = mainCamera.Position + ray * half;
-			return glm::vec3(endPoint.x, mainScene->getTerrainHeight(endPoint.x, endPoint.z), endPoint.z);
-		}
-		if (GameController::intersectionInRange(start, half, ray))
-		{
-			return binarySearch(count + 1, start, half, ray);
-		}
-		else
-		{
-			return binarySearch(count + 1, half, finish, ray);
-		}
-	}
-	bool GameController::intersectionInRange(float start, float finish, glm::vec3 ray)
-	{
-		glm::vec3 startPoint = mainCamera.Position + ray * start;
-		glm::vec3 endPoint = mainCamera.Position + ray * finish;
-		float terrainHeightStart = mainScene->getTerrainHeight(startPoint.x, startPoint.z);
-		float terrainHeightEnd = mainScene->getTerrainHeight(endPoint.x, endPoint.z);
-		if (startPoint.y > terrainHeightStart && endPoint.y < terrainHeightEnd)
-			return true;
-		else
-			return false;
-	}
+        mousePicker.update(cursorX, cursorY);
+        glm::vec3 d3 = mousePicker.getCurrentRay();
+        float MAX_PICKING_DISTANCE = 1000.0f;
+        return GameController::binarySearch(0, 0, MAX_PICKING_DISTANCE, d3);
+    }
+    glm::vec3 GameController::binarySearch(int count, float start, float finish, glm::vec3 ray)
+    {
+        float half = start + ((finish - start) / 2.0f);
+        if (count >= RECURSION_COUNT)
+        {
+            glm::vec3 endPoint = mainCamera.Position + ray * half;
+            return glm::vec3(endPoint.x, mainScene->getTerrainHeight(endPoint.x, endPoint.z), endPoint.z);
+        }
+        if (GameController::intersectionInRange(start, half, ray))
+        {
+            return binarySearch(count + 1, start, half, ray);
+        }
+        else
+        {
+            return binarySearch(count + 1, half, finish, ray);
+        }
+    }
+    bool GameController::intersectionInRange(float start, float finish, glm::vec3 ray)
+    {
+        glm::vec3 startPoint = mainCamera.Position + ray * start;
+        glm::vec3 endPoint = mainCamera.Position + ray * finish;
+        float terrainHeightStart = mainScene->getTerrainHeight(startPoint.x, startPoint.z);
+        float terrainHeightEnd = mainScene->getTerrainHeight(endPoint.x, endPoint.z);
+        if (startPoint.y > terrainHeightStart && endPoint.y < terrainHeightEnd)
+            return true;
+        else
+            return false;
+    }
 
     // 状态锟斤拷锟脚号筹拷始锟斤拷
-	MouseMode GameController::mouseMode = MouseMode::GUIMode;
-	float GameController::lastFrame = .0f;
-	float GameController::deltaTime = .0f;
-	double GameController::cursorX = .0;
-	double GameController::cursorY = .0;
-	double GameController::lastCursorX = .0;
-	double GameController::lastCursorY = .0;
+    MouseMode GameController::mouseMode = MouseMode::GUIMode;
+    float GameController::lastFrame = .0f;
+    float GameController::deltaTime = .0f;
+    double GameController::cursorX = .0;
+    double GameController::cursorY = .0;
+    double GameController::lastCursorX = .0;
+    double GameController::lastCursorY = .0;
 
-	Camera GameController::oriCreatingCamera = Camera(0.f, 10.0f, 40.f, 0.f, 0.f, 30.f, 0.f, 1.f, 0.f);
-	Camera GameController::mainCamera = GameController::oriCreatingCamera;
+    Camera GameController::oriCreatingCamera = Camera(0.f, 10.0f, 40.f, 0.f, 0.f, 30.f, 0.f, 1.f, 0.f);
+    Camera GameController::mainCamera = GameController::oriCreatingCamera;
 
-	MousePicker GameController::mousePicker = MousePicker(GameController::mainCamera);
+    MousePicker GameController::mousePicker = MousePicker(GameController::mainCamera);
 
-	GameMode GameController::gameMode = GameMode::Creating;
-	GameMode GameController::lastGameMode = GameMode::Title;
-	CreatingMode GameController::creatingMode = CreatingMode::Selecting;
+    GameMode GameController::gameMode = GameMode::Creating;
+    GameMode GameController::lastGameMode = GameMode::Title;
+    CreatingMode GameController::creatingMode = CreatingMode::Selecting;
 
-	bool GameController::isRecordingLast = false;
-	bool GameController::isRecording = false;
+    bool GameController::isRecordingLast = false;
+    bool GameController::isRecording = false;
 
-	Model::ModelType GameController::modelType = Model::ModelType::ComplexModel;
+    Model::ModelType GameController::modelType = Model::ModelType::ComplexModel;
 
-	bool GameController::isCursorOnGui = false;
+    bool GameController::isCursorOnGui = false;
 
-	bool GameController::firstMouse = true;
-	bool GameController::ctrlPressedLast = false;
-	bool GameController::altPressedLast = false;
-	bool GameController::midBtnPressedLast = false;
+    bool GameController::firstMouse = true;
+    bool GameController::ctrlPressedLast = false;
+    bool GameController::altPressedLast = false;
+    bool GameController::midBtnPressedLast = false;
 
-	Scene *GameController::mainScene = NULL;
-	Light *GameController::mainLight = NULL;
+    Scene *GameController::mainScene = NULL;
+    Light *GameController::mainLight = NULL;
 
-	string GameController::selectedModel = "";
-	GameObject *GameController::helperGameObj = NULL;
-	GameObject *GameController::selectedGameObj = NULL;
+    string GameController::selectedModel = "";
+    GameObject *GameController::helperGameObj = NULL;
+    GameObject *GameController::selectedGameObj = NULL;
 
-	int GameController::RECURSION_COUNT = 64;
+    int GameController::RECURSION_COUNT = 64;
 }

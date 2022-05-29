@@ -1,5 +1,6 @@
 #version 330 core
 
+uniform int enable;
 //Position in world space
 uniform sampler2D gPosition; 
 //Normal in world space
@@ -17,6 +18,12 @@ layout (location = 1) out vec3 reflected_uv;
 
 void main()
 {
+    if(enable == 0)
+    {
+        reflected_uv = vec3(0.0, 0.0, 0.0);
+        return;
+    }
+    
     //parameters
     float maxDistance = 50;
     float resolution = 0.9;

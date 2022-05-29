@@ -53,6 +53,7 @@ namespace KooNan {
         static void setLightingPassShader(const glm::mat4* lightMVP,const float* endViewSpace)
         {
             lightingShader->use();
+            lightingShader->setInt("softShadowType",softShadowType);
             lightingShader->setInt("gPosition", 0);
             lightingShader->setInt("gNormal", 1);
             lightingShader->setInt("gAlbedoSpec", 2);
@@ -105,6 +106,12 @@ namespace KooNan {
         {
             ssrShader->use();
             Camera& cam = GameController::mainCamera;
+            if(ssrOn){
+                ssrShader->setInt("enable", 1);
+            }
+            else{
+                ssrShader->setInt("enable", 0);
+                }
             ssrShader->setMat4("projection", projection);
             ssrShader->setMat4("view", cam.GetViewMatrix());
             ssrShader->setInt("gPosition", 0);
@@ -112,9 +119,18 @@ namespace KooNan {
             ssrShader->setInt("gMask", 3);
             ssrShader->setVec3("viewPos", GameController::mainCamera.Position);
         }
+
+
         static void setReflectDrawShader()
         {
+            
             reflectDrawShader->use();
+            if(ReflectOn){
+                reflectDrawShader->setInt("enable", 1);
+            }
+            else{
+                reflectDrawShader->setInt("enable", 0);
+                }
             reflectDrawShader->setInt("gPosition", 0);
             reflectDrawShader->setInt("gNormal", 1);
             reflectDrawShader->setInt("gMask", 3);
@@ -123,6 +139,8 @@ namespace KooNan {
             reflectDrawShader->setInt("skybox", 6);
             reflectDrawShader->setMat4("inv_view", glm::inverse(GameController::mainCamera.GetViewMatrix()));
         }
+
+
         static void setSSAOShader(const glm::mat4& projection)
         {
             
@@ -143,6 +161,12 @@ namespace KooNan {
 
             ssaoShader->use();
             Camera& cam = GameController::mainCamera;
+            if(ssaoOn){
+            ssaoShader->setInt("enable", 1);
+            }
+            else{
+                ssaoShader->setInt("enable", 0);
+            }
             ssaoShader->setInt("gPosition", 0);
             ssaoShader->setInt("gNormal", 1);
             ssaoShader->setInt("gMask", 3);

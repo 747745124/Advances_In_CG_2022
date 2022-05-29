@@ -2,6 +2,8 @@
 uniform sampler2D rColor;
 uniform sampler2D rTexcoord;
 
+uniform int enable;
+
 uniform samplerCube skybox;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
@@ -13,9 +15,11 @@ out vec4 FragColor;
 uniform mat4 inv_view;
 
 void main()
-{
+{   
+ 
+
     vec4 origin_color = texture(rColor, aTexCoords);
-    if(texture(gMask, aTexCoords).x<=0.0)//Mask for water
+    if(texture(gMask, aTexCoords).x<=0.0 || enable == 0)//Mask for water
     {
         FragColor=origin_color;
         return;

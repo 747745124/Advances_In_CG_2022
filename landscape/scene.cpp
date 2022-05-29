@@ -22,7 +22,7 @@ namespace KooNan
 		{
 			types.push_back("texture_diffuse");
 		}
-		
+
 		TextureManager texman(GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 		std::vector<Texture> textures = texman.LoadTexture(ground_path, types);
 		std::vector<Texture> ground_textures;
@@ -52,9 +52,9 @@ namespace KooNan
 					all_water_chunks.push_back(water_surface);
 				}
 			}
-		
+
 		WaterShader.use();
-		
+
 #ifndef DEFERRED_SHADING
 		WaterShader.setVec3("material.diffuse", glm::vec3(0.2, 0.2, 0.2));
 		WaterShader.setVec3("material.specular", glm::vec3(1.0, 1.0, 1.0));
@@ -62,15 +62,13 @@ namespace KooNan
 #endif // !DEFERRED_SHADING
 		setDudvMap(textures[textures.size() - 2].id);
 		setNormalMap(textures[textures.size() - 1].id);
-
-
 	}
 
-	void Scene::DrawSky(const glm::mat4* projection, const glm::mat4* jitteredProjection, const glm::mat4* lastViewProjection)
+	void Scene::DrawSky(const glm::mat4 *projection, const glm::mat4 *jitteredProjection, const glm::mat4 *lastViewProjection)
 	{
 		SkyShader.use();
-		
-		Camera& cam = GameController::mainCamera;
+
+		Camera &cam = GameController::mainCamera;
 		if (jitteredProjection && lastViewProjection)
 		{
 			SkyShader.use();
@@ -80,9 +78,9 @@ namespace KooNan
 		skybox.Draw(SkyShader, glm::scale(glm::mat4(1.0f), glm::vec3(500.0f)), cam.GetViewMatrix(), *projection);
 	}
 
-	void Scene::DrawScene(float deltaTime, const glm::mat4* projection, const glm::mat4* jitteredProjection, const glm::mat4* lastViewProjection, const glm::vec4* clippling_plane, bool draw_water, bool draw_shadow)
+	void Scene::DrawScene(float deltaTime, const glm::mat4 *projection, const glm::mat4 *jitteredProjection, const glm::mat4 *lastViewProjection, const glm::vec4 *clippling_plane, bool draw_water, bool draw_shadow)
 	{
-		Camera& cam = GameController::mainCamera;
+		Camera &cam = GameController::mainCamera;
 		glm::mat4 view = cam.GetViewMatrix();
 		glm::vec3 viewPos = cam.Position;
 
@@ -121,12 +119,12 @@ namespace KooNan
 				all_terrain_chunks[i].Draw(TerrainShader);
 			}
 		}
-		
+
 		if (draw_water)
 		{
 			waterMoveFactor += deltaTime * 0.1f;
 			waterMoveFactor = waterMoveFactor - (int)waterMoveFactor;
-			if (clippling_plane)//Forward rendering
+			if (clippling_plane) // Forward rendering
 			{
 				WaterShader.use();
 				WaterShader.setMat4("projection", *projection);
@@ -155,7 +153,7 @@ namespace KooNan
 					all_water_chunks[j].Draw(WaterShader);
 				}
 			}
-			else//Deferred rendering
+			else // Deferred rendering
 			{
 				WaterShader.use();
 				WaterShader.setMat4("view", view);
@@ -174,20 +172,16 @@ namespace KooNan
 				{
 					all_water_chunks[j].Draw(WaterShader);
 				}
-				
 			}
 		}
-		
-		
 	}
 
-	void Scene::DrawSceneShadowPass(Shader& shadowPassShader)
+	void Scene::DrawSceneShadowPass(Shader &shadowPassShader)
 	{
 		for (int i = 0; i < all_terrain_chunks.size(); i++)
 		{
 			all_terrain_chunks[i].Draw(shadowPassShader);
 		}
-		
 	}
 
 	float Scene::getTerrainHeight(float x, float z)
@@ -202,6 +196,5 @@ namespace KooNan
 		if (height < getWaterHeight())
 			height = getWaterHeight();
 		return height;
-
 	}
 }

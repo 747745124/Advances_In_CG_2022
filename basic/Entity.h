@@ -1,7 +1,6 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
-
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -15,10 +14,11 @@ namespace KooNan
 	class Entity
 	{
 	private:
-		Shader& EntityShader;
+		Shader &EntityShader;
+
 	public:
-		Entity(Shader& SomeShader):EntityShader(SomeShader){}
-		void Draw(Mesh& mesh,Camera& cam, const glm::mat4 projection, glm::mat4 model, bool if_hit = false)
+		Entity(Shader &SomeShader) : EntityShader(SomeShader) {}
+		void Draw(Mesh &mesh, Camera &cam, const glm::mat4 projection, glm::mat4 model, bool if_hit = false)
 		{
 			EntityShader.use();
 			if (if_hit)
@@ -33,7 +33,7 @@ namespace KooNan
 			EntityShader.setMat4("model", model);
 			mesh.Draw(&EntityShader);
 		}
-		void Pick(Mesh& mesh, Shader& pickingShader, Camera& cam, glm::mat4 model, unsigned int objIndex, unsigned int drawIndex)
+		void Pick(Mesh &mesh, Shader &pickingShader, Camera &cam, glm::mat4 model, unsigned int objIndex, unsigned int drawIndex)
 		{
 			glm::mat4 projection = Common::GetPerspectiveMat(cam);
 			pickingShader.use();

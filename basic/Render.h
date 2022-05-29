@@ -35,13 +35,7 @@ namespace KooNan
 
 #endif
 		PickingTexture &mouse_picking;
-		GBuffer gbuf;
-		SSRBuffer ssrbuf;
-		SSAOBuffer aobuf;
-		SSAOBlurBuffer aoblurbuf;
-		ReflectionDrawBuffer reflectdrawbuf;
-		ReflectionBlurBuffer reflectblurbuf;
-		CSMBuffer csmbuf;
+
 		TAABuffer taabuf;
 		static const int NUM_CASCADES = 3;
 		static const float cascade_Z[NUM_CASCADES + 1];
@@ -144,11 +138,18 @@ namespace KooNan
 		void DrawAll(Shader &pickingShader, Shader &modelShader, Shader &shadowShader)
 		{
 #ifdef DEFERRED_SHADING
-			
-			
+			GBuffer gbuf;
+			SSRBuffer ssrbuf;
+			SSAOBuffer aobuf;
+			SSAOBlurBuffer aoblurbuf;
+			ReflectionDrawBuffer reflectdrawbuf;
+			ReflectionBlurBuffer reflectblurbuf;
+			CSMBuffer csmbuf;
+
 			// Shadow pass
 			glm::vec3 DivPos = GameController::mainCamera.Position;
 			glm::mat4 lightView = glm::lookAt(DivPos - main_light.GetDirLightDirection() * 10.0f, DivPos, glm::vec3(0.0f, 1.0f, 0.0f));
+
 			CSMUpdateOrthoProj();
 			glEnable(GL_DEPTH_TEST);
 

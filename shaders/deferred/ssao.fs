@@ -1,5 +1,6 @@
 #version 330 core
 
+uniform int enable;
 //Position in world space
 uniform sampler2D gPosition; 
 //Normal in world space
@@ -22,6 +23,12 @@ out float FragColor;
 
 void main()
 {
+    if(enable==0)
+    {
+        FragColor = 1.0;
+        return;
+    }
+
     //fragpos in view space
     vec4 FragPos = vec4(texture(gPosition, aTexCoords).xyz, 1.0);
     //normal in view space
