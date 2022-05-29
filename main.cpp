@@ -254,7 +254,7 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 
-#ifdef FRAMECOUNT
+#ifdef FRAME_COUNT
 		// frame count
 		double currentTime = glfwGetTime();
 		nbFrames++;

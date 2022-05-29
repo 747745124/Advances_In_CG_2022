@@ -34,7 +34,6 @@ namespace KooNan
 		Shadow_Frame_Buffer &shadowfb;
 
 #endif
-
 		PickingTexture &mouse_picking;
 		GBuffer gbuf;
 		SSRBuffer ssrbuf;
@@ -153,7 +152,7 @@ namespace KooNan
 			CSMUpdateOrthoProj();
 			glEnable(GL_DEPTH_TEST);
 
-			for (int i = 0; i < 3; i++)
+			for (int i = 0; i < NUM_CASCADES; i++)
 			{
 				cascadeUpdateCounter[i] = 1;
 				csmbuf.bindToWrite(i);
