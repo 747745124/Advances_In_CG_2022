@@ -50,4 +50,8 @@
 4. `Texture2D()` 在OpenGL 3.3中弃用, use `Texture()` instead
 5. SSR步长有待重新设置，全屏像素渲染（接近4K）情况下，帧数仅20fps，可以考虑capped at 24fps/30fps
 
+## 22-05-29 commit b2659e0
 
+将SSR的探查距离改小，用cubemap解决天空的反射
+
+将所有的延迟着色阶段的buffer移至渲染循环外，以提高渲染帧数
