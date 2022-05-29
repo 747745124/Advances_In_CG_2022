@@ -18,11 +18,10 @@ layout (location = 1) out vec3 reflected_uv;
 void main()
 {
     //parameters
-    float maxDistance = 300;
-    float resolution = 0.6;
-    int   steps = 8;
-    float min_thickness = 0.01;
-    float max_thickness = 40;
+    float maxDistance = 50;
+    float resolution = 0.9;
+    int   steps = 16;
+    float thickness = 1;
 
     vec2 texSize  = textureSize(gPosition, 0).xy;
     ivec2 c = ivec2(gl_FragCoord.xy);
@@ -80,12 +79,11 @@ void main()
 
     float currentZ = startView.z;
     float depth;
-    float curr_thickness = min_thickness;
     float i = 0;
     vec2 frag = startFrag.xy;
     vec3 uv;
-
-    frag += jitter*increment;
+    frag += increment*delta*0.05;
+    i += delta*0.05;
     //linear search pass
     for(; i<int(delta); i++)
     {
@@ -103,12 +101,9 @@ void main()
         search1 = clamp(search1, 0., 1.);
         //Perform perspective correct intrapolation
         currentZ = (startView.z * endView.z)/mix(endView.z, startView.z, search1);
-        depth = abs(currentZ) - abs(positionTo.z);
-        //curr_thickness is determined by current search position, the further the thicker
-        float fact = smoothstep(0,1,i/delta);
-        curr_thickness = min_thickness + pow(fact, 3)*(max_thickness-min_thickness);
+        depth =  abs(currentZ) - abs(positionTo.z);
         //check if intersected
-        if (depth>0 && depth<curr_thickness) 
+        if (depth>0 && depth<thickness) 
         {
             hit0 = 1;
             break;
@@ -139,10 +134,9 @@ void main()
         currentZ = (startView.z * endView.z)/mix(endView.z, startView.z, search1);
         depth = abs(currentZ) - abs(positionTo.z);
         //check if intersected
-        if (depth>0 && depth<curr_thickness) 
+        if (depth>0 && depth<thickness) 
         {
             hit1 = 1;
-            curr_thickness/=2;
             search1 = search0 + ((search1 - search0) / 2);
         } 
         else 
@@ -155,7 +149,7 @@ void main()
 
     float visibility = hit1 * positionTo.w
     * (1 - max(dot(vec3(-unitpositionFrom), pivot), 0))
-    * (1 - clamp(depth/max_thickness, 0, 1))
+    * (1 - clamp(depth/thickness, 0, 1))
     * (1 - clamp(length(positionTo - positionFrom) / maxDistance, 0, 1));
 
     reflected_uv = vec3(uv.xy,clamp(visibility,0,1));

@@ -28,6 +28,8 @@ namespace KooNan
 		void Draw(Shader &shader, glm::mat4 model, glm::mat4 view, glm::mat4 projection);
 
 		unsigned int getCubeMap() { return texture; }
+
+		void bindSkyboxTexture(int i);
 	private:
 		unsigned int VAO, VBO, texture;
 

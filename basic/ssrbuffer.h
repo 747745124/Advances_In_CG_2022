@@ -70,9 +70,9 @@ namespace KooNan {
 
 	void SSRBuffer::bindTexture()
 	{
-		glActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE4);
 		glBindTexture(GL_TEXTURE_2D, rColor_text);
-		glActiveTexture(GL_TEXTURE1);
+		glActiveTexture(GL_TEXTURE5);
 		glBindTexture(GL_TEXTURE_2D, rTexcoord_text);
 	}
 }

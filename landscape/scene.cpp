@@ -44,7 +44,11 @@ namespace KooNan
 				{
 					Terrain ground(i, j, ground_textures, heightMapPath, chunk_size);
 					all_terrain_chunks.push_back(ground);
+#ifdef DEFERRED_SHADING
+					Water water_surface(i, j, 2048, water_height, chunk_size);
+#else // !
 					Water water_surface(i, j, water_height, chunk_size);
+#endif
 					all_water_chunks.push_back(water_surface);
 				}
 			}
@@ -73,7 +77,7 @@ namespace KooNan
 			SkyShader.setMat4("jitteredProjection", *jitteredProjection);
 			SkyShader.setMat4("lastViewProjection", *lastViewProjection);
 		}
-		skybox.Draw(SkyShader, glm::scale(glm::mat4(1.0f), glm::vec3(150.0f)), cam.GetViewMatrix(), *projection);
+		skybox.Draw(SkyShader, glm::scale(glm::mat4(1.0f), glm::vec3(500.0f)), cam.GetViewMatrix(), *projection);
 	}
 
 	void Scene::DrawScene(float deltaTime, const glm::mat4* projection, const glm::mat4* jitteredProjection, const glm::mat4* lastViewProjection, const glm::vec4* clippling_plane, bool draw_water, bool draw_shadow)

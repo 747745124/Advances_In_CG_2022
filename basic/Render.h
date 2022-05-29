@@ -32,10 +32,18 @@ namespace KooNan
 #ifndef DEFERRED_SHADING
 		Water_Frame_Buffer &waterfb;
 		Shadow_Frame_Buffer &shadowfb;
+
 #endif
 
 		PickingTexture &mouse_picking;
-
+		GBuffer gbuf;
+		SSRBuffer ssrbuf;
+		SSAOBuffer aobuf;
+		SSAOBlurBuffer aoblurbuf;
+		ReflectionDrawBuffer reflectdrawbuf;
+		ReflectionBlurBuffer reflectblurbuf;
+		CSMBuffer csmbuf;
+		TAABuffer taabuf;
 		static const int NUM_CASCADES = 3;
 		static const float cascade_Z[NUM_CASCADES + 1];
 		struct
@@ -137,14 +145,8 @@ namespace KooNan
 		void DrawAll(Shader &pickingShader, Shader &modelShader, Shader &shadowShader)
 		{
 #ifdef DEFERRED_SHADING
-			GBuffer gbuf;
-			SSRBuffer ssrbuf;
-			SSAOBuffer aobuf;
-			SSAOBlurBuffer aoblurbuf;
-			ReflectionDrawBuffer reflectdrawbuf;
-			ReflectionBlurBuffer reflectblurbuf;
-			CSMBuffer csmbuf;
-			TAABuffer taabuf;
+			
+			
 			// Shadow pass
 			glm::vec3 DivPos = GameController::mainCamera.Position;
 			glm::mat4 lightView = glm::lookAt(DivPos - main_light.GetDirLightDirection() * 10.0f, DivPos, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -224,9 +226,11 @@ namespace KooNan
 			DeferredShading::DrawQuad();
 
 			// Draw reflection
+			gbuf.bindTexture();
 			ssrbuf.bindTexture();
 			reflectdrawbuf.bindToWrite();
 			DeferredShading::setReflectDrawShader();
+			main_scene.bindSkyboxTexture(6);
 			DeferredShading::DrawQuad();
 
 			taabuf.bindToWrite();

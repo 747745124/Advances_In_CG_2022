@@ -130,8 +130,13 @@ int main()
 
 	// glfw window creation
 	// --------------------
+#ifdef __APPLE__
+	GLFWwindow* window = glfwCreateWindow(Common::SCR_WIDTH / 2, Common::SCR_HEIGHT / 2, "Koonan", NULL, NULL);
+#else
+	GLFWwindow* window = glfwCreateWindow(Common::SCR_WIDTH, Common::SCR_HEIGHT, "Koonan", NULL, NULL);
+#endif // __APPLE__
 
-	GLFWwindow *window = glfwCreateWindow(Common::SCR_WIDTH / 2, Common::SCR_HEIGHT / 2, "Koonan", NULL, NULL);
+	
 
 	if (window == NULL)
 	{

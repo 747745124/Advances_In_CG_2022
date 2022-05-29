@@ -60,7 +60,7 @@ vec3 CalcDirLight(DirLight light, vec3 color, float spec, vec3 normal, vec3 view
     vec3 diffuse  = light.diffuse  * diff * color * water_mask;
     vec3 specular = light.specular * specCalc * spec * color;
     ambient += ambient * (1.0-water_mask) * 1.2;
-    specular += specular * (1.0-water_mask) * 2.0;
+    specular += specular * 2.0;
     return ambient*1.5*pow(ambient_mask,1.5)+diffuse*2.5*shadow+specular;
 }
 
@@ -85,7 +85,7 @@ vec3 CalcPointLight(PointLight light, vec3 color, float spec, vec3 normal, vec3 
     diffuse *= attenuation;
     specular *= attenuation;
     ambient += ambient * (1.0-water_mask);
-    specular += specular * (1.0-water_mask) * 2.0;
+    specular += specular * 2.0;
     return (ambient*pow(ambient_mask,1.5)+diffuse)*0.3+specular;
 }
 

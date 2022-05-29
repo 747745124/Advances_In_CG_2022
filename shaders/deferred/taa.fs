@@ -6,7 +6,7 @@ uniform sampler2D gDepth;
 uniform sampler2D gVelocity;
 
 
-const float alpha=0.05f;
+const float alpha=0.1f;
 in vec2 aTexCoords;
 
 out vec4 aaColor;

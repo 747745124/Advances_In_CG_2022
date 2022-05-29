@@ -115,8 +115,13 @@ namespace KooNan {
         static void setReflectDrawShader()
         {
             reflectDrawShader->use();
-            reflectDrawShader->setInt("rColor", 0);
-            reflectDrawShader->setInt("rTexcoord", 1);
+            reflectDrawShader->setInt("gPosition", 0);
+            reflectDrawShader->setInt("gNormal", 1);
+            reflectDrawShader->setInt("gMask", 3);
+            reflectDrawShader->setInt("rColor", 4);
+            reflectDrawShader->setInt("rTexcoord", 5);
+            reflectDrawShader->setInt("skybox", 6);
+            reflectDrawShader->setMat4("inv_view", glm::inverse(GameController::mainCamera.GetViewMatrix()));
         }
         static void setSSAOShader(const glm::mat4& projection)
         {
@@ -164,7 +169,7 @@ namespace KooNan {
         static void setCombineColorShader()
         {
             combineColorShader->use();
-            combineColorShader->setInt("Tcolor", 0);
+            combineColorShader->setInt("Tcolor", 4);
             combineColorShader->setInt("Treflection", 1);
             combineColorShader->setInt("gMask", 3);
         }

@@ -76,6 +76,12 @@ namespace KooNan
 		glDepthMask(GL_TRUE);
 	}
 
+	void Skybox::bindSkyboxTexture(int i)
+	{
+		glActiveTexture(GL_TEXTURE0+i);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+	}
+
 	unsigned int Skybox::GenCubeMap(std::vector<std::string> facePaths)
 	{
 		if (facePaths.size() < 6) {

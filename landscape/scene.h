@@ -82,6 +82,10 @@ namespace KooNan
 			shadowMap = textID;
 		}
 
+		void bindSkyboxTexture(int i)
+		{
+			skybox.bindSkyboxTexture(i);
+		}
 		// Draw sky(Skybox doesn't need to be lit)
 		void DrawSky(const glm::mat4 *projection, const glm::mat4 *jitteredProjection, const glm::mat4 *lastViewProjection);
 
