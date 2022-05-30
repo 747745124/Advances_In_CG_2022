@@ -18,7 +18,6 @@ namespace KooNan
 	bool ReflectOn = true;
 	bool showFPS = true;
 	bool taaOn = true;
-	bool deferredShading = true;
 	float ssrThickness = 1.0;
 
 	int softShadowType = 2; //2 for PCSS, 1 for PCF
@@ -147,7 +146,6 @@ namespace KooNan
 				else
 					;
 				
-				ImGui::Checkbox("Deferred Shading", &deferredShading);
 				ImGui::Checkbox("SSR On/Off", &ssrOn);
 				ImGui::SliderFloat("SSR Thickness", &ssrThickness, 0.f, 10.f);
 				ImGui::Checkbox("SSAO On/Off",&ssaoOn);
@@ -220,7 +218,6 @@ namespace KooNan
 				{
 					GameController::mainCamera = GameController::oriCreatingCamera;
 				}
-				ImGui::Checkbox("Deferred Shading", &deferredShading);
 				ImGui::Checkbox("SSR On/Off", &ssrOn);
 				ImGui::SliderFloat("SSR Thickness", &ssrThickness, 0.f, 10.f);
 

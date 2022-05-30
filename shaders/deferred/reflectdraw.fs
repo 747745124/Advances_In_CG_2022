@@ -19,11 +19,13 @@ void main()
  
 
     vec4 origin_color = texture(rColor, aTexCoords);
-    if(texture(gMask, aTexCoords).x<=0.0 || enable == 0)//Mask for water
+
+    if(texture(gMask, aTexCoords).x<=0.0)//Mask for water
     {
         FragColor=origin_color;
         return;
     }
+
     int scan_size = 5;
     float separation = 2.0;
     vec4 uv = texture(rTexcoord, aTexCoords);
@@ -44,6 +46,11 @@ void main()
     
     if (uv.z <= 0.0)//Perform cubemap lookup
     { 
+        if(enable==0)
+        {
+            FragColor = origin_color;
+            return;
+        }
         vec3 fragpos=texture(gPosition,aTexCoords).xyz;
         vec3 normal=texture(gNormal,aTexCoords).xyz;
         vec3 reflected=reflect(fragpos,normal);
