@@ -4,7 +4,7 @@ uniform sampler2D lastFrame;
 uniform sampler2D currFrame;
 uniform sampler2D gDepth;
 uniform sampler2D gVelocity;
-
+uniform int taaOn;
 
 const float alpha=0.1f;
 in vec2 aTexCoords;
@@ -122,7 +122,9 @@ void main()
     }
     lastColor = clipInYCoCgR(RGB2YCoCgR(currColor), RGB2YCoCgR(lastColor));
     lastColor = YCoCgR2RGB(lastColor);
-    aaColor = vec4(lastColor*(1-alpha)+currColor*alpha,1.0f);
-    
+    if(taaOn==1)
+        aaColor = vec4(lastColor*(1-alpha)+currColor*alpha,1.0f);
+    else
+        aaColor = vec4(currColor,1.0f);
     
 }

@@ -17,6 +17,10 @@ namespace KooNan
 	bool csmOn = false;
 	bool ReflectOn = true;
 	bool showFPS = true;
+	bool taaOn = true;
+	bool deferredShading = true;
+	float ssrThickness = 1.0;
+
 	int softShadowType = 2; //2 for PCSS, 1 for PCF
 	class GUI
 	{
@@ -142,10 +146,15 @@ namespace KooNan
 				}
 				else
 					;
+				
+				ImGui::Checkbox("Deferred Shading", &deferredShading);
 				ImGui::Checkbox("SSR On/Off", &ssrOn);
+				ImGui::SliderFloat("SSR Thickness", &ssrThickness, 0.f, 10.f);
 				ImGui::Checkbox("SSAO On/Off",&ssaoOn);
 				ImGui::Checkbox("CSM Color On/Off",&csmOn);
 				ImGui::Checkbox("Reflect On/Off",&ReflectOn);
+				ImGui::Checkbox("TAA On/Off",&taaOn);
+
 				ImGui::Text("Soft Shadow Type");
 				ImGui::RadioButton("PCF", &softShadowType, 1); ImGui::SameLine();
 				ImGui::RadioButton("PCSS", &softShadowType, 2);
@@ -211,11 +220,14 @@ namespace KooNan
 				{
 					GameController::mainCamera = GameController::oriCreatingCamera;
 				}
+				ImGui::Checkbox("Deferred Shading", &deferredShading);
 				ImGui::Checkbox("SSR On/Off", &ssrOn);
+				ImGui::SliderFloat("SSR Thickness", &ssrThickness, 0.f, 10.f);
+
 				ImGui::Checkbox("SSAO On/Off",&ssaoOn);
 				ImGui::Checkbox("CSM Color On/Off",&csmOn);
 				ImGui::Checkbox("Cubemap Reflect On/Off",&ReflectOn);
-				
+				ImGui::Checkbox("TAA On/Off",&taaOn);
 				ImGui::Text("Soft Shadow Type");
 				ImGui::RadioButton("PCF", &softShadowType, 1); ImGui::SameLine();
 				ImGui::RadioButton("PCSS", &softShadowType, 2);
