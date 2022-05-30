@@ -54,6 +54,10 @@ namespace KooNan {
         {
             lightingShader->use();
             lightingShader->setInt("softShadowType",softShadowType);
+            if(csmOn)
+                lightingShader->setInt("csmShow",1);
+            else
+                lightingShader->setInt("csmShow",0);
             lightingShader->setInt("gPosition", 0);
             lightingShader->setInt("gNormal", 1);
             lightingShader->setInt("gAlbedoSpec", 2);

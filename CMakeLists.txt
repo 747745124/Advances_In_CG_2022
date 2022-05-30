@@ -14,7 +14,7 @@ ELSEIF (CMAKE_SYSTEM_NAME MATCHES "Windows")
 ENDIF ()
 
 add_definitions(-DDEFERRED_SHADING)
-add_definitions(-DFRAME_COUNT)
+# add_definitions(-DFRAME_COUNT)
 
 file(GLOB_RECURSE imgui_cpp ${PROJECT_SOURCE_DIR}/include/imgui/*.cpp)
 file(GLOB basic_cpp ${PROJECT_SOURCE_DIR}/basic/*.cpp)
