@@ -85,7 +85,7 @@ namespace KooNan {
 
 	void CSMBuffer::bindTexture()
 	{
-		for (int i = 0; i < sizeof(shadowMap) / sizeof(shadowMap[0]); i++)
+		for (int i = 0; i < 3; i++)
 		{
 			glActiveTexture(CASCACDE_SHADOW_TEXTURE_UNIT0+i);
 			glBindTexture(GL_TEXTURE_2D, shadowMap[i]);

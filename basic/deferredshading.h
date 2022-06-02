@@ -20,6 +20,9 @@ namespace KooNan {
         static Shader* combineColorShader;
         static Shader* csmShader;
         static Shader* taaShader;
+        static Shader* causticShader;
+        static Shader* bufferDebugShader;
+        static Shader* refractionPositionShader;
         static void DrawQuad()
 		{
 			static GLuint quadVAO = 0;
@@ -50,7 +53,7 @@ namespace KooNan {
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             glBindVertexArray(0);
 		}
-        static void setLightingPassShader(const glm::mat4* lightMVP,const float* endViewSpace)
+        static void setLightingPassShader(const glm::mat4* lightMVP,const glm::mat4* causticVP,const float* endViewSpace)
         {
             lightingShader->use();
             lightingShader->setInt("softShadowType",softShadowType);
@@ -59,6 +62,9 @@ namespace KooNan {
             lightingShader->setInt("gAlbedoSpec", 2);
             lightingShader->setInt("gMask", 3);
             lightingShader->setInt("SSAOMask", 5);
+            lightingShader->setInt("refractionPos", 11);
+            lightingShader->setInt("causticMap", 10);
+            lightingShader->setMat4("causticVP", *causticVP);
             glm::mat4 view = GameController::mainCamera.GetViewMatrix();
             lightingShader->setMat4("view", view);
             lightingShader->setMat4("inv_view", glm::inverse(view));
@@ -213,6 +219,13 @@ namespace KooNan {
             taaShader->setInt("gDepth", 3);
             taaShader->setInt("gVelocity", 4);
             
+        }
+        static void setRefractionPositionShader(const glm::mat4& view, const glm::mat4& projection)
+        {
+            refractionPositionShader->use();
+            refractionPositionShader->setMat4("view", view);
+            refractionPositionShader->setMat4("model", glm::mat4(1.0f));
+            refractionPositionShader->setMat4("projection", projection);
         }
     private:
         static void SSAOKernalInit(std::vector<glm::vec3>& ssaoKernel)

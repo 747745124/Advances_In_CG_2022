@@ -8,6 +8,8 @@ uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
 uniform sampler2D gMask;
 uniform sampler2D SSAOMask;
+uniform sampler2D refractionPos;
+uniform sampler2D causticMap;
 uniform int softShadowType;
 
 const int NUM_CASCADES=3;
@@ -47,8 +49,10 @@ uniform PointLight pointLights[NR_POINT_LIGHTS];
 
 uniform mat4 view;
 uniform mat4 inv_view;
+uniform mat4 causticVP;
 
-vec3 CalcDirLight(DirLight light, vec3 color, float spec, vec3 normal, vec3 viewDir, float water_mask, float ambient_mask, float shadow)
+
+vec3 CalcDirLight(DirLight light, vec3 color, float spec, vec3 normal, vec3 viewDir, float water_mask, float ambient_mask, float shadow, float caustics)
 {
     vec3 lightDir = mat3(view)*normalize(-light.direction);
     // diffuse shading
@@ -60,9 +64,12 @@ vec3 CalcDirLight(DirLight light, vec3 color, float spec, vec3 normal, vec3 view
     vec3 ambient  = light.ambient  * color;
     vec3 diffuse  = light.diffuse  * diff * color * water_mask;
     vec3 specular = light.specular * specCalc * spec * color;
-    ambient += ambient * (1.0-water_mask) * 1.2;
-    specular += specular * 2.0;
-    return ambient*1.5*pow(ambient_mask,1.5)+diffuse*2.5*shadow+specular;
+    ambient += ambient * (1.0-water_mask) * 0.3;
+    specular += specular * 2.0 * water_mask;
+    vec3 result = ambient*1.5*pow(ambient_mask,1.5)+diffuse*2.5*shadow+specular;
+
+    result = water_mask>0.0?result:result*(1.3+caustics);
+    return result;
 }
 
 float bias[NUM_CASCADES];
@@ -197,6 +204,20 @@ float CalcShadowPCSS(float NoL, int index, vec4 PosLightClipSpace)
 }
 
 
+float CalcCausticsPCF(vec2 uv)
+{
+    vec2 texelSize=textureSize(causticMap,0);
+    float caustics=0.0;
+    int size=3;
+    for(int x=-size;x<=size;x++)
+        for(int y=-size;y<=size;y++)
+        {
+            float curr_caustics = texture(causticMap, (uv+vec2(x,y)*texelSize)).x;
+            caustics+=curr_caustics;
+        }
+    return caustics/((2*size+1)*(2*size+1));
+}
+
 void main()
 {
     vec2 TexCoord = aTexCoords;
@@ -245,9 +266,16 @@ void main()
         }
     }
     
-	vec3 result = CalcDirLight(dirLight, Color, spec, Norm, viewDir, ref_mask, ssao, shadow);
+    //caustics calculation
+    vec4 backFragPosWorld = vec4(texture(refractionPos, TexCoord).xyz,1.0f);
+    backFragPosWorld = inv_view*backFragPosWorld;
+    vec4 causticUV = causticVP*backFragPosWorld;
+    causticUV.xyz/=causticUV.w;
+    causticUV.xyz=causticUV.xyz*0.5+0.5;
+    float caustics = CalcCausticsPCF(causticUV.xy);
+	vec3 result = CalcDirLight(dirLight, Color, spec, Norm, viewDir, ref_mask, ssao, shadow, caustics);
 	for(int i = 0; i < NR_POINT_LIGHTS; i++)
         result += CalcPointLight(pointLights[i], Color, spec, Norm, FragPos, viewDir, ref_mask, ssao);    
 
-	FragColor = (mask.x+mask.y)>=0.1f?Color:result;
+	FragColor = (mask.y)>=0.1f?Color:result;
 }

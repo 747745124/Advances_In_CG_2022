@@ -25,8 +25,8 @@ void main()
     }
     
     //parameters
-    float maxDistance = 50;
-    float resolution = 0.9;
+    float maxDistance = 30;
+    float resolution = 0.6;
     int   steps = 16;
     float thickness = 1;
 
