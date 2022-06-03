@@ -62,3 +62,7 @@
 ## 22-05-31 commit e78d68b
 1. 新增frame counter
 2. 新增彩色csm显示
+
+## 22-06-03 commit d58f9b6
+1. 增加了实时水面caustics
+2. 目前的问题是在水面三角形顶点上做ray marching带来的帧数下降
