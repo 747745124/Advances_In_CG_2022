@@ -71,7 +71,7 @@ std::vector<std::string> groundPaths = {
 void addlights(Light &light);
 
 Shader *DeferredShading::lightingShader = nullptr;
-Shader *DeferredShading::ssrShader = nullptr;
+Shader *DeferredShading::ssreflectionShader = nullptr;
 Shader *DeferredShading::reflectDrawShader = nullptr;
 Shader *DeferredShading::ssaoShader = nullptr;
 Shader *DeferredShading::simpleBlurShader = nullptr;
@@ -82,6 +82,8 @@ Shader *DeferredShading::taaShader = nullptr;
 Shader *DeferredShading::causticShader = nullptr;
 Shader* DeferredShading::bufferDebugShader = nullptr;
 Shader* DeferredShading::refractionPositionShader = nullptr;
+Shader* DeferredShading::ssrefractionShader = nullptr;
+Shader* DeferredShading::refractDrawShader = nullptr;
 const float Render::cascade_Z[NUM_CASCADES + 1] = {0.1f, 30.0f, 100.0f, 1000.0f};
 unsigned Render::cascadeUpdateCounter[NUM_CASCADES] = {1, 1, 1};
 
@@ -172,7 +174,7 @@ int main()
 	Shader modelShader(FileSystem::getPath("shaders/deferred/gbuffer.vs").c_str(), FileSystem::getPath("shaders/deferred/gbuffer.fs").c_str());
 	Shader shadowShader(FileSystem::getPath("shaders/deferred/shadow.vs").c_str(), FileSystem::getPath("shaders/deferred/shadow.fs").c_str());
 	Shader lightingShader(FileSystem::getPath("shaders/deferred/light.vs").c_str(), FileSystem::getPath("shaders/deferred/light.fs").c_str());
-	Shader ssrShader(FileSystem::getPath("shaders/deferred/ssr.vs").c_str(), FileSystem::getPath("shaders/deferred/ssr.fs").c_str());
+	Shader ssreflectionShader(FileSystem::getPath("shaders/deferred/ssreflection.vs").c_str(), FileSystem::getPath("shaders/deferred/ssreflection.fs").c_str());
 	Shader reflectDrawShader(FileSystem::getPath("shaders/deferred/reflectdraw.vs").c_str(), FileSystem::getPath("shaders/deferred/reflectdraw.fs").c_str());
 	Shader ssaoShader(FileSystem::getPath("shaders/deferred/ssao.vs").c_str(), FileSystem::getPath("shaders/deferred/ssao.fs").c_str());
 	Shader simpleblurShader(FileSystem::getPath("shaders/deferred/simpleblur.vs").c_str(), FileSystem::getPath("shaders/deferred/simpleblur.fs").c_str());
@@ -183,8 +185,10 @@ int main()
 	Shader causticShader(FileSystem::getPath("shaders/deferred/caustics.vs").c_str(), FileSystem::getPath("shaders/deferred/caustics.fs").c_str());
 	Shader bufferviewShader(FileSystem::getPath("shaders/deferred/bufferview.vs").c_str(), FileSystem::getPath("shaders/deferred/bufferview.fs").c_str());
 	Shader refractionPositionShader(FileSystem::getPath("shaders/deferred/refractionposition.vs").c_str(), FileSystem::getPath("shaders/deferred/refractionposition.fs").c_str());
+	Shader ssrefractionShader(FileSystem::getPath("shaders/deferred/ssrefraction.vs").c_str(), FileSystem::getPath("shaders/deferred/ssrefraction.fs").c_str());
+	Shader refractDrawShader(FileSystem::getPath("shaders/deferred/refractdraw.vs").c_str(), FileSystem::getPath("shaders/deferred/refractdraw.fs").c_str());
 	DeferredShading::lightingShader = &lightingShader;
-	DeferredShading::ssrShader = &ssrShader;
+	DeferredShading::ssreflectionShader = &ssreflectionShader;
 	DeferredShading::reflectDrawShader = &reflectDrawShader;
 	DeferredShading::ssaoShader = &ssaoShader;
 	DeferredShading::simpleBlurShader = &simpleblurShader;
@@ -195,6 +199,8 @@ int main()
 	DeferredShading::causticShader = &causticShader;
 	DeferredShading::bufferDebugShader = &bufferviewShader;
 	DeferredShading::refractionPositionShader = &refractionPositionShader;
+	DeferredShading::ssrefractionShader = &ssrefractionShader;
+	DeferredShading::refractDrawShader = &refractDrawShader;
 #else
 	Shader terrainShader(FileSystem::getPath("shaders/forward/terrain.vs").c_str(), FileSystem::getPath("shaders/forward/terrain.fs").c_str());
 	Shader waterShader(FileSystem::getPath("shaders/forward/water.vs").c_str(), FileSystem::getPath("shaders/forward/water.fs").c_str());

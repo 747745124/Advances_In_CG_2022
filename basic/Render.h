@@ -13,7 +13,8 @@
 #include "GameController.h"
 #include "gbuffer.h"
 #include "deferredshading.h"
-#include "ssrbuffer.h"
+#include "ssreflectuvbuffer.h"
+#include "ssrefractuvbuffer.h"
 #include "ssaobuffer.h"
 #include "ssaoblurbuffer.h"
 #include "reflectionblurbuffer.h"
@@ -23,6 +24,8 @@
 #include "causticDepthBuffer.h"
 #include "causticMapBuffer.h"
 #include "refractionPositionBuffer.h"
+#include "refractiondrawbuffer.h"
+#include "originColorBuffer.h"
 
 namespace KooNan
 {
@@ -40,15 +43,18 @@ namespace KooNan
 		PickingTexture &mouse_picking;
 		TAABuffer taabuf;
 		GBuffer gbuf;
-		SSRBuffer ssrbuf;
+		SSReflectUVBuffer ssreflectbuf;
+		SSRefractUVBuffer ssrefractbuf;
 		SSAOBuffer aobuf;
 		SSAOBlurBuffer aoblurbuf;
 		ReflectionDrawBuffer reflectdrawbuf;
 		ReflectionBlurBuffer reflectblurbuf;
+		RefractionDrawBuffer refractdrawbuf;
 		CSMBuffer csmbuf;
 		CausticDepthBuffer causticdepthbuf;
 		CausticMapBuffer causticmapbuf;
 		RefractionPositionBuffer refractionposbuf;
+		OriginColorBuffer lightingcolorbuf;
 		static const int NUM_CASCADES = 3;
 		static const float cascade_Z[NUM_CASCADES + 1];
 		struct
@@ -200,8 +206,7 @@ namespace KooNan
 
 			//Draw terrain position for refraction
 			refractionposbuf.bindToWrite();
-			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-			glEnable(GL_DEPTH_TEST);
+			glClear(GL_COLOR_BUFFER_BIT);
 			DeferredShading::setRefractionPositionShader(GameController::mainCamera.GetViewMatrix(), projection);
 			main_scene.DrawSceneWithoutMVP(*DeferredShading::refractionPositionShader);
 
@@ -251,7 +256,7 @@ namespace KooNan
 			csmbuf.bindTexture();
 			refractionposbuf.bindTexture();
 			causticmapbuf.bindTexture();
-			ssrbuf.bindToWrite();
+			lightingcolorbuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT);
 			InitLighting(*DeferredShading::lightingShader);
 			glDisable(GL_BLEND);
@@ -259,24 +264,47 @@ namespace KooNan
 			DeferredShading::setLightingPassShader(lightMVP, &causticsVP, cascade_Z);
 			DeferredShading::DrawQuad();
 
-			// Draw reflected uv
+			// SSReflection pass
 			gbuf.bindTexture();
-			ssrbuf.bindToWrite();
-			DeferredShading::setSSRShader(jittered_projection);
+			ssreflectbuf.bindToWrite();
+			DeferredShading::setSSReflectionShader(jittered_projection);
 			DeferredShading::DrawQuad();
 
 			// Draw reflection
 			gbuf.bindTexture();
-			ssrbuf.bindTexture();
+			lightingcolorbuf.bindTexture();
+			ssreflectbuf.bindTexture();
 			reflectdrawbuf.bindToWrite();
 			DeferredShading::setReflectDrawShader();
 			main_scene.bindSkyboxTexture(6);
 			DeferredShading::DrawQuad();
 
+			//SSRefraction pass
+			gbuf.bindTexture();
+			refractionposbuf.bindTexture();
+			ssrefractbuf.bindToWrite();
+			DeferredShading::setSSRefractionShader(jittered_projection);
+			DeferredShading::DrawQuad();
+			
+			// Draw refraction
+			gbuf.bindTexture();
+			lightingcolorbuf.bindTexture();
+			ssrefractbuf.bindTexture();
+			refractdrawbuf.bindToWrite();
+			DeferredShading::setRefractDrawShader();
+			DeferredShading::DrawQuad();
+
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			refractdrawbuf.bindToRead();
+			glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			
+			//Combine reflect/refract and origin color
 			taabuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT);
-			ssrbuf.bindTexture();
+			gbuf.bindTexture();
+			lightingcolorbuf.bindTexture();
 			reflectdrawbuf.bindTexture();
+			refractdrawbuf.bindTexture();
 			DeferredShading::setCombineColorShader();
 			DeferredShading::DrawQuad();
 

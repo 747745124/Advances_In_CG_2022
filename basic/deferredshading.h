@@ -12,8 +12,10 @@ namespace KooNan {
     public:
         DeferredShading() = delete;
         static Shader* lightingShader;
-        static Shader* ssrShader;
+        static Shader* ssreflectionShader;
+        static Shader* ssrefractionShader;
         static Shader* reflectDrawShader;
+        static Shader* refractDrawShader;
         static Shader* ssaoShader;
         static Shader* simpleBlurShader;
         static Shader* kuwaharaBlurShader;
@@ -112,25 +114,24 @@ namespace KooNan {
 
 
         }
-        static void setSSRShader(const glm::mat4& projection)
+        static void setSSReflectionShader(const glm::mat4& projection)
         {
-            ssrShader->use();
+            ssreflectionShader->use();
             Camera& cam = GameController::mainCamera;
             if(ssrOn){
-                ssrShader->setInt("enable", 1);
+                ssreflectionShader->setInt("enable", 1);
             }
             else{
-                ssrShader->setInt("enable", 0);
+                ssreflectionShader->setInt("enable", 0);
                 }
-            ssrShader->setFloat("thickness",ssrThickness);
-            ssrShader->setMat4("projection", projection);
-            ssrShader->setMat4("view", cam.GetViewMatrix());
-            ssrShader->setInt("gPosition", 0);
-            ssrShader->setInt("gNormal", 1);
-            ssrShader->setInt("gMask", 3);
-            ssrShader->setVec3("viewPos", GameController::mainCamera.Position);
+            ssreflectionShader->setFloat("thickness",ssrThickness);
+            ssreflectionShader->setMat4("projection", projection);
+            ssreflectionShader->setMat4("view", cam.GetViewMatrix());
+            ssreflectionShader->setInt("gPosition", 0);
+            ssreflectionShader->setInt("gNormal", 1);
+            ssreflectionShader->setInt("gMask", 3);
+            ssreflectionShader->setVec3("viewPos", GameController::mainCamera.Position);
         }
-
 
         static void setReflectDrawShader()
         {
@@ -151,6 +152,25 @@ namespace KooNan {
             reflectDrawShader->setMat4("inv_view", glm::inverse(GameController::mainCamera.GetViewMatrix()));
         }
 
+        static void setSSRefractionShader(const glm::mat4& projection)
+        {
+            ssrefractionShader->use();
+            Camera& cam = GameController::mainCamera;
+            ssrefractionShader->setMat4("projection", projection);
+            ssrefractionShader->setMat4("view", cam.GetViewMatrix());
+            ssrefractionShader->setInt("gPosition", 0);
+            ssrefractionShader->setInt("gNormal", 1);
+            ssrefractionShader->setInt("gMask", 3);
+            ssrefractionShader->setInt("gTerrain", 11);
+        }
+
+        static void setRefractDrawShader()
+        {
+            refractDrawShader->use();
+            refractDrawShader->setInt("gMask", 3);
+            refractDrawShader->setInt("rColor", 4);
+            refractDrawShader->setInt("rTexcoord", 5);
+        }
 
         static void setSSAOShader(const glm::mat4& projection)
         {
@@ -205,7 +225,10 @@ namespace KooNan {
         {
             combineColorShader->use();
             combineColorShader->setInt("Tcolor", 4);
-            combineColorShader->setInt("Treflection", 1);
+            combineColorShader->setInt("Treflection", 5);
+            combineColorShader->setInt("Trefraction", 6);
+            combineColorShader->setInt("gPosition", 0);
+            combineColorShader->setInt("gNormal", 1);
             combineColorShader->setInt("gMask", 3);
         }
         static void setCSMShader(const glm::mat4& view, const glm::mat4& projection)
