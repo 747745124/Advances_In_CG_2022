@@ -20,6 +20,7 @@
 #include "reflectiondrawbuffer.h"
 #include "csmbuffer.h"
 #include "taabuffer.h"
+#include "hdr.h"
 
 namespace KooNan
 {
@@ -43,6 +44,8 @@ namespace KooNan
 		ReflectionBlurBuffer reflectblurbuf;
 		CSMBuffer csmbuf;
 		TAABuffer taabuf;
+		HDRProcessor hdrProcessor;
+
 		static const int NUM_CASCADES = 3;
 		static const float cascade_Z[NUM_CASCADES + 1];
 		struct
@@ -56,7 +59,6 @@ namespace KooNan
 		static glm::mat4 lastViewProjection;
 
 	public:
-
 #ifdef DEFERRED_SHADING
 		Render(Scene &main_scene, Light &main_light, PickingTexture &mouse_picking) : main_scene(main_scene), main_light(main_light), mouse_picking(mouse_picking)
 		{
@@ -145,6 +147,9 @@ namespace KooNan
 		void DrawAll(Shader &pickingShader, Shader &modelShader, Shader &shadowShader)
 		{
 #ifdef DEFERRED_SHADING
+			hdrProcessor.bindToWrite();
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 			// Shadow pass
 			glm::vec3 DivPos = GameController::mainCamera.Position;
 			glm::mat4 lightView = glm::lookAt(DivPos - main_light.GetDirLightDirection() * 10.0f, DivPos, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -175,11 +180,12 @@ namespace KooNan
 			offset = (offset - 0.5f) * 2.0f / glm::vec2(float(Common::SCR_WIDTH), float(Common::SCR_HEIGHT));
 			haltonIndex = (haltonIndex + 1) % NUM_TAA_SAMPLES;
 
-			if(taaOn){
+			if (taaOn)
+			{
 				jittered_projection[2][0] += offset.x;
 				jittered_projection[2][1] += offset.y;
 			}
-			
+
 			// Geometry pass
 			gbuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -235,6 +241,13 @@ namespace KooNan
 			main_scene.bindSkyboxTexture(6);
 			DeferredShading::DrawQuad();
 
+			// hdr processing
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			hdrProcessor.bindTexture();
+			DeferredShading::setHDRProcessor();
+			DeferredShading::DrawQuad();
+
 			taabuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT);
 			ssrbuf.bindTexture();
@@ -257,6 +270,12 @@ namespace KooNan
 
 			taabuf.copyToLast();
 			lastViewProjection = projection * GameController::mainCamera.GetViewMatrix();
+
+			// hdr processing
+			// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			// hdrProcessor.bindTexture();
+			// DeferredShading::setHDRProcessor();
+			// DeferredShading::DrawQuad();
 
 #else
 			InitLighting(main_scene.WaterShader);

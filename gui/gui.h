@@ -18,9 +18,10 @@ namespace KooNan
 	bool ReflectOn = true;
 	bool showFPS = true;
 	bool taaOn = true;
-	float ssrThickness = 1.0;
+	float ssrThickness = 1.0f;
+	float exposure = 1.0f;
+	int softShadowType = 2; // 2 for PCSS, 1 for PCF
 
-	int softShadowType = 2; //2 for PCSS, 1 for PCF
 	class GUI
 	{
 	public:
@@ -145,24 +146,26 @@ namespace KooNan
 				}
 				else
 					;
-				
+
 				ImGui::Checkbox("SSR On/Off", &ssrOn);
 				ImGui::SliderFloat("SSR Thickness", &ssrThickness, 0.f, 10.f);
-				ImGui::Checkbox("SSAO On/Off",&ssaoOn);
-				ImGui::Checkbox("CSM Color On/Off",&csmOn);
-				ImGui::Checkbox("Reflect On/Off",&ReflectOn);
-				ImGui::Checkbox("TAA On/Off",&taaOn);
+				ImGui::Checkbox("SSAO On/Off", &ssaoOn);
+				ImGui::Checkbox("CSM Color On/Off", &csmOn);
+				ImGui::Checkbox("Reflect On/Off", &ReflectOn);
+				ImGui::Checkbox("TAA On/Off", &taaOn);
 
 				ImGui::Text("Soft Shadow Type");
-				ImGui::RadioButton("PCF", &softShadowType, 1); ImGui::SameLine();
+				ImGui::RadioButton("PCF", &softShadowType, 1);
+				ImGui::SameLine();
 				ImGui::RadioButton("PCSS", &softShadowType, 2);
+				ImGui::SliderFloat("Exposure", &exposure, 0.f, 10.f);
 				ImGui::Checkbox("Show FPS", &showFPS);
-				if(showFPS)
-				{	
+				if (showFPS)
+				{
 					ImGui::SameLine();
-            		ImGui::Text("(%.1f FPS)", ImGui::GetIO().Framerate);
+					ImGui::Text("(%.1f FPS)", ImGui::GetIO().Framerate);
 				}
-            	
+
 				break;
 				/*
 			case KooNan::GUIState::Recording:
@@ -221,18 +224,20 @@ namespace KooNan
 				ImGui::Checkbox("SSR On/Off", &ssrOn);
 				ImGui::SliderFloat("SSR Thickness", &ssrThickness, 0.f, 10.f);
 
-				ImGui::Checkbox("SSAO On/Off",&ssaoOn);
-				ImGui::Checkbox("CSM Color On/Off",&csmOn);
-				ImGui::Checkbox("Cubemap Reflect On/Off",&ReflectOn);
-				ImGui::Checkbox("TAA On/Off",&taaOn);
+				ImGui::Checkbox("SSAO On/Off", &ssaoOn);
+				ImGui::Checkbox("CSM Color On/Off", &csmOn);
+				ImGui::Checkbox("Cubemap Reflect On/Off", &ReflectOn);
+				ImGui::Checkbox("TAA On/Off", &taaOn);
 				ImGui::Text("Soft Shadow Type");
-				ImGui::RadioButton("PCF", &softShadowType, 1); ImGui::SameLine();
+				ImGui::RadioButton("PCF", &softShadowType, 1);
+				ImGui::SameLine();
 				ImGui::RadioButton("PCSS", &softShadowType, 2);
+				ImGui::SliderFloat("Exposure", &exposure, 0.f, 10.f);
 				ImGui::Checkbox("Show FPS", &showFPS);
-				if(showFPS)
-				{	
+				if (showFPS)
+				{
 					ImGui::SameLine();
-            		ImGui::Text("(%.1f FPS)", ImGui::GetIO().Framerate);
+					ImGui::Text("(%.1f FPS)", ImGui::GetIO().Framerate);
 				}
 				break;
 			case GameMode::Pause:
