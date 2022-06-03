@@ -58,3 +58,7 @@
 1. 新增SSR/SSAO/Reflect/PCSS四项参数的渲染切换GUI
 2. 增加Wander返回初始视图的按钮，同时确保按下Alt键能够找回鼠标控制权
 3. 需要考虑一下CSM的切换怎么做
+
+## 22-05-31 commit e78d68b
+1. 新增frame counter
+2. 新增彩色csm显示

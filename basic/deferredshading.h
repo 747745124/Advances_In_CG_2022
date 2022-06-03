@@ -57,6 +57,10 @@ namespace KooNan {
         {
             lightingShader->use();
             lightingShader->setInt("softShadowType",softShadowType);
+            if(csmOn)
+                lightingShader->setInt("csmShow",1);
+            else
+                lightingShader->setInt("csmShow",0);
             lightingShader->setInt("gPosition", 0);
             lightingShader->setInt("gNormal", 1);
             lightingShader->setInt("gAlbedoSpec", 2);
@@ -118,6 +122,7 @@ namespace KooNan {
             else{
                 ssrShader->setInt("enable", 0);
                 }
+            ssrShader->setFloat("thickness",ssrThickness);
             ssrShader->setMat4("projection", projection);
             ssrShader->setMat4("view", cam.GetViewMatrix());
             ssrShader->setInt("gPosition", 0);
@@ -213,6 +218,10 @@ namespace KooNan {
         static void setTAAShader()
         {
             taaShader->use();
+            if(taaOn==1)
+                taaShader->setInt("taaOn",1);
+            else
+                taaShader->setInt("taaOn",0);
             taaShader->setInt("gPosition", 0);
             taaShader->setInt("currFrame", 1);
             taaShader->setInt("lastFrame", 2);

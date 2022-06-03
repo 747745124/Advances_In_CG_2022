@@ -38,7 +38,6 @@ namespace KooNan
 
 #endif
 		PickingTexture &mouse_picking;
-
 		TAABuffer taabuf;
 		GBuffer gbuf;
 		SSRBuffer ssrbuf;
@@ -63,6 +62,7 @@ namespace KooNan
 		static glm::mat4 lastViewProjection;
 
 	public:
+
 #ifdef DEFERRED_SHADING
 		Render(Scene &main_scene, Light &main_light, PickingTexture &mouse_picking) : main_scene(main_scene), main_light(main_light), mouse_picking(mouse_picking)
 		{
@@ -151,7 +151,6 @@ namespace KooNan
 		void DrawAll(Shader &pickingShader, Shader &modelShader, Shader &shadowShader)
 		{
 #ifdef DEFERRED_SHADING
-
 			// Shadow pass
 			glm::vec3 DivPos = GameController::mainCamera.Position;
 			glm::mat4 lightView = glm::lookAt(DivPos - main_light.GetDirLightDirection() * 10.0f, DivPos, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -198,8 +197,6 @@ namespace KooNan
 			glm::vec2 offset = haltonSequence[haltonIndex];
 			offset = (offset - 0.5f) * 2.0f / glm::vec2(float(Common::SCR_WIDTH), float(Common::SCR_HEIGHT));
 			haltonIndex = (haltonIndex + 1) % NUM_TAA_SAMPLES;
-			jittered_projection[2][0] += offset.x;
-			jittered_projection[2][1] += offset.y;
 
 			//Draw terrain position for refraction
 			refractionposbuf.bindToWrite();
@@ -212,6 +209,10 @@ namespace KooNan
 			//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 			//glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 			
+			if(taaOn){
+				jittered_projection[2][0] += offset.x;
+				jittered_projection[2][1] += offset.y;
+			}
 			
 			// Geometry pass
 			gbuf.bindToWrite();

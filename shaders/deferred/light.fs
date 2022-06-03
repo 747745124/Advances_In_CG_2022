@@ -1,5 +1,5 @@
 //Light pass fragment shader
-#version 330 core
+#version 400 core
 
 in vec2 aTexCoords;
 
@@ -11,6 +11,7 @@ uniform sampler2D SSAOMask;
 uniform sampler2D refractionPos;
 uniform sampler2D causticMap;
 uniform int softShadowType;
+uniform int csmShow;
 
 const int NUM_CASCADES=3;
 uniform sampler2D ShadowMap[NUM_CASCADES];
@@ -251,20 +252,39 @@ void main()
 
     for(int i=0;i<NUM_CASCADES;i++)
     {
-        if(abs(FragPos.z)<=EndViewSpace[i])
-        {   //PCF
-            if(softShadowType==1)
-            {
-                shadow = CalcShadowPCF(NoL, i, FragPosLightClipSpace[i]);
+        if(csmShow == 1)
+        {   
+            if(abs(FragPos.z)<=EndViewSpace[i])
+            {  
+                if(i==0)
+                    FragColor = vec3(1.0,0.98,0.835);
+                else if(i==1)
+                    FragColor = vec3(0.9412,0.694,0.82);
+                else if(i==2)
+                    FragColor = vec3(0.592,0.812,0.964);
                 break;
             }
-            //PCSS
-            else if(softShadowType==2) {
-                shadow = CalcShadowPCSS(NoL,i,FragPosLightClipSpace[i]);
-                break;
-            } 
+        }
+
+        else{
+            if(abs(FragPos.z)<=EndViewSpace[i])
+            {   
+                //PCF
+                if(softShadowType==1)
+                {
+                    shadow = CalcShadowPCF(NoL, i, FragPosLightClipSpace[i]);
+                    break;
+                }
+                //PCSS
+                else if(softShadowType==2) {
+                    shadow = CalcShadowPCSS(NoL,i,FragPosLightClipSpace[i]);
+                    break;
+                } 
+            }
         }
     }
+
+
     
     //caustics calculation
     vec4 backFragPosWorld = vec4(texture(refractionPos, TexCoord).xyz,1.0f);
@@ -277,5 +297,13 @@ void main()
 	for(int i = 0; i < NR_POINT_LIGHTS; i++)
         result += CalcPointLight(pointLights[i], Color, spec, Norm, FragPos, viewDir, ref_mask, ssao);    
 
+	
+    if(csmShow==1)
+    {   
+        FragColor = mix(FragColor,Color,0.2);
+        return;
+    }
+
 	FragColor = (mask.y)>=0.1f?Color:result;
+
 }

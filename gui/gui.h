@@ -14,14 +14,18 @@ namespace KooNan
 	int selectPageFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 	bool ssrOn = true;
 	bool ssaoOn = true;
-	bool csmOn = true;
-	bool ReflectOn=true;
+	bool csmOn = false;
+	bool ReflectOn = true;
+	bool showFPS = true;
+	bool taaOn = true;
+	float ssrThickness = 1.0;
+
 	int softShadowType = 2; //2 for PCSS, 1 for PCF
 	class GUI
 	{
 	public:
 		// init: ��ʼ��GUI����
-		//   ��GLFW��ʼ���ʹ��ڴ��������?
+		//   ��GLFW��ʼ���ʹ��ڴ��������??
 		//   �ڻ���GUIǰ����
 		static void initEnv(GLFWwindow *window)
 		{
@@ -86,7 +90,7 @@ namespace KooNan
 		}
 
 		// setWidgets: �������пؼ�
-		//   ��initEnv�����?
+		//   ��initEnv�����??
 		static void drawWidgets(GLFWwindow *window)
 		{
 			static ImVec2 menuButtonSize(buttonWidth1, buttonHeight1);
@@ -141,13 +145,24 @@ namespace KooNan
 				}
 				else
 					;
+				
 				ImGui::Checkbox("SSR On/Off", &ssrOn);
+				ImGui::SliderFloat("SSR Thickness", &ssrThickness, 0.f, 10.f);
 				ImGui::Checkbox("SSAO On/Off",&ssaoOn);
-				ImGui::Checkbox("CSM On/Off",&csmOn);
+				ImGui::Checkbox("CSM Color On/Off",&csmOn);
 				ImGui::Checkbox("Reflect On/Off",&ReflectOn);
+				ImGui::Checkbox("TAA On/Off",&taaOn);
+
 				ImGui::Text("Soft Shadow Type");
 				ImGui::RadioButton("PCF", &softShadowType, 1); ImGui::SameLine();
 				ImGui::RadioButton("PCSS", &softShadowType, 2);
+				ImGui::Checkbox("Show FPS", &showFPS);
+				if(showFPS)
+				{	
+					ImGui::SameLine();
+            		ImGui::Text("(%.1f FPS)", ImGui::GetIO().Framerate);
+				}
+            	
 				break;
 				/*
 			case KooNan::GUIState::Recording:
@@ -194,7 +209,6 @@ namespace KooNan
 				}
 				if (ImGui::Button("Wander", shotcutButtonSize))
 				{
-					// ��鵱ǰ�Ƿ�ѡ���˽�����λ�ò��Ϸ�?
 					if (1)
 					{
 						GameController::changeGameModeTo(GameMode::Wandering);
@@ -205,13 +219,21 @@ namespace KooNan
 					GameController::mainCamera = GameController::oriCreatingCamera;
 				}
 				ImGui::Checkbox("SSR On/Off", &ssrOn);
+				ImGui::SliderFloat("SSR Thickness", &ssrThickness, 0.f, 10.f);
+
 				ImGui::Checkbox("SSAO On/Off",&ssaoOn);
-				ImGui::Checkbox("CSM On/Off",&csmOn);
+				ImGui::Checkbox("CSM Color On/Off",&csmOn);
 				ImGui::Checkbox("Cubemap Reflect On/Off",&ReflectOn);
-				
+				ImGui::Checkbox("TAA On/Off",&taaOn);
 				ImGui::Text("Soft Shadow Type");
 				ImGui::RadioButton("PCF", &softShadowType, 1); ImGui::SameLine();
 				ImGui::RadioButton("PCSS", &softShadowType, 2);
+				ImGui::Checkbox("Show FPS", &showFPS);
+				if(showFPS)
+				{	
+					ImGui::SameLine();
+            		ImGui::Text("(%.1f FPS)", ImGui::GetIO().Framerate);
+				}
 				break;
 			case GameMode::Pause:
 				ImGui::SetWindowPos(ImVec2((Common::SCR_WIDTH - menuWidth) / 2, Common::SCR_HEIGHT * 2 / 3));
@@ -221,7 +243,7 @@ namespace KooNan
 				}
 				if (ImGui::Button("Save and Quit to Title", menuButtonSize))
 				{
-					// todo����鵱ǰ�Ƿ�ѡ���˽�����λ�ò��Ϸ�?
+					// todo����鵱ǰ�Ƿ�ѡ���˽�����λ�ò��Ϸ�??
 					GameController::SaveGameToFile();
 					if (1)
 					{

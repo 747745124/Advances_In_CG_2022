@@ -124,7 +124,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifndef DEFERRED_SHADING
-	glfwWindowHint(GLFW_SAMPLES, 4);
+		glfwWindowHint(GLFW_SAMPLES, 4);
 #endif // !DEFERRED_SHADING
 
 #ifdef __APPLE__
@@ -224,13 +224,16 @@ int main()
 		glm::vec3(0.3f, 0.3f, 0.3f),
 		glm::vec3(0.35f, 0.35f, 0.35f),
 		glm::vec3(0.4f, 0.4f, 0.4f)};
-	Light main_light(parallel, lightShader);
+	
+
+		Light main_light(parallel, lightShader);
+
 	GameController::mainLight = &main_light; // 这个设计实在不行
 
 	if (!GameController::LoadGameFromFile())
 	{
-		addlights(main_light); // Add four point lights
 
+		addlights(main_light); // Add four point lights
 		GameObject *p3 = new GameObject("model/rsc/Temple1/Temple1.obj",
 										scale(translate(mat4(1.0f), vec3(-7.0f, main_scene.getTerrainHeight(-7.0f, -7.0f), -7.0f)), vec3(0.2f, 0.2f, 0.2f)), true);
 	}
@@ -241,38 +244,20 @@ int main()
 	// GUI::updateModelTextures(modelShader);
 
 	PickingTexture mouse_picking;
-
 #ifndef DEFERRED_SHADING
-	Water_Frame_Buffer waterfb;
-	Shadow_Frame_Buffer shadowfb;
-	Render main_renderer(main_scene, *GameController::mainLight, waterfb, mouse_picking, shadowfb);
+		Water_Frame_Buffer waterfb;
+		Shadow_Frame_Buffer shadowfb;
+		Render main_renderer(main_scene, *GameController::mainLight, waterfb, mouse_picking, shadowfb);
 #endif
-
 #ifdef DEFERRED_SHADING
-	Render main_renderer(main_scene, *GameController::mainLight, mouse_picking);
+		Render main_renderer(main_scene, *GameController::mainLight, mouse_picking);
 #endif
-
-	// a frame counter
-	double lastTime = glfwGetTime();
-	int nbFrames = 0;
 
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
 	{
 
-#ifdef FRAME_COUNT
-		// frame count
-		double currentTime = glfwGetTime();
-		nbFrames++;
-		if (currentTime - lastTime >= 1.0)
-		{ // If last prinf() was more than 1 sec ago
-			// printf and reset timer
-			printf("%f ms/frame\n", 1000.0 / double(nbFrames));
-			nbFrames = 0;
-			lastTime += 1.0;
-		}
-#endif
 
 		// per-frame time logic
 		// --------------------
@@ -281,11 +266,9 @@ int main()
 		//需要渲染三次 前两次不渲染水面 最后一次渲染水面
 
 #ifndef DEFERRED_SHADING
-
 		main_renderer.DrawReflection(modelShader);
 
 		main_renderer.DrawRefraction(modelShader);
-
 #endif // !DEFERRED_SHADING
 
 		main_renderer.DrawAll(pickingShader, modelShader, shadowShader);
@@ -319,9 +302,8 @@ int main()
 	Model::modelList.clear();
 
 #ifndef DEFERRED_SHADING
-	waterfb.cleanUp();
+		waterfb.cleanUp();
 #endif
-
 	// glfw: terminate, clearing all previously allocated GLFW resources.
 	// ------------------------------------------------------------------
 	glfwTerminate();

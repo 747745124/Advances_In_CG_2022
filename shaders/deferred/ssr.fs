@@ -12,6 +12,7 @@ uniform mat4 projection;
 uniform mat4 view;//Use this to convert postion from world space to view space
 uniform vec3 viewPos;
 
+uniform float thickness;
 in vec2 aTexCoords;
 
 layout (location = 1) out vec3 reflected_uv;
@@ -28,7 +29,7 @@ void main()
     float maxDistance = 30;
     float resolution = 0.6;
     int   steps = 16;
-    float thickness = 1;
+
 
     vec2 texSize  = textureSize(gPosition, 0).xy;
     ivec2 c = ivec2(gl_FragCoord.xy);
