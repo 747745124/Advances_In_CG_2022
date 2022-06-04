@@ -13,14 +13,19 @@
 #include "GameController.h"
 #include "gbuffer.h"
 #include "deferredshading.h"
-#include "ssrbuffer.h"
+#include "ssreflectuvbuffer.h"
+#include "ssrefractuvbuffer.h"
 #include "ssaobuffer.h"
 #include "ssaoblurbuffer.h"
 #include "reflectionblurbuffer.h"
 #include "reflectiondrawbuffer.h"
 #include "csmbuffer.h"
 #include "taabuffer.h"
-#include "hdr.h"
+#include "causticDepthBuffer.h"
+#include "causticMapBuffer.h"
+#include "refractionPositionBuffer.h"
+#include "refractiondrawbuffer.h"
+#include "originColorBuffer.h"
 
 namespace KooNan
 {
@@ -36,16 +41,20 @@ namespace KooNan
 
 #endif
 		PickingTexture &mouse_picking;
+		TAABuffer taabuf;
 		GBuffer gbuf;
-		SSRBuffer ssrbuf;
+		SSReflectUVBuffer ssreflectbuf;
+		SSRefractUVBuffer ssrefractbuf;
 		SSAOBuffer aobuf;
 		SSAOBlurBuffer aoblurbuf;
 		ReflectionDrawBuffer reflectdrawbuf;
 		ReflectionBlurBuffer reflectblurbuf;
+		RefractionDrawBuffer refractdrawbuf;
 		CSMBuffer csmbuf;
-		TAABuffer taabuf;
-		HDRProcessor hdrProcessor;
-
+		CausticDepthBuffer causticdepthbuf;
+		CausticMapBuffer causticmapbuf;
+		RefractionPositionBuffer refractionposbuf;
+		OriginColorBuffer lightingcolorbuf;
 		static const int NUM_CASCADES = 3;
 		static const float cascade_Z[NUM_CASCADES + 1];
 		struct
@@ -166,9 +175,25 @@ namespace KooNan
 				// Common::setWidthAndHeight();
 				glViewport(0, 0, csmbuf.viewPortSize[i * 2 + 0], csmbuf.viewPortSize[i * 2 + 1]);
 
-				main_scene.DrawSceneShadowPass(*DeferredShading::csmShader);
-				DrawObjectsShadowPass(*DeferredShading::csmShader);
+				main_scene.DrawSceneWithoutMVP(*DeferredShading::csmShader);
+				DrawObjectsWithoutVP(*DeferredShading::csmShader);
 			}
+
+			// Draw depth for caustics calculation
+			glm::mat4 caustics_proj = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, 1.0f, 30.0f);
+			glm::mat4 caustics_view = glm::lookAt(GameController::mainCamera.Position + glm::vec3(0.0, 10.0, 0.0), GameController::mainCamera.Position, glm::vec3(0.0, 0.0, -1.0));
+			causticdepthbuf.bindToWrite();
+			glClear(GL_DEPTH_BUFFER_BIT);
+			DeferredShading::setCSMShader(caustics_view, caustics_proj);
+			glViewport(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT);
+			main_scene.DrawSceneWithoutMVP(*DeferredShading::csmShader);
+
+			// Draw caustics map
+			causticmapbuf.bindToWrite();
+			glClear(GL_COLOR_BUFFER_BIT);
+			causticdepthbuf.bindTexture();
+			glViewport(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT);
+			main_scene.DrawCausticMap(*DeferredShading::causticShader, caustics_proj, caustics_view, main_light.GetDirLightDirection());
 
 			glViewport(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT);
 
@@ -178,6 +203,16 @@ namespace KooNan
 			glm::vec2 offset = haltonSequence[haltonIndex];
 			offset = (offset - 0.5f) * 2.0f / glm::vec2(float(Common::SCR_WIDTH), float(Common::SCR_HEIGHT));
 			haltonIndex = (haltonIndex + 1) % NUM_TAA_SAMPLES;
+
+			// Draw terrain position for refraction
+			refractionposbuf.bindToWrite();
+			glClear(GL_COLOR_BUFFER_BIT);
+			DeferredShading::setRefractionPositionShader(GameController::mainCamera.GetViewMatrix(), projection);
+			main_scene.DrawSceneWithoutMVP(*DeferredShading::refractionPositionShader);
+
+			// causticmapbuf.bindToRead();
+			// glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			// glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 			if (taaOn)
 			{
@@ -195,12 +230,13 @@ namespace KooNan
 			main_scene.DrawSky(&projection, &jittered_projection, &lastViewProjection);
 			main_light.Draw(&projection, &jittered_projection, &lastViewProjection, nullptr);
 
+			// SSAO pass
 			gbuf.bindTexture();
 			aobuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT);
 			DeferredShading::setSSAOShader(jittered_projection);
 			DeferredShading::DrawQuad();
-
+			// SSAO blur pass
 			aobuf.bindTexture();
 			aoblurbuf.bindToWrite();
 			DeferredShading::setSimpleBlurShader();
@@ -215,44 +251,61 @@ namespace KooNan
 			// Drawing quads from now on
 			glDisable(GL_DEPTH_TEST);
 
-			// hdrProcessor.bindToWrite();
-
-			// Render with lighting
+			// Lighting pass
 			gbuf.bindTexture();
 			aoblurbuf.bindTexture();
 			csmbuf.bindTexture();
-			ssrbuf.bindToWrite();
+			refractionposbuf.bindTexture();
+			causticmapbuf.bindTexture();
+			lightingcolorbuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT);
 			InitLighting(*DeferredShading::lightingShader);
 			glDisable(GL_BLEND);
-			DeferredShading::setLightingPassShader(lightMVP, cascade_Z);
+			glm::mat4 causticsVP = caustics_proj * caustics_view;
+			DeferredShading::setLightingPassShader(lightMVP, &causticsVP, cascade_Z);
 			DeferredShading::DrawQuad();
 
-			// Draw reflected uv
+			// SSReflection pass
 			gbuf.bindTexture();
-			ssrbuf.bindToWrite();
-			DeferredShading::setSSRShader(jittered_projection);
+			ssreflectbuf.bindToWrite();
+			DeferredShading::setSSReflectionShader(jittered_projection);
 			DeferredShading::DrawQuad();
 
 			// Draw reflection
 			gbuf.bindTexture();
-			ssrbuf.bindTexture();
+			lightingcolorbuf.bindTexture();
+			ssreflectbuf.bindTexture();
 			reflectdrawbuf.bindToWrite();
 			DeferredShading::setReflectDrawShader();
 			main_scene.bindSkyboxTexture(6);
 			DeferredShading::DrawQuad();
 
-			// hdr processing
-			// glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			// hdrProcessor.bindTexture();
-			// DeferredShading::setHDRProcessor();
-			// DeferredShading::DrawQuad();
+			// SSRefraction pass
+			gbuf.bindTexture();
+			refractionposbuf.bindTexture();
+			ssrefractbuf.bindToWrite();
+			DeferredShading::setSSRefractionShader(jittered_projection);
+			DeferredShading::DrawQuad();
 
+			// Draw refraction
+			gbuf.bindTexture();
+			lightingcolorbuf.bindTexture();
+			ssrefractbuf.bindTexture();
+			refractdrawbuf.bindToWrite();
+			DeferredShading::setRefractDrawShader();
+			DeferredShading::DrawQuad();
+
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			refractdrawbuf.bindToRead();
+			glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+			// Combine reflect/refract and origin color
 			taabuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT);
-			ssrbuf.bindTexture();
+			gbuf.bindTexture();
+			lightingcolorbuf.bindTexture();
 			reflectdrawbuf.bindTexture();
+			refractdrawbuf.bindTexture();
 			DeferredShading::setCombineColorShader();
 			DeferredShading::DrawQuad();
 
@@ -271,12 +324,6 @@ namespace KooNan
 
 			taabuf.copyToLast();
 			lastViewProjection = projection * GameController::mainCamera.GetViewMatrix();
-
-			// hdr processing
-			// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			// hdrProcessor.bindTexture();
-			// DeferredShading::setHDRProcessor();
-			// DeferredShading::DrawQuad();
 
 #else
 			InitLighting(main_scene.WaterShader);
@@ -386,7 +433,7 @@ namespace KooNan
 			glDisable(GL_CULL_FACE);
 		}
 
-		void DrawObjectsShadowPass(Shader &shadowPassShader)
+		void DrawObjectsWithoutVP(Shader &shadowPassShader)
 		{
 			glEnable(GL_CULL_FACE);
 			auto itr = GameObject::gameObjList.begin();

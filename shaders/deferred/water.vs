@@ -30,7 +30,7 @@ void main()
     TexCoords=distortedTexCoords;
 
     vec3 normalColor = texture(normalMap, distortedTexCoords).xyz;
-    vec3 normal = vec3(normalColor.r * 2.0 - 1.0, normalColor.b * 10.0, normalColor.g * 2.0 - 1.0);
+    vec3 normal = vec3(normalColor.r * 2.0 - 1.0, normalColor.b * 3.0, normalColor.g * 2.0 - 1.0);
     normal = normalize(normal);
 
     vec4 World_Pos =  vec4(aPos, 1.0f);

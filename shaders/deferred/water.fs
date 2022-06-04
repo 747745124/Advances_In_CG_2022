@@ -24,13 +24,13 @@ void main()
 {
     gPosition = FragPos;
     vec3 normalColor=texture(normalMap, TexCoords).xyz;
-    vec3 normal = vec3(normalColor.r * 2.0 - 1.0, normalColor.b * 10.0, normalColor.g * 2.0 - 1.0);
+    vec3 normal = vec3(normalColor.r * 2.0 - 1.0, normalColor.b * 7.0, normalColor.g * 2.0 - 1.0);
     normal = normalize(normal);
 
     gNormal = mat3(trans_inv_view)*normalize(normal);
     // gNormal = mat3(trans_inv_view)*vec3(0.0,1.0,0.0); //Plane reflection
     //gAlbedoSpec = vec4(0.0f, 0.0f, 0.0f, 0.2f);
-    gReflect_mask = vec3(0.9f, 0.0f, 0.0f);
+    gReflect_mask = vec3(0.8f, 0.0f, 0.0f);
 
     vec2 lastuv=lastUV.xy/lastUV.w;
     lastuv.xy=lastuv.xy*0.5+0.5;

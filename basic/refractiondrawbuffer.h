@@ -1,14 +1,14 @@
-#ifndef REFLECTIONDRAWBUFFER_H
-#define REFLECTIONDRAWBUFFER_H
+#ifndef REFRACTIONDRAWBUFFER_H
+#define REFRACTIONDRAWBUFFER_H
 
 #include <glad/glad.h>
 #include "common.h"
 
 namespace KooNan {
-	class ReflectionDrawBuffer {
+	class RefractionDrawBuffer {
 	public:
-		ReflectionDrawBuffer() { refdrawbuffer_init(); }
-		~ReflectionDrawBuffer() { cleanUp(); }
+		RefractionDrawBuffer() { refdrawbuffer_init(); }
+		~RefractionDrawBuffer() { cleanUp(); }
 		void bindToWrite();
 		void bindToRead();
 		void bindTexture();
@@ -19,7 +19,7 @@ namespace KooNan {
 		GLuint draw_text;
 	};
 
-	void ReflectionDrawBuffer::refdrawbuffer_init()
+	void RefractionDrawBuffer::refdrawbuffer_init()
 	{
 		unsigned SCR_WIDTH = Common::SCR_WIDTH;
 		unsigned SCR_HEIGHT = Common::SCR_HEIGHT;
@@ -40,25 +40,25 @@ namespace KooNan {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void ReflectionDrawBuffer::cleanUp()
+	void RefractionDrawBuffer::cleanUp()
 	{
 		glDeleteFramebuffers(1, &refdrawbuffer);
 		glDeleteTextures(1, &draw_text);
 	}
 
-	void ReflectionDrawBuffer::bindToWrite()
+	void RefractionDrawBuffer::bindToWrite()
 	{
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, refdrawbuffer);
 	}
 
-	void ReflectionDrawBuffer::bindToRead()
+	void RefractionDrawBuffer::bindToRead()
 	{
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, refdrawbuffer);
 	}
 
-	void ReflectionDrawBuffer::bindTexture()
+	void RefractionDrawBuffer::bindTexture()
 	{
-		glActiveTexture(GL_TEXTURE5);
+		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_2D, draw_text);
 	}
 }

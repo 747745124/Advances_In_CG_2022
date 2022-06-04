@@ -92,9 +92,11 @@ namespace KooNan
 		// Draw all scene with shading (ground and water) (Used in forward shading)
 		void DrawScene(float deltaTime, const glm::mat4 *projection, const glm::mat4 *jitteredProjection, const glm::mat4 *lastViewProjection, const glm::vec4 *clippling_plane, bool draw_water, bool draw_shadow = false);
 
-		void DrawSceneShadowPass(Shader &shadowPassShader);
+		void DrawSceneWithoutMVP(Shader &shadowPassShader);
 
 		float getTerrainHeight(float x, float z);
+
+		void DrawCausticMap(Shader& causticShader, const glm::mat4& projection, const glm::mat4& view, const glm::vec3& lightDir);
 
 	private:
 		void InitScene(vector<string> ground_path);

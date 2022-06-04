@@ -15,7 +15,7 @@ uniform vec3 viewPos;
 uniform float thickness;
 in vec2 aTexCoords;
 
-layout (location = 1) out vec3 reflected_uv;
+out vec3 reflected_uv;
 
 void main()
 {
@@ -26,8 +26,8 @@ void main()
     }
     
     //parameters
-    float maxDistance = 50;
-    float resolution = 0.9;
+    float maxDistance = 30;
+    float resolution = 0.6;
     int   steps = 16;
 
 

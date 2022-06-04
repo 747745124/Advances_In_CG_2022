@@ -45,7 +45,7 @@ namespace KooNan
 					Terrain ground(i, j, ground_textures, heightMapPath, chunk_size);
 					all_terrain_chunks.push_back(ground);
 #ifdef DEFERRED_SHADING
-					Water water_surface(i, j, 2048, water_height, chunk_size);
+					Water water_surface(i, j, 4096, water_height, chunk_size);
 #else // !
 					Water water_surface(i, j, water_height, chunk_size);
 #endif
@@ -176,7 +176,28 @@ namespace KooNan
 		}
 	}
 
-	void Scene::DrawSceneShadowPass(Shader &shadowPassShader)
+	void Scene::DrawCausticMap(Shader& causticShader, const glm::mat4& projection,const glm::mat4& view, const glm::vec3& lightDir)
+	{
+		causticShader.use();
+		causticShader.setMat4("projection", projection);
+		causticShader.setMat4("view", view);
+		causticShader.setVec3("lightDir", lightDir);
+		causticShader.setFloat("chunk_size", chunk_size);
+		causticShader.setFloat("moveOffset", waterMoveFactor);
+		causticShader.setInt("dudvMap", 0);
+		causticShader.setInt("normalMap", 1);
+		causticShader.setInt("terrainDepth", 2);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, dudvMap);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, normalMap);
+		for (int j = 0; j < all_water_chunks.size(); j++)
+		{
+			all_water_chunks[j].Draw(causticShader);
+		}
+	}
+
+	void Scene::DrawSceneWithoutMVP(Shader &shadowPassShader)
 	{
 		for (int i = 0; i < all_terrain_chunks.size(); i++)
 		{
