@@ -56,6 +56,11 @@ namespace KooNan
         static void setLightingPassShader(const glm::mat4 *lightMVP, const float *endViewSpace)
         {
             lightingShader->use();
+            if (toneMapping)
+                lightingShader->setInt("toneMapping", 1);
+            else
+                lightingShader->setInt("toneMapping", 0);
+            lightingShader->setFloat("exposure", exposure);
             lightingShader->setInt("softShadowType", softShadowType);
             if (csmOn)
                 lightingShader->setInt("csmShow", 1);

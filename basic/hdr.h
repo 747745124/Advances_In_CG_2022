@@ -14,12 +14,14 @@ namespace KooNan
 		void bindToWrite();
 		void bindToRead();
 		void bindTexture();
+		void bindFramebuffer();
 
 	private:
 		void hdr_init();
 		void cleanUp();
 		GLuint hdrBuffer;
 		GLuint color_text;
+		GLuint hdr_depth;
 	};
 
 	void HDRProcessor::hdr_init()
@@ -29,7 +31,6 @@ namespace KooNan
 		unsigned SCR_HEIGHT = Common::SCR_HEIGHT;
 
 		glGenFramebuffers(1, &hdrBuffer);
-		glBindFramebuffer(GL_FRAMEBUFFER, hdrBuffer);
 
 		glGenTextures(1, &color_text);
 		glBindTexture(GL_TEXTURE_2D, color_text);
@@ -37,6 +38,15 @@ namespace KooNan
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_text, 0);
+
+		glGenRenderbuffers(1, &hdr_depth);
+		glBindRenderbuffer(GL_RENDERBUFFER, hdr_depth);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, hdrBuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, hdrBuffer);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_text, 0);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, hdr_depth);
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			std::cout << "Framebuffer not complete!" << std::endl;

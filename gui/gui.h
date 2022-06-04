@@ -18,6 +18,7 @@ namespace KooNan
 	bool ReflectOn = true;
 	bool showFPS = true;
 	bool taaOn = true;
+	bool toneMapping = false;
 	float ssrThickness = 1.0f;
 	float exposure = 1.0f;
 	int softShadowType = 2; // 2 for PCSS, 1 for PCF
@@ -158,6 +159,7 @@ namespace KooNan
 				ImGui::RadioButton("PCF", &softShadowType, 1);
 				ImGui::SameLine();
 				ImGui::RadioButton("PCSS", &softShadowType, 2);
+				ImGui::Checkbox("Tone Mapping", &toneMapping);
 				ImGui::SliderFloat("Exposure", &exposure, 0.f, 10.f);
 				ImGui::Checkbox("Show FPS", &showFPS);
 				if (showFPS)
@@ -232,6 +234,7 @@ namespace KooNan
 				ImGui::RadioButton("PCF", &softShadowType, 1);
 				ImGui::SameLine();
 				ImGui::RadioButton("PCSS", &softShadowType, 2);
+				ImGui::Checkbox("Tone Mapping", &toneMapping);
 				ImGui::SliderFloat("Exposure", &exposure, 0.f, 10.f);
 				ImGui::Checkbox("Show FPS", &showFPS);
 				if (showFPS)

@@ -146,9 +146,8 @@ namespace KooNan
 
 		void DrawAll(Shader &pickingShader, Shader &modelShader, Shader &shadowShader)
 		{
+
 #ifdef DEFERRED_SHADING
-			hdrProcessor.bindToWrite();
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			// Shadow pass
 			glm::vec3 DivPos = GameController::mainCamera.Position;
@@ -216,6 +215,8 @@ namespace KooNan
 			// Drawing quads from now on
 			glDisable(GL_DEPTH_TEST);
 
+			// hdrProcessor.bindToWrite();
+
 			// Render with lighting
 			gbuf.bindTexture();
 			aoblurbuf.bindTexture();
@@ -242,11 +243,11 @@ namespace KooNan
 			DeferredShading::DrawQuad();
 
 			// hdr processing
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			hdrProcessor.bindTexture();
-			DeferredShading::setHDRProcessor();
-			DeferredShading::DrawQuad();
+			// glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			// hdrProcessor.bindTexture();
+			// DeferredShading::setHDRProcessor();
+			// DeferredShading::DrawQuad();
 
 			taabuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT);

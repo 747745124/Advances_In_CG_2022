@@ -11,6 +11,10 @@ uniform sampler2D SSAOMask;
 uniform int softShadowType;
 uniform int csmShow;
 
+uniform float exposure;
+uniform int toneMapping;
+const float gamma =2.2f;
+
 const int NUM_CASCADES=3;
 uniform sampler2D ShadowMap[NUM_CASCADES];
 uniform float EndViewSpace[NUM_CASCADES];
@@ -275,6 +279,16 @@ void main()
         return;
     }
 
-	FragColor = (mask.x+mask.y)>=0.1f?Color:result;
+    vec3 beforeColor = (mask.x+mask.y)>=0.1f?Color:result;
 
+    if(toneMapping==0)
+    {
+        FragColor = beforeColor;
+        return;
+    }
+
+    //hdr processing, reinhard tone-mapping
+    vec3 res = vec3(1.0) - exp(-beforeColor * exposure);
+    vec3 hdr_result = pow(res, vec3(1.0 / gamma));
+    FragColor = hdr_result;
 }
