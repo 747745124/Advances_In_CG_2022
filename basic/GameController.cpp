@@ -23,6 +23,44 @@ using nlohmann::json;
 
 namespace KooNan
 {
+    MouseMode GameController::mouseMode = MouseMode::GUIMode;
+    float GameController::lastFrame = .0f;
+    float GameController::deltaTime = .0f;
+    double GameController::cursorX = .0;
+    double GameController::cursorY = .0;
+    double GameController::lastCursorX = .0;
+    double GameController::lastCursorY = .0;
+
+    Camera GameController::oriCreatingCamera = Camera(0.f, 10.0f, 40.f, 0.f, 0.f, 30.f, 0.f, 1.f, 0.f);
+    Camera GameController::mainCamera = GameController::oriCreatingCamera;
+
+    MousePicker GameController::mousePicker = MousePicker(GameController::mainCamera);
+
+    GameMode GameController::gameMode = GameMode::Creating;
+    GameMode GameController::lastGameMode = GameMode::Title;
+    CreatingMode GameController::creatingMode = CreatingMode::Selecting;
+
+    bool GameController::isRecordingLast = false;
+    bool GameController::isRecording = false;
+
+    Model::ModelType GameController::modelType = Model::ModelType::ComplexModel;
+
+    bool GameController::isCursorOnGui = false;
+
+    bool GameController::firstMouse = true;
+    bool GameController::ctrlPressedLast = false;
+    bool GameController::altPressedLast = false;
+    bool GameController::midBtnPressedLast = false;
+
+    Scene *GameController::mainScene = NULL;
+    Light *GameController::mainLight = NULL;
+
+    string GameController::selectedModel = "";
+    GameObject *GameController::helperGameObj = NULL;
+    GameObject *GameController::selectedGameObj = NULL;
+
+    int GameController::RECURSION_COUNT = 64;
+    
     void GameController::initGameController(GLFWwindow *window)
     {
         Common::setWindow(window);
@@ -514,41 +552,5 @@ namespace KooNan
     }
 
     // 状态锟斤拷锟脚号筹拷始锟斤拷
-    MouseMode GameController::mouseMode = MouseMode::GUIMode;
-    float GameController::lastFrame = .0f;
-    float GameController::deltaTime = .0f;
-    double GameController::cursorX = .0;
-    double GameController::cursorY = .0;
-    double GameController::lastCursorX = .0;
-    double GameController::lastCursorY = .0;
-
-    Camera GameController::oriCreatingCamera = Camera(0.f, 10.0f, 40.f, 0.f, 0.f, 30.f, 0.f, 1.f, 0.f);
-    Camera GameController::mainCamera = GameController::oriCreatingCamera;
-
-    MousePicker GameController::mousePicker = MousePicker(GameController::mainCamera);
-
-    GameMode GameController::gameMode = GameMode::Creating;
-    GameMode GameController::lastGameMode = GameMode::Title;
-    CreatingMode GameController::creatingMode = CreatingMode::Selecting;
-
-    bool GameController::isRecordingLast = false;
-    bool GameController::isRecording = false;
-
-    Model::ModelType GameController::modelType = Model::ModelType::ComplexModel;
-
-    bool GameController::isCursorOnGui = false;
-
-    bool GameController::firstMouse = true;
-    bool GameController::ctrlPressedLast = false;
-    bool GameController::altPressedLast = false;
-    bool GameController::midBtnPressedLast = false;
-
-    Scene *GameController::mainScene = NULL;
-    Light *GameController::mainLight = NULL;
-
-    string GameController::selectedModel = "";
-    GameObject *GameController::helperGameObj = NULL;
-    GameObject *GameController::selectedGameObj = NULL;
-
-    int GameController::RECURSION_COUNT = 64;
+    
 }
