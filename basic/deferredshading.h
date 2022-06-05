@@ -20,6 +20,7 @@ namespace KooNan
         static Shader *refractDrawShader;
         static Shader *ssaoShader;
         static Shader *simpleBlurShader;
+        static Shader *ssdoShader;
         static Shader *kuwaharaBlurShader;
         static Shader *combineColorShader;
         static Shader *csmShader;
@@ -218,6 +219,43 @@ namespace KooNan
                 ssaoShader->setVec3("samples[" + std::to_string(i) + "]", ssaoKernel[i]);
             }
         }
+         static void setSSDOShader(const glm::mat4& projection)
+        {
+            static std::vector<glm::vec3> ssdoKernel;
+            if (ssdoKernel.empty())
+            {
+                //Kernel data initialization
+                SSDOKernalInit(ssdoKernel);
+            }
+          /*  static GLuint noiseTexture = 0;
+            if (!noiseTexture)
+            {
+                //Generate noise map
+                SSDONoiseTextureInit(noiseTexture);
+            }
+            glActiveTexture(GL_TEXTURE4);
+            glBindTexture(GL_TEXTURE_2D, noiseTexture);
+            */
+            ssdoShader->use();
+            Camera& cam = GameController::mainCamera;
+            if (ssdoOn) {
+                ssdoShader->setInt("enable", 1);
+            }
+            else {
+                ssdoShader->setInt("enable", 0);
+            }
+            ssdoShader->setInt("gPosition", 0);
+            ssdoShader->setInt("gNormal", 1);
+            ssdoShader->setInt("gAlbedoSpec", 2);
+            ssdoShader->setInt("gMask", 3);
+            ssdoShader->setInt("texNoise", 4);
+            ssdoShader->setMat4("projection", projection);
+            ssdoShader->setMat4("view", cam.GetViewMatrix());
+            for (int i = 0; i < ssdoKernel.size(); i++)
+            {
+                ssdoShader->setVec3("samples[" + std::to_string(i) + "]", ssdoKernel[i]);
+            }
+        }
         static void setSimpleBlurShader()
         {
             simpleBlurShader->use();
@@ -285,6 +323,25 @@ namespace KooNan
                 scale = 0.1f + scale * scale * 0.9;
                 sample *= scale;
                 ssaoKernel.push_back(sample);
+            }
+        }
+         static void SSDOKernalInit(std::vector<glm::vec3>& ssdoKernel)
+        {
+            std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0);
+            std::default_random_engine generator;
+            for (GLuint i = 0; i < 64; ++i)
+            {
+                glm::vec3 sample(
+                    randomFloats(generator) * 2.0 - 1.0,
+                    randomFloats(generator) * 2.0 - 1.0,
+                    randomFloats(generator)
+                );
+                sample = glm::normalize(sample);
+                sample *= randomFloats(generator);
+                GLfloat scale = GLfloat(i) / 64.0;
+                scale = 0.1f + scale * scale * 0.9;
+                sample *= scale;
+                ssdoKernel.push_back(sample);
             }
         }
         static void SSAONoiseTextureInit(GLuint &noiseTexture)
