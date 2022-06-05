@@ -79,6 +79,8 @@ namespace KooNan
             lightingShader->setInt("refractionPos", 11);
             lightingShader->setInt("causticMap", 10);
             lightingShader->setMat4("causticVP", *causticVP);
+            
+            lightingShader->setInt("SSDOMask", 13);
             glm::mat4 view = GameController::mainCamera.GetViewMatrix();
             lightingShader->setMat4("view", view);
             lightingShader->setMat4("inv_view", glm::inverse(view));
