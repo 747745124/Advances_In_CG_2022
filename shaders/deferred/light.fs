@@ -8,6 +8,7 @@ uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
 uniform sampler2D gMask;
 uniform sampler2D SSAOMask;
+uniform sampler2D SSDOMask;
 uniform sampler2D refractionPos;
 uniform sampler2D causticMap;
 uniform int softShadowType;
@@ -231,6 +232,7 @@ void main()
     //view space fragment position
     vec3 FragPos = texture(gPosition, TexCoord).xyz;
     vec3 Color = texture(gAlbedoSpec, TexCoord).xyz;
+    vec3 ssdo = texture(SSDOMask,TexCoord).xyz;
     vec3 mask = texture(gMask, TexCoord).rgb;
     float ssao = texture(SSAOMask, TexCoord).r;
     float spec = texture(gAlbedoSpec, TexCoord).w;
@@ -301,6 +303,12 @@ void main()
 	for(int i = 0; i < NR_POINT_LIGHTS; i++)
         result += CalcPointLight(pointLights[i], Color, spec, Norm, FragPos, viewDir, ref_mask, ssao);    
 
+    ssdo.x=ssdo.x>0.1?ssdo.x:1;
+    ssdo.y=ssdo.y>0.1?ssdo.y:1;
+    ssdo.z=ssdo.z>0.1?ssdo.z:1;   
+    result.x=ssdo.x>1.0?result.x:ssdo.x*result.x;
+    result.y=ssdo.y>1.0?result.y:ssdo.y*result.y;
+    result.z=ssdo.z>1.0?result.z:ssdo.z*result.z;
 	
     if(csmShow==1)
     {   
