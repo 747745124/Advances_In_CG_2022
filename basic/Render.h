@@ -302,7 +302,7 @@ namespace KooNan
 			refractdrawbuf.bindToRead();
 			glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-			// postprocessor.bindToWrite();
+
 
 			// Combine reflect/refract and origin color
 			taabuf.bindToWrite();
@@ -322,21 +322,22 @@ namespace KooNan
 
 			gbuf.bindTexture();
 			taabuf.bindTexture();
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			postprocessor.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			DeferredShading::setTAAShader();
 			DeferredShading::DrawQuad();
 
-			taabuf.copyToLast();
+
 			lastViewProjection = projection * GameController::mainCamera.GetViewMatrix();
 
 
 			// postprocess effect
-			// glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			// postprocessor.bindTexture();
-			// DeferredShading::setPostprocessShader();
-			// DeferredShading::DrawQuad();
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			postprocessor.bindTexture();
+			DeferredShading::setPostprocessShader();
+			DeferredShading::DrawQuad();
+			taabuf.copyToLast();
 #else
 			InitLighting(main_scene.WaterShader);
 			InitLighting(main_scene.TerrainShader);
