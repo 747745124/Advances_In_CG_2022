@@ -20,6 +20,7 @@ namespace KooNan
 	bool showFPS = true;
 	bool taaOn = true;
 	bool toneMapping = false;
+	int effectType = -1; // sobel=0
 	float ssrThickness = 1.0f;
 	float exposure = 1.0f;
 	int softShadowType = 2; // 2 for PCSS, 1 for PCF
@@ -164,6 +165,12 @@ namespace KooNan
 				ImGui::Checkbox("Tone Mapping", &toneMapping);
 				ImGui::SliderFloat("Exposure", &exposure, 0.f, 10.f);
 				ImGui::Checkbox("Show FPS", &showFPS);
+
+				ImGui::Text("Postprocessing");
+				ImGui::RadioButton("None", &effectType, -1);
+				ImGui::SameLine();
+				ImGui::RadioButton("Sobel", &effectType, 0);
+
 				if (showFPS)
 				{
 					ImGui::SameLine();
@@ -240,6 +247,12 @@ namespace KooNan
 				ImGui::Checkbox("Tone Mapping", &toneMapping);
 				ImGui::SliderFloat("Exposure", &exposure, 0.f, 10.f);
 				ImGui::Checkbox("Show FPS", &showFPS);
+
+				ImGui::Text("Postprocessing");
+				ImGui::RadioButton("None", &effectType, -1);
+				ImGui::SameLine();
+				ImGui::RadioButton("Sobel", &effectType, 0);
+
 				if (showFPS)
 				{
 					ImGui::SameLine();

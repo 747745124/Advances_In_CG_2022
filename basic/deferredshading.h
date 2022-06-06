@@ -13,21 +13,21 @@ namespace KooNan
     {
     public:
         DeferredShading() = delete;
-        static Shader* lightingShader;
-        static Shader* ssreflectionShader;
-        static Shader* ssrefractionShader;
-        static Shader* reflectDrawShader;
-        static Shader* refractDrawShader;
-        static Shader* ssaoShader;
-        static Shader* ssdoShader;
-        static Shader* simpleBlurShader;
-        static Shader* kuwaharaBlurShader;
-        static Shader* combineColorShader;
-        static Shader* csmShader;
-        static Shader* taaShader;
-        static Shader* causticShader;
-        static Shader* bufferDebugShader;
-        static Shader* refractionPositionShader;
+        static Shader *lightingShader;
+        static Shader *ssreflectionShader;
+        static Shader *ssrefractionShader;
+        static Shader *reflectDrawShader;
+        static Shader *refractDrawShader;
+        static Shader *ssaoShader;
+        static Shader *ssdoShader;
+        static Shader *simpleBlurShader;
+        static Shader *kuwaharaBlurShader;
+        static Shader *combineColorShader;
+        static Shader *csmShader;
+        static Shader *taaShader;
+        static Shader *causticShader;
+        static Shader *bufferDebugShader;
+        static Shader *refractionPositionShader;
         static Shader *postprocessShader;
         static void DrawQuad()
         {
@@ -65,7 +65,7 @@ namespace KooNan
             // if (toneMapping)
             //     lightingShader->setInt("toneMapping", 1);
             // else
-                lightingShader->setInt("toneMapping", 0);
+            lightingShader->setInt("toneMapping", 0);
             lightingShader->setFloat("exposure", exposure);
             lightingShader->setInt("softShadowType", softShadowType);
             if (csmOn)
@@ -228,29 +228,31 @@ namespace KooNan
                 ssaoShader->setVec3("samples[" + std::to_string(i) + "]", ssaoKernel[i]);
             }
         }
-        static void setSSDOShader(const glm::mat4& projection)
+        static void setSSDOShader(const glm::mat4 &projection)
         {
             static std::vector<glm::vec3> ssaoKernel;
             if (ssaoKernel.empty())
             {
-                //Kernel data initialization
+                // Kernel data initialization
                 SSAOKernalInit(ssaoKernel);
             }
             static GLuint noiseTexture = 0;
             if (!noiseTexture)
             {
-                //Generate noise map
+                // Generate noise map
                 SSAONoiseTextureInit(noiseTexture);
             }
             glActiveTexture(GL_TEXTURE4);
             glBindTexture(GL_TEXTURE_2D, noiseTexture);
 
             ssdoShader->use();
-            Camera& cam = GameController::mainCamera;
-            if (ssaoOn) {
+            Camera &cam = GameController::mainCamera;
+            if (ssaoOn)
+            {
                 ssaoShader->setInt("enable", 1);
             }
-            else {
+            else
+            {
                 ssaoShader->setInt("enable", 0);
             }
             ssdoShader->setInt("gPosition", 0);
@@ -318,8 +320,8 @@ namespace KooNan
         static void setPostprocessShader()
         {
             postprocessShader->use();
-            postprocessShader->setInt("effectType",1);
-            postprocessShader->setFloat("exposure",exposure);
+            postprocessShader->setInt("effectType", effectType);
+            postprocessShader->setFloat("exposure", exposure);
             if (toneMapping)
                 postprocessShader->setInt("toneMapping", 1);
             else

@@ -315,16 +315,7 @@ void main()
         return;
     }
 
-    vec3 beforeColor = (mask.x+mask.y)>=0.1f?Color:result;
+    vec3 color = (mask.x+mask.y)>=0.1f?Color:result;
 
-    if(toneMapping==0)
-    {
-        FragColor = beforeColor;
-        return;
-    }
-
-    //hdr processing, reinhard tone-mapping
-    vec3 res = vec3(1.0) - exp(-beforeColor * exposure);
-    vec3 hdr_result = pow(res, vec3(1.0 / gamma));
-    FragColor = hdr_result;
+    FragColor = color;
 }

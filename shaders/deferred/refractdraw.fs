@@ -2,14 +2,20 @@
 uniform sampler2D gMask;
 uniform sampler2D rColor;
 uniform sampler2D rTexcoord;
+uniform int enable;
 
 in vec2 aTexCoords;
 out vec4 FragColor;
 
-
 void main()
 {   
     vec4 origin_color = texture(rColor, aTexCoords);
+
+    if(enable==0)
+    {
+        FragColor = origin_color;
+        return;
+    }
 
     if(texture(gMask, aTexCoords).x<=0.0)//Mask for water
     {

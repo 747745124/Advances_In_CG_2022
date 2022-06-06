@@ -182,7 +182,7 @@ namespace KooNan
 				DrawObjectsWithoutVP(*DeferredShading::csmShader);
 			}
 
-			//Draw depth for caustics calculation
+			// Draw depth for caustics calculation
 			glm::mat4 caustics_proj = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, 1.0f, 30.0f);
 			glm::mat4 caustics_view = glm::lookAt(GameController::mainCamera.Position + glm::vec3(0.0, 10.0, 0.0), GameController::mainCamera.Position, glm::vec3(0.0, 0.0, -1.0));
 			causticdepthbuf.bindToWrite();
@@ -233,24 +233,24 @@ namespace KooNan
 			main_scene.DrawSky(&projection, &jittered_projection, &lastViewProjection);
 			main_light.Draw(&projection, &jittered_projection, &lastViewProjection, nullptr);
 
-			//SSDO pass
+			// SSDO pass
 			gbuf.bindTexture();
 			aobuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT);
 			DeferredShading::setSSDOShader(jittered_projection);
 			DeferredShading::DrawQuad();
 
-			//aobuf.bindToRead();
-			//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-			//glReadBuffer(GL_COLOR_ATTACHMENT1);
-			//glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			// aobuf.bindToRead();
+			// glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			// glReadBuffer(GL_COLOR_ATTACHMENT1);
+			// glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-			//SSDO blur pass
+			// SSDO blur pass
 			aobuf.bindTexture();
 			aoblurbuf.bindToWrite();
 			DeferredShading::setSimpleBlurShader();
 			DeferredShading::DrawQuad();
-			
+
 			glm::mat4 lightMVP[NUM_CASCADES];
 			for (int i = 0; i < NUM_CASCADES; i++)
 			{
@@ -308,8 +308,6 @@ namespace KooNan
 			ssrefractbuf.bindToRead();
 			glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-
-
 			// Combine reflect/refract and origin color
 			taabuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT);
@@ -328,21 +326,18 @@ namespace KooNan
 
 			gbuf.bindTexture();
 			taabuf.bindTexture();
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-			// postprocessor.bindToWrite();
+			// glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			postprocessor.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			DeferredShading::setTAAShader();
 			DeferredShading::DrawQuad();
 
-
-
-
 			// postprocess effect
-			// glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			// postprocessor.bindTexture();
-			// DeferredShading::setPostprocessShader();
-			// DeferredShading::DrawQuad();
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			postprocessor.bindTexture();
+			DeferredShading::setPostprocessShader();
+			DeferredShading::DrawQuad();
 
 			taabuf.copyToLast();
 			lastViewProjection = projection * GameController::mainCamera.GetViewMatrix();
