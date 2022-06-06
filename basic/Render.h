@@ -48,6 +48,7 @@ namespace KooNan
 		SSRefractUVBuffer ssrefractbuf;
 		SSAOBuffer aobuf;
 		SSAOBlurBuffer aoblurbuf;
+		SSDOBuffer dobuf;
 		ReflectionDrawBuffer reflectdrawbuf;
 		ReflectionBlurBuffer reflectblurbuf;
 		RefractionDrawBuffer refractdrawbuf;
