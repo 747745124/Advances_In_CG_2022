@@ -7,7 +7,7 @@ out vec4 FragColor;
 
 uniform sampler2D terrainDepth;
 
-const float caustics_factor=0.20;
+const float caustics_factor=0.1;
 
 void main()
 {

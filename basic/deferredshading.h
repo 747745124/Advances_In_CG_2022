@@ -116,9 +116,9 @@ namespace KooNan
             {
                 lightingShader->setVec2("poissonDisk[" + std::to_string(i) + "]", poissonDisk[i]);
             }
-            glActiveTexture(GL_TEXTURE9);
+            glActiveTexture(GL_TEXTURE12);
             glBindTexture(GL_TEXTURE_2D, rotationNoise);
-            lightingShader->setInt("rotationNoise", 9);
+            lightingShader->setInt("rotationNoise", 12);
         }
         static void setSSReflectionShader(const glm::mat4 &projection)
         {
