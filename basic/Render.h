@@ -16,6 +16,7 @@
 #include "ssreflectuvbuffer.h"
 #include "ssrefractuvbuffer.h"
 #include "ssaobuffer.h"
+#include "ssdobuffer.h"
 #include "ssaoblurbuffer.h"
 #include "reflectionblurbuffer.h"
 #include "reflectiondrawbuffer.h"
