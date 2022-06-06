@@ -4,9 +4,16 @@ in vec2 TexCoords;
 
 uniform sampler2D postBuffer;
 uniform float weight[9] = float[] (1.0, 2.0, 1.0, 0.0, 0.0, 0.0, -1.0, -2.0, -1.0);
+uniform float exposure;
+uniform int toneMapping;
+uniform int effectType;
+const float gamma=2.2;
 
 void main()
 {             
+    
+    if(effectType==0)
+    {
     //doing sobel detection
     vec4 tex = texture(postBuffer, TexCoords);
 
@@ -41,5 +48,10 @@ void main()
     }
 
     color = result;
+    }
 
+    else{
+        color = texture(postBuffer, TexCoords);
+        return;
+    }
 }

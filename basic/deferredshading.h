@@ -62,9 +62,9 @@ namespace KooNan
         static void setLightingPassShader(const glm::mat4 *lightMVP, const glm::mat4 *causticVP, const float *endViewSpace)
         {
             lightingShader->use();
-            if (toneMapping)
-                lightingShader->setInt("toneMapping", 1);
-            else
+            // if (toneMapping)
+            //     lightingShader->setInt("toneMapping", 1);
+            // else
                 lightingShader->setInt("toneMapping", 0);
             lightingShader->setFloat("exposure", exposure);
             lightingShader->setInt("softShadowType", softShadowType);
@@ -318,6 +318,12 @@ namespace KooNan
         static void setPostprocessShader()
         {
             postprocessShader->use();
+            postprocessShader->setInt("effectType",1);
+            postprocessShader->setFloat("exposure",exposure);
+            if (toneMapping)
+                postprocessShader->setInt("toneMapping", 1);
+            else
+                postprocessShader->setInt("toneMapping", 0);
         }
 
     private:
