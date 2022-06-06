@@ -84,6 +84,8 @@ Shader *DeferredShading::bufferDebugShader = nullptr;
 Shader *DeferredShading::refractionPositionShader = nullptr;
 Shader *DeferredShading::ssrefractionShader = nullptr;
 Shader *DeferredShading::refractDrawShader = nullptr;
+Shader* DeferredShading::ssdoShader = nullptr;
+
 const float Render::cascade_Z[NUM_CASCADES + 1] = {0.1f, 30.0f, 100.0f, 1000.0f};
 unsigned Render::cascadeUpdateCounter[NUM_CASCADES] = {1, 1, 1};
 
@@ -187,6 +189,7 @@ int main()
 	Shader refractionPositionShader(FileSystem::getPath("shaders/deferred/refractionposition.vs").c_str(), FileSystem::getPath("shaders/deferred/refractionposition.fs").c_str());
 	Shader ssrefractionShader(FileSystem::getPath("shaders/deferred/ssrefraction.vs").c_str(), FileSystem::getPath("shaders/deferred/ssrefraction.fs").c_str());
 	Shader refractDrawShader(FileSystem::getPath("shaders/deferred/refractdraw.vs").c_str(), FileSystem::getPath("shaders/deferred/refractdraw.fs").c_str());
+	Shader ssdoShader(FileSystem::getPath("shaders/deferred/ssdo.vs").c_str(), FileSystem::getPath("shaders/deferred/ssdo.fs").c_str());
 	DeferredShading::lightingShader = &lightingShader;
 	DeferredShading::ssreflectionShader = &ssreflectionShader;
 	DeferredShading::reflectDrawShader = &reflectDrawShader;
@@ -196,6 +199,7 @@ int main()
 	DeferredShading::combineColorShader = &combineColorShader;
 	DeferredShading::csmShader = &csmShader;
 	DeferredShading::taaShader = &taaShader;
+	DeferredShading::ssdoShader = &ssdoShader;
 
 	DeferredShading::causticShader = &causticShader;
 	DeferredShading::bufferDebugShader = &bufferviewShader;
