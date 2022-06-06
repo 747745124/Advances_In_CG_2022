@@ -247,13 +247,21 @@ namespace KooNan
 			{
 				lightMVP[i] = GetCSMProjection(i) * lightView;
 			}
-
+			
+			gbuf.bindTexture();
+			dobuf.bindToWrite();
+			glClear(GL_COLOR_BUFFER_BIT);
+			InitLighting(*DeferredShading::ssdoShader);
+			DeferredShading::setSSDOShader(jittered_projection);
+			DeferredShading::DrawQuad();
+			
 			// Drawing quads from now on
 			glDisable(GL_DEPTH_TEST);
 
 			// Lighting pass
 			gbuf.bindTexture();
 			aoblurbuf.bindTexture();
+			dobuf.bindTexture();
 			csmbuf.bindTexture();
 			refractionposbuf.bindTexture();
 			causticmapbuf.bindTexture();
