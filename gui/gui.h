@@ -14,6 +14,7 @@ namespace KooNan
 	int selectPageFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 	bool ssrOn = true;
 	bool ssaoOn = true;
+	bool ssdoOn = false;
 	bool csmOn = false;
 	bool ReflectOn = true;
 	bool showFPS = true;
@@ -151,6 +152,7 @@ namespace KooNan
 				ImGui::Checkbox("SSR On/Off", &ssrOn);
 				ImGui::SliderFloat("SSR Thickness", &ssrThickness, 0.f, 10.f);
 				ImGui::Checkbox("SSAO On/Off", &ssaoOn);
+				ImGui::Checkbox("SSDO On/Off",&ssdoOn);
 				ImGui::Checkbox("CSM Color On/Off", &csmOn);
 				ImGui::Checkbox("Reflect On/Off", &ReflectOn);
 				ImGui::Checkbox("TAA On/Off", &taaOn);
@@ -227,6 +229,7 @@ namespace KooNan
 				ImGui::SliderFloat("SSR Thickness", &ssrThickness, 0.f, 10.f);
 
 				ImGui::Checkbox("SSAO On/Off", &ssaoOn);
+				ImGui::Checkbox("SSDO On/Off",&ssdoOn);
 				ImGui::Checkbox("CSM Color On/Off", &csmOn);
 				ImGui::Checkbox("Cubemap Reflect On/Off", &ReflectOn);
 				ImGui::Checkbox("TAA On/Off", &taaOn);
