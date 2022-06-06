@@ -74,6 +74,7 @@ Shader *DeferredShading::lightingShader = nullptr;
 Shader *DeferredShading::ssreflectionShader = nullptr;
 Shader *DeferredShading::reflectDrawShader = nullptr;
 Shader *DeferredShading::ssaoShader = nullptr;
+Shader* DeferredShading::ssdoShader = nullptr;
 Shader *DeferredShading::simpleBlurShader = nullptr;
 Shader *DeferredShading::kuwaharaBlurShader = nullptr;
 Shader *DeferredShading::combineColorShader = nullptr;
@@ -178,6 +179,7 @@ int main()
 	Shader ssreflectionShader(FileSystem::getPath("shaders/deferred/ssreflection.vs").c_str(), FileSystem::getPath("shaders/deferred/ssreflection.fs").c_str());
 	Shader reflectDrawShader(FileSystem::getPath("shaders/deferred/reflectdraw.vs").c_str(), FileSystem::getPath("shaders/deferred/reflectdraw.fs").c_str());
 	Shader ssaoShader(FileSystem::getPath("shaders/deferred/ssao.vs").c_str(), FileSystem::getPath("shaders/deferred/ssao.fs").c_str());
+	Shader ssdoShader(FileSystem::getPath("shaders/deferred/ssdo.vs").c_str(), FileSystem::getPath("shaders/deferred/ssdo.fs").c_str());
 	Shader simpleblurShader(FileSystem::getPath("shaders/deferred/simpleblur.vs").c_str(), FileSystem::getPath("shaders/deferred/simpleblur.fs").c_str());
 	Shader kuwaharaBlurShader(FileSystem::getPath("shaders/deferred/kuwaharablur.vs").c_str(), FileSystem::getPath("shaders/deferred/kuwaharablur.fs").c_str());
 	Shader combineColorShader(FileSystem::getPath("shaders/deferred/combinecolor.vs").c_str(), FileSystem::getPath("shaders/deferred/combinecolor.fs").c_str());
@@ -193,6 +195,7 @@ int main()
 	DeferredShading::ssreflectionShader = &ssreflectionShader;
 	DeferredShading::reflectDrawShader = &reflectDrawShader;
 	DeferredShading::ssaoShader = &ssaoShader;
+	DeferredShading::ssdoShader = &ssdoShader;
 	DeferredShading::simpleBlurShader = &simpleblurShader;
 	DeferredShading::kuwaharaBlurShader = &kuwaharaBlurShader;
 	DeferredShading::combineColorShader = &combineColorShader;

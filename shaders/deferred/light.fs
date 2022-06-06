@@ -7,7 +7,8 @@ uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
 uniform sampler2D gMask;
-uniform sampler2D SSAOMask;
+uniform sampler2D SSDO_bent_normals;
+uniform sampler2D SSDO_bounced_light;
 uniform sampler2D refractionPos;
 uniform sampler2D causticMap;
 uniform int softShadowType;
@@ -57,7 +58,7 @@ uniform mat4 inv_view;
 uniform mat4 causticVP;
 
 
-vec3 CalcDirLight(DirLight light, vec3 color, float spec, vec3 normal, vec3 viewDir, float water_mask, float ambient_mask, float shadow, float caustics)
+vec3 CalcDirLight(DirLight light, vec3 color, float spec, vec3 normal, vec3 viewDir, float water_mask, vec3 bent_normal, float ssao, vec3 bounced_color, float shadow, float caustics)
 {
     vec3 lightDir = mat3(view)*normalize(-light.direction);
     // diffuse shading
@@ -71,15 +72,17 @@ vec3 CalcDirLight(DirLight light, vec3 color, float spec, vec3 normal, vec3 view
     vec3 specular = light.specular * specCalc * spec * color;
     ambient += ambient * (1.0-water_mask) * 0.3;
     specular += specular * 2.0 * water_mask;
-    vec3 result = ambient*1.5*pow(ambient_mask,1.5)+diffuse*2.5*shadow+specular;
+    float ambient_mask = clamp(dot(bent_normal, lightDir),0.0,1.0);
 
-    result = water_mask>0.0?result:result*(1.3+caustics);
+    vec3 result = (bounced_color*0.04+ambient)*1.5*pow(ssao,3.0)+diffuse*2.5*shadow+specular;
+
+    result = water_mask>0.0?result:(result*(1.3+caustics));
     return result;
 }
 
 float bias[NUM_CASCADES];
 
-vec3 CalcPointLight(PointLight light, vec3 color, float spec, vec3 normal, vec3 fragPos, vec3 viewDir, float water_mask, float ambient_mask)
+vec3 CalcPointLight(PointLight light, vec3 color, float spec, vec3 normal, vec3 fragPos, vec3 viewDir, float water_mask,  vec3 bent_normal, float ssao, vec3 bounced_color)
 {
     vec3 lightDir = normalize(vec3(view*vec4(light.position,1.0)) - fragPos);
     // diffuse shading
@@ -91,6 +94,7 @@ vec3 CalcPointLight(PointLight light, vec3 color, float spec, vec3 normal, vec3 
     float distance = length(vec3(view*vec4(light.position,1.0)) - fragPos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
     // combine results
+    float ambient_mask = clamp(dot(bent_normal, lightDir),0.0,1.0);
     vec3 ambient = light.ambient * color * ambient_mask;
     vec3 diffuse = light.diffuse * diff * color * water_mask;
     vec3 specular = light.specular * specCalc * spec * color;
@@ -99,7 +103,7 @@ vec3 CalcPointLight(PointLight light, vec3 color, float spec, vec3 normal, vec3 
     specular *= attenuation;
     ambient += ambient * (1.0-water_mask);
     specular += specular * 2.0;
-    return (ambient*pow(ambient_mask,1.5)+diffuse)*0.3+specular;
+    return (bounced_color*0.04+ambient*pow(ssao,3.0)+diffuse)*0.3+specular;
 }
 
 float CalcShadowPCF(float NoL, int index, vec4 PosLightClipSpace)
@@ -232,7 +236,10 @@ void main()
     vec3 FragPos = texture(gPosition, TexCoord).xyz;
     vec3 Color = texture(gAlbedoSpec, TexCoord).xyz;
     vec3 mask = texture(gMask, TexCoord).rgb;
-    float ssao = texture(SSAOMask, TexCoord).r;
+    //float ssao = texture(SSAOMask, TexCoord).r;
+    vec3 bent_normal = texture(SSDO_bent_normals, TexCoord).xyz;
+    float occlude = texture(SSDO_bent_normals, TexCoord).w;
+    vec3 bounced_color = texture(SSDO_bounced_light, TexCoord).xyz;
     float spec = texture(gAlbedoSpec, TexCoord).w;
     vec3 viewDir = normalize(FragPos);
     float ref_mask = mask.x>0.f?0.:1.;
@@ -297,9 +304,9 @@ void main()
     causticUV.xyz/=causticUV.w;
     causticUV.xyz=causticUV.xyz*0.5+0.5;
     float caustics = CalcCausticsPCF(causticUV.xy);
-	vec3 result = CalcDirLight(dirLight, Color, spec, Norm, viewDir, ref_mask, ssao, shadow, caustics);
+	vec3 result = CalcDirLight(dirLight, Color, spec, Norm, viewDir, ref_mask, bent_normal, occlude, bounced_color, shadow, caustics);
 	for(int i = 0; i < NR_POINT_LIGHTS; i++)
-        result += CalcPointLight(pointLights[i], Color, spec, Norm, FragPos, viewDir, ref_mask, ssao);    
+        result += CalcPointLight(pointLights[i], Color, spec, Norm, FragPos, viewDir, ref_mask, bent_normal, occlude, bounced_color);    
 
 	
     if(csmShow==1)

@@ -16,24 +16,24 @@ uniform mat4 projection;
 uniform mat4 view;//Use this to convert postion from world space to view space
 
 
-const float refract_index = 1/0.77f;
-const float thickness = 1.0f;
+const float refract_index = 1.3f;
+const float thickness = 10.0f;
 
-out vec3 reflected_uv;
+out vec3 refracted_uv;
 
 
 void main()
 {
     if(enable==0)
     {
-        reflected_uv = vec3(0.0);
+        refracted_uv = vec3(aTexCoords.xy,1.0);
         return;
     }
     
     //parameters
-    float maxDistance = 5;
-    float resolution = 1.0;
-    int   steps = 16;
+    float maxDistance = 10;
+    float resolution = 0.5;
+    int   steps = 4;
 
     vec2 texSize  = textureSize(gPosition, 0).xy;
 
@@ -46,7 +46,7 @@ void main()
     
     if(mask<=0.)
     {
-        reflected_uv = vec3(0.0);
+        refracted_uv = vec3(0.0);
         return;
     }
     
@@ -80,7 +80,6 @@ void main()
     float useX = abs(deltaX) >= abs(deltaY) ? 1.0 : 0.0;
     float delta = mix(abs(deltaY), abs(deltaX), useX) * clamp(resolution, 0.0, 1.0);
     vec2 increment = vec2(deltaX, deltaY) / max(delta, 0.001);
-
     float search0 = 0;
     float search1 = 0;
 
@@ -100,7 +99,7 @@ void main()
         uv.xy = frag / texSize;
         if(uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1)
         {
-            reflected_uv = vec3(0.0);
+            refracted_uv = vec3(0.0);
             break;
         }
         //get view space position of current pixel
@@ -111,7 +110,7 @@ void main()
         currentZ = (startView.z * endView.z)/mix(endView.z, startView.z, search1);
         depth =  abs(currentZ)-abs(positionTo.z);
         //check if intersected
-        if (depth>0 && depth<thickness) 
+        if (depth>0&&depth<thickness) 
         {
             hit0 = 1;
             break;
@@ -133,7 +132,7 @@ void main()
         uv.xy = frag / texSize;
         if(uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1)
         {
-            reflected_uv = vec3(0.0);
+            refracted_uv = vec3(0.0);
             break;
         }
         //get view space position of current pixel
@@ -155,7 +154,7 @@ void main()
         }
     }
 
-    float visibility = hit1;
+    float visibility = hit0;
 
-    reflected_uv = vec3(mix(aTexCoords, uv.xy, visibility), 1);
+    refracted_uv = vec3(mix(aTexCoords, uv.xy, visibility), 1);
 }

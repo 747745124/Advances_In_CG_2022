@@ -17,7 +17,7 @@ namespace KooNan
 		void aobuffer_init();
 		void cleanUp();
 		GLuint aobuffer;
-		GLuint ao_text;
+		GLuint bent_normal_text, bounce_text;
 	};
 
 	void SSAOBuffer::aobuffer_init()
@@ -28,13 +28,22 @@ namespace KooNan
 		glGenFramebuffers(1, &aobuffer);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, aobuffer);
 
-		glGenTextures(1, &ao_text);
-		glBindTexture(GL_TEXTURE_2D, ao_text);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+		glGenTextures(1, &bent_normal_text);
+		glBindTexture(GL_TEXTURE_2D, bent_normal_text);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ao_text, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bent_normal_text, 0);
 
+		glGenTextures(1, &bounce_text);
+		glBindTexture(GL_TEXTURE_2D, bounce_text);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, bounce_text, 0);
+
+		GLuint drawbufs[] = { GL_COLOR_ATTACHMENT0 ,GL_COLOR_ATTACHMENT1 };
+		glDrawBuffers(2, drawbufs);
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			std::cout << "Framebuffer not complete!" << std::endl;
@@ -45,7 +54,7 @@ namespace KooNan
 	void SSAOBuffer::cleanUp()
 	{
 		glDeleteFramebuffers(1, &aobuffer);
-		glDeleteTextures(1, &ao_text);
+		glDeleteTextures(1, &bent_normal_text);
 	}
 
 	void SSAOBuffer::bindToWrite()
@@ -62,7 +71,9 @@ namespace KooNan
 	{
 		//GL_TEXTURE0-GL_TEXTURE4 is used by gbuffer
 		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, ao_text);
+		glBindTexture(GL_TEXTURE_2D, bent_normal_text);
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_2D, bounce_text);
 	}
 
 }

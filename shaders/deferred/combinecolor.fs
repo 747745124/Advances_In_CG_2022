@@ -21,6 +21,6 @@ void main()
     vec4 color = texture(Tcolor, aTexCoords);
     vec4 reflection = texture(Treflection, aTexCoords);
     vec4 refraction = texture(Trefraction, aTexCoords);
-    vec4 water = mix(reflection,refraction,coeff);
+    vec4 water = mix(reflection,refraction,coeff*1.6);
     FragColor = mask<=0.0?color:water;
 }

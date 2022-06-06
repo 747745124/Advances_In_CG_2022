@@ -13,20 +13,21 @@ namespace KooNan
     {
     public:
         DeferredShading() = delete;
-        static Shader *lightingShader;
-        static Shader *ssreflectionShader;
-        static Shader *ssrefractionShader;
-        static Shader *reflectDrawShader;
-        static Shader *refractDrawShader;
-        static Shader *ssaoShader;
-        static Shader *simpleBlurShader;
-        static Shader *kuwaharaBlurShader;
-        static Shader *combineColorShader;
-        static Shader *csmShader;
-        static Shader *taaShader;
-        static Shader *causticShader;
-        static Shader *bufferDebugShader;
-        static Shader *refractionPositionShader;
+        static Shader* lightingShader;
+        static Shader* ssreflectionShader;
+        static Shader* ssrefractionShader;
+        static Shader* reflectDrawShader;
+        static Shader* refractDrawShader;
+        static Shader* ssaoShader;
+        static Shader* ssdoShader;
+        static Shader* simpleBlurShader;
+        static Shader* kuwaharaBlurShader;
+        static Shader* combineColorShader;
+        static Shader* csmShader;
+        static Shader* taaShader;
+        static Shader* causticShader;
+        static Shader* bufferDebugShader;
+        static Shader* refractionPositionShader;
         static Shader *postprocessShader;
         static void DrawQuad()
         {
@@ -75,7 +76,8 @@ namespace KooNan
             lightingShader->setInt("gNormal", 1);
             lightingShader->setInt("gAlbedoSpec", 2);
             lightingShader->setInt("gMask", 3);
-            lightingShader->setInt("SSAOMask", 5);
+            lightingShader->setInt("SSDO_bent_normals", 5);
+            lightingShader->setInt("SSDO_bounced_light", 6);
             lightingShader->setInt("refractionPos", 11);
             lightingShader->setInt("causticMap", 10);
             lightingShader->setMat4("causticVP", *causticVP);
@@ -84,7 +86,7 @@ namespace KooNan
             lightingShader->setMat4("inv_view", glm::inverse(view));
             for (int i = 0; i < 3; i++)
             {
-                lightingShader->setInt("ShadowMap[" + std::to_string(i) + "]", 6 + i);
+                lightingShader->setInt("ShadowMap[" + std::to_string(i) + "]", 7 + i);
                 lightingShader->setMat4("lightMVP[" + std::to_string(i) + "]", lightMVP[i]);
                 lightingShader->setFloat("EndViewSpace[" + std::to_string(i) + "]", endViewSpace[i + 1]);
             }
@@ -190,7 +192,6 @@ namespace KooNan
 
         static void setSSAOShader(const glm::mat4 &projection)
         {
-
             static std::vector<glm::vec3> ssaoKernel;
             if (ssaoKernel.empty())
             {
@@ -227,10 +228,48 @@ namespace KooNan
                 ssaoShader->setVec3("samples[" + std::to_string(i) + "]", ssaoKernel[i]);
             }
         }
+        static void setSSDOShader(const glm::mat4& projection)
+        {
+            static std::vector<glm::vec3> ssaoKernel;
+            if (ssaoKernel.empty())
+            {
+                //Kernel data initialization
+                SSAOKernalInit(ssaoKernel);
+            }
+            static GLuint noiseTexture = 0;
+            if (!noiseTexture)
+            {
+                //Generate noise map
+                SSAONoiseTextureInit(noiseTexture);
+            }
+            glActiveTexture(GL_TEXTURE4);
+            glBindTexture(GL_TEXTURE_2D, noiseTexture);
+
+            ssdoShader->use();
+            Camera& cam = GameController::mainCamera;
+            if (ssaoOn) {
+                ssaoShader->setInt("enable", 1);
+            }
+            else {
+                ssaoShader->setInt("enable", 0);
+            }
+            ssdoShader->setInt("gPosition", 0);
+            ssdoShader->setInt("gNormal", 1);
+            ssdoShader->setInt("gAlbedoSpec", 2);
+            ssdoShader->setInt("gMask", 3);
+            ssdoShader->setInt("texNoise", 4);
+            ssdoShader->setMat4("projection", projection);
+            ssdoShader->setMat4("view", cam.GetViewMatrix());
+            for (int i = 0; i < ssaoKernel.size(); i++)
+            {
+                ssdoShader->setVec3("samples[" + std::to_string(i) + "]", ssaoKernel[i]);
+            }
+        }
         static void setSimpleBlurShader()
         {
             simpleBlurShader->use();
-            simpleBlurShader->setInt("Input", 5);
+            simpleBlurShader->setInt("Input1", 5);
+            simpleBlurShader->setInt("Input2", 6);
         }
         static void setKuwaharaBlurShader()
         {

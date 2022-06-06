@@ -16,7 +16,7 @@ uniform float moveOffset;
 out mat4 trans_inv_view;
 
 
-const float tiling = 32;
+const float tiling = 8;
 
 out vec4 lastUV;
 out vec4 currUV;
