@@ -26,6 +26,7 @@
 #include "refractionPositionBuffer.h"
 #include "refractiondrawbuffer.h"
 #include "originColorBuffer.h"
+#include "postprocess.h"
 
 namespace KooNan
 {
@@ -55,6 +56,8 @@ namespace KooNan
 		CausticMapBuffer causticmapbuf;
 		RefractionPositionBuffer refractionposbuf;
 		OriginColorBuffer lightingcolorbuf;
+		Postprocessor postprocessor;
+
 		static const int NUM_CASCADES = 3;
 		static const float cascade_Z[NUM_CASCADES + 1];
 		struct
@@ -299,6 +302,8 @@ namespace KooNan
 			refractdrawbuf.bindToRead();
 			glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
+			// postprocessor.bindToWrite();
+
 			// Combine reflect/refract and origin color
 			taabuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT);
@@ -325,6 +330,13 @@ namespace KooNan
 			taabuf.copyToLast();
 			lastViewProjection = projection * GameController::mainCamera.GetViewMatrix();
 
+
+			// postprocess effect
+			// glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			// postprocessor.bindTexture();
+			// DeferredShading::setPostprocessShader();
+			// DeferredShading::DrawQuad();
 #else
 			InitLighting(main_scene.WaterShader);
 			InitLighting(main_scene.TerrainShader);

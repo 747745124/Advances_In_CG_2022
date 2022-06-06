@@ -2,6 +2,7 @@
 
 in vec2 aTexCoords;
 
+uniform int enable;
 //Position in world space
 uniform sampler2D gPosition; 
 //Normal in world space
@@ -23,6 +24,12 @@ out vec3 reflected_uv;
 
 void main()
 {
+    if(enable==0)
+    {
+        reflected_uv = vec3(0.0);
+        return;
+    }
+    
     //parameters
     float maxDistance = 5;
     float resolution = 1.0;

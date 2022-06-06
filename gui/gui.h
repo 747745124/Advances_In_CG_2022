@@ -13,6 +13,7 @@ namespace KooNan
 	int menuFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBackground;
 	int selectPageFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 	bool ssrOn = true;
+	bool ssRefractOn = true;
 	bool ssaoOn = true;
 	bool csmOn = false;
 	bool ReflectOn = true;
@@ -148,8 +149,9 @@ namespace KooNan
 				else
 					;
 
-				ImGui::Checkbox("SSR On/Off", &ssrOn);
+				ImGui::Checkbox("SSReflect On/Off", &ssrOn);
 				ImGui::SliderFloat("SSR Thickness", &ssrThickness, 0.f, 10.f);
+				ImGui::Checkbox("SSRefract On/Off", &ssRefractOn);
 				ImGui::Checkbox("SSAO On/Off", &ssaoOn);
 				ImGui::Checkbox("CSM Color On/Off", &csmOn);
 				ImGui::Checkbox("Reflect On/Off", &ReflectOn);
@@ -223,8 +225,9 @@ namespace KooNan
 				{
 					GameController::mainCamera = GameController::oriCreatingCamera;
 				}
-				ImGui::Checkbox("SSR On/Off", &ssrOn);
+				ImGui::Checkbox("SSReflect On/Off", &ssrOn);
 				ImGui::SliderFloat("SSR Thickness", &ssrThickness, 0.f, 10.f);
+				ImGui::Checkbox("SSRefract On/Off", &ssRefractOn);
 
 				ImGui::Checkbox("SSAO On/Off", &ssaoOn);
 				ImGui::Checkbox("CSM Color On/Off", &csmOn);

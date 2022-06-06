@@ -27,6 +27,7 @@ namespace KooNan
         static Shader *causticShader;
         static Shader *bufferDebugShader;
         static Shader *refractionPositionShader;
+        static Shader *postprocessShader;
         static void DrawQuad()
         {
             static GLuint quadVAO = 0;
@@ -162,6 +163,14 @@ namespace KooNan
         static void setSSRefractionShader(const glm::mat4 &projection)
         {
             ssrefractionShader->use();
+            if (ssRefractOn)
+            {
+                ssrefractionShader->setInt("enable", 1);
+            }
+            else
+            {
+                ssrefractionShader->setInt("enable", 0);
+            }
             Camera &cam = GameController::mainCamera;
             ssrefractionShader->setMat4("projection", projection);
             ssrefractionShader->setMat4("view", cam.GetViewMatrix());
@@ -266,6 +275,10 @@ namespace KooNan
             refractionPositionShader->setMat4("view", view);
             refractionPositionShader->setMat4("model", glm::mat4(1.0f));
             refractionPositionShader->setMat4("projection", projection);
+        }
+        static void setPostprocessShader()
+        {
+            postprocessShader->use();
         }
 
     private:
