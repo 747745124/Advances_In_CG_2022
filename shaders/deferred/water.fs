@@ -28,7 +28,7 @@ void main()
     normal = normalize(normal);
 
     gNormal = mat3(trans_inv_view)*normalize(normal);
-    // gNormal = mat3(trans_inv_view)*vec3(0.0,1.0,0.0); //Plane reflection
+    //gNormal = mat3(trans_inv_view)*vec3(0.0,1.0,0.0); //Plane reflection
     //gAlbedoSpec = vec4(0.0f, 0.0f, 0.0f, 0.2f);
     gReflect_mask = vec3(0.8f, 0.0f, 0.0f);
 

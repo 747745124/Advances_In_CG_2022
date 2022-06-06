@@ -127,4 +127,5 @@ void main()
     else
         aaColor = vec4(currColor,1.0f);
     
+    
 }

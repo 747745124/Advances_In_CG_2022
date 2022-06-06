@@ -16,7 +16,7 @@ namespace KooNan {
 		void aoblurbuffer_init();
 		void cleanUp();
 		GLuint aoblurbuffer;
-		GLuint blurred_text;
+		GLuint blurred_text1,blurred_text2;
 	};
 
 	void SSAOBlurBuffer::aoblurbuffer_init()
@@ -27,12 +27,22 @@ namespace KooNan {
 		glGenFramebuffers(1, &aoblurbuffer);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, aoblurbuffer);
 
-		glGenTextures(1, &blurred_text);
-		glBindTexture(GL_TEXTURE_2D, blurred_text);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+		glGenTextures(1, &blurred_text1);
+		glBindTexture(GL_TEXTURE_2D, blurred_text1);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, blurred_text, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, blurred_text1, 0);
+
+		glGenTextures(1, &blurred_text2);
+		glBindTexture(GL_TEXTURE_2D, blurred_text2);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, blurred_text2, 0);
+
+		GLuint drawbufs[] = { GL_COLOR_ATTACHMENT0 ,GL_COLOR_ATTACHMENT1 };
+		glDrawBuffers(2, drawbufs);
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			std::cout << "Framebuffer not complete!" << std::endl;
@@ -43,7 +53,8 @@ namespace KooNan {
 	void SSAOBlurBuffer::cleanUp()
 	{
 		glDeleteFramebuffers(1, &aoblurbuffer);
-		glDeleteTextures(1, &blurred_text);
+		glDeleteTextures(1, &blurred_text1);
+		glDeleteTextures(1, &blurred_text2);
 	}
 
 	void SSAOBlurBuffer::bindToWrite()
@@ -60,7 +71,9 @@ namespace KooNan {
 	{
 		//GL_TEXTURE0-GL_TEXTURE4 is used by gbuffer
 		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, blurred_text);
+		glBindTexture(GL_TEXTURE_2D, blurred_text1);
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_2D, blurred_text2);
 	}
 }
 

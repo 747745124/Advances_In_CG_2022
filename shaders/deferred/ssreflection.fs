@@ -26,14 +26,14 @@ void main()
     }
     
     //parameters
-    float maxDistance = 30;
-    float resolution = 0.6;
+    float maxDistance = 80;
+    float resolution = 0.8;
     int   steps = 16;
 
 
     vec2 texSize  = textureSize(gPosition, 0).xy;
     ivec2 c = ivec2(gl_FragCoord.xy);
-    float jitter = float((c.x+c.y)&1)*0.5;
+    float jitter = float((c.x+c.y)&1)/texSize.x;
 
     //frag position in view space
     vec4 positionFrom = vec4(texture(gPosition, aTexCoords).xyz, 1.0);
@@ -90,8 +90,8 @@ void main()
     float i = 0;
     vec2 frag = startFrag.xy;
     vec3 uv;
-    frag += increment*delta*0.05;
-    i += delta*0.05;
+    frag += increment*delta*0.1;
+    i += delta*0.1;
     //linear search pass
     for(; i<int(delta); i++)
     {

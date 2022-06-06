@@ -179,7 +179,7 @@ namespace KooNan
 			}
 
 			//Draw depth for caustics calculation
-			glm::mat4 caustics_proj = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, 1.0f, 30.0f);
+			glm::mat4 caustics_proj = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, 1.0f, 30.0f);
 			glm::mat4 caustics_view = glm::lookAt(GameController::mainCamera.Position + glm::vec3(0.0, 10.0, 0.0), GameController::mainCamera.Position, glm::vec3(0.0, 0.0, -1.0));
 			causticdepthbuf.bindToWrite();
 			glClear(GL_DEPTH_BUFFER_BIT);
@@ -229,18 +229,24 @@ namespace KooNan
 			main_scene.DrawSky(&projection, &jittered_projection, &lastViewProjection);
 			main_light.Draw(&projection, &jittered_projection, &lastViewProjection, nullptr);
 
-			//SSAO pass
+			//SSDO pass
 			gbuf.bindTexture();
 			aobuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT);
-			DeferredShading::setSSAOShader(jittered_projection);
+			DeferredShading::setSSDOShader(jittered_projection);
 			DeferredShading::DrawQuad();
-			//SSAO blur pass
+
+			//aobuf.bindToRead();
+			//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			//glReadBuffer(GL_COLOR_ATTACHMENT1);
+			//glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+			//SSDO blur pass
 			aobuf.bindTexture();
 			aoblurbuf.bindToWrite();
 			DeferredShading::setSimpleBlurShader();
 			DeferredShading::DrawQuad();
-
+			
 			glm::mat4 lightMVP[NUM_CASCADES];
 			for (int i = 0; i < NUM_CASCADES; i++)
 			{
@@ -295,7 +301,7 @@ namespace KooNan
 			DeferredShading::DrawQuad();
 
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-			refractdrawbuf.bindToRead();
+			ssrefractbuf.bindToRead();
 			glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 			
 			//Combine reflect/refract and origin color

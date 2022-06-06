@@ -14,7 +14,7 @@ const float refract_index = 0.77;
 const float max_distance = 5;
 const float resolution = 0.5;
 
-const float tiling = 32;
+const float tiling = 8;
 
 out vec3 beforeRefract;
 out vec3 afterRefract;
