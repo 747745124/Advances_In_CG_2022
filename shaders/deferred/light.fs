@@ -3,14 +3,14 @@
 
 in vec2 aTexCoords;
 
-uniform sampler2D gPosition;
-uniform sampler2D gNormal;
-uniform sampler2D gAlbedoSpec;
-uniform sampler2D gMask;
-uniform sampler2D SSDO_bent_normals;
-uniform sampler2D SSDO_bounced_light;
-uniform sampler2D refractionPos;
-uniform sampler2D causticMap;
+uniform sampler2D gPosition;//0
+uniform sampler2D gNormal;//1
+uniform sampler2D gAlbedoSpec;//2
+uniform sampler2D gMask;//3
+uniform sampler2D SSDO_bent_normals;//4
+uniform sampler2D SSDO_bounced_light;//5
+uniform sampler2D refractionPos;//11
+uniform sampler2D causticMap;//10
 uniform int softShadowType;
 uniform int csmShow;
 
@@ -19,13 +19,13 @@ uniform int toneMapping;
 const float gamma =2.2f;
 
 const int NUM_CASCADES=3;
-uniform sampler2D ShadowMap[NUM_CASCADES];
+uniform sampler2D ShadowMap[NUM_CASCADES];//7,8,9
 uniform float EndViewSpace[NUM_CASCADES];
 uniform mat4 lightMVP[NUM_CASCADES];
 
 const int NUM_SHADOW_SAMPLES=16;
 uniform vec2 poissonDisk[NUM_SHADOW_SAMPLES];
-uniform sampler2D rotationNoise;
+uniform sampler2D rotationNoise;//12
 
 layout (location = 0) out vec3 FragColor;
 
@@ -76,7 +76,7 @@ vec3 CalcDirLight(DirLight light, vec3 color, float spec, vec3 normal, vec3 view
 
     vec3 result = (bounced_color*0.04+ambient)*1.5*pow(ssao,3.0)+diffuse*2.5*shadow+specular;
 
-    result = water_mask>0.0?result:(result*(1.3+caustics));
+    result = water_mask>0?result:(result*(1.3+caustics));
     return result;
 }
 
@@ -294,8 +294,6 @@ void main()
             }
         }
     }
-
-
     
     //caustics calculation
     vec4 backFragPosWorld = vec4(texture(refractionPos, TexCoord).xyz,1.0f);
@@ -315,7 +313,7 @@ void main()
         return;
     }
 
-    vec3 beforeColor = (mask.x+mask.y)>=0.1f?Color:result;
+    vec3 beforeColor = (mask.y)>=0.1f?Color:result;
 
     if(toneMapping==0)
     {

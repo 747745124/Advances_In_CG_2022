@@ -273,7 +273,7 @@ namespace KooNan
 			glm::mat4 causticsVP = caustics_proj * caustics_view;
 			DeferredShading::setLightingPassShader(lightMVP, &causticsVP, cascade_Z);
 			DeferredShading::DrawQuad();
-
+			
 			// SSReflection pass
 			gbuf.bindTexture();
 			ssreflectbuf.bindToWrite();
@@ -336,7 +336,7 @@ namespace KooNan
 			taabuf.copyToLast();
 			lastViewProjection = projection * GameController::mainCamera.GetViewMatrix();
 
-
+			
 			// postprocess effect
 			// glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
