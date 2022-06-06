@@ -26,6 +26,7 @@
 #include "refractionPositionBuffer.h"
 #include "refractiondrawbuffer.h"
 #include "originColorBuffer.h"
+#include "postprocess.h"
 
 namespace KooNan
 {
@@ -55,6 +56,8 @@ namespace KooNan
 		CausticMapBuffer causticmapbuf;
 		RefractionPositionBuffer refractionposbuf;
 		OriginColorBuffer lightingcolorbuf;
+		Postprocessor postprocessor;
+
 		static const int NUM_CASCADES = 3;
 		static const float cascade_Z[NUM_CASCADES + 1];
 		struct
@@ -68,7 +71,6 @@ namespace KooNan
 		static glm::mat4 lastViewProjection;
 
 	public:
-
 #ifdef DEFERRED_SHADING
 		Render(Scene &main_scene, Light &main_light, PickingTexture &mouse_picking) : main_scene(main_scene), main_light(main_light), mouse_picking(mouse_picking)
 		{
@@ -156,7 +158,9 @@ namespace KooNan
 
 		void DrawAll(Shader &pickingShader, Shader &modelShader, Shader &shadowShader)
 		{
+
 #ifdef DEFERRED_SHADING
+
 			// Shadow pass
 			glm::vec3 DivPos = GameController::mainCamera.Position;
 			glm::mat4 lightView = glm::lookAt(DivPos - main_light.GetDirLightDirection() * 10.0f, DivPos, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -187,7 +191,7 @@ namespace KooNan
 			glViewport(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT);
 			main_scene.DrawSceneWithoutMVP(*DeferredShading::csmShader);
 
-			//Draw caustics map
+			// Draw caustics map
 			causticmapbuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT);
 			causticdepthbuf.bindTexture();
@@ -195,7 +199,6 @@ namespace KooNan
 			main_scene.DrawCausticMap(*DeferredShading::causticShader, caustics_proj, caustics_view, main_light.GetDirLightDirection());
 
 			glViewport(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT);
-			
 
 			// Set up jitter in projection(TAA)
 			glm::mat4 projection = Common::GetPerspectiveMat(GameController::mainCamera);
@@ -204,21 +207,22 @@ namespace KooNan
 			offset = (offset - 0.5f) * 2.0f / glm::vec2(float(Common::SCR_WIDTH), float(Common::SCR_HEIGHT));
 			haltonIndex = (haltonIndex + 1) % NUM_TAA_SAMPLES;
 
-			//Draw terrain position for refraction
+			// Draw terrain position for refraction
 			refractionposbuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT);
 			DeferredShading::setRefractionPositionShader(GameController::mainCamera.GetViewMatrix(), projection);
 			main_scene.DrawSceneWithoutMVP(*DeferredShading::refractionPositionShader);
 
-			//causticmapbuf.bindToRead();
-			//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-			//glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-			
-			if(taaOn){
+			// causticmapbuf.bindToRead();
+			// glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			// glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+			if (taaOn)
+			{
 				jittered_projection[2][0] += offset.x;
 				jittered_projection[2][1] += offset.y;
 			}
-			
+
 			// Geometry pass
 			gbuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -285,13 +289,13 @@ namespace KooNan
 			main_scene.bindSkyboxTexture(6);
 			DeferredShading::DrawQuad();
 
-			//SSRefraction pass
+			// SSRefraction pass
 			gbuf.bindTexture();
 			refractionposbuf.bindTexture();
 			ssrefractbuf.bindToWrite();
 			DeferredShading::setSSRefractionShader(jittered_projection);
 			DeferredShading::DrawQuad();
-			
+
 			// Draw refraction
 			gbuf.bindTexture();
 			lightingcolorbuf.bindTexture();
@@ -303,8 +307,10 @@ namespace KooNan
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 			ssrefractbuf.bindToRead();
 			glBlitFramebuffer(0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, 0, 0, Common::SCR_WIDTH, Common::SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-			
-			//Combine reflect/refract and origin color
+
+			// postprocessor.bindToWrite();
+
+			// Combine reflect/refract and origin color
 			taabuf.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT);
 			gbuf.bindTexture();
@@ -329,8 +335,14 @@ namespace KooNan
 
 			taabuf.copyToLast();
 			lastViewProjection = projection * GameController::mainCamera.GetViewMatrix();
-			
-			
+
+
+			// postprocess effect
+			// glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			// postprocessor.bindTexture();
+			// DeferredShading::setPostprocessShader();
+			// DeferredShading::DrawQuad();
 #else
 			InitLighting(main_scene.WaterShader);
 			InitLighting(main_scene.TerrainShader);

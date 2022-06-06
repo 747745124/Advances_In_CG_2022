@@ -81,10 +81,11 @@ Shader *DeferredShading::combineColorShader = nullptr;
 Shader *DeferredShading::csmShader = nullptr;
 Shader *DeferredShading::taaShader = nullptr;
 Shader *DeferredShading::causticShader = nullptr;
-Shader* DeferredShading::bufferDebugShader = nullptr;
-Shader* DeferredShading::refractionPositionShader = nullptr;
-Shader* DeferredShading::ssrefractionShader = nullptr;
-Shader* DeferredShading::refractDrawShader = nullptr;
+Shader *DeferredShading::bufferDebugShader = nullptr;
+Shader *DeferredShading::refractionPositionShader = nullptr;
+Shader *DeferredShading::ssrefractionShader = nullptr;
+Shader *DeferredShading::refractDrawShader = nullptr;
+Shader *DeferredShading::postprocessShader = nullptr;
 const float Render::cascade_Z[NUM_CASCADES + 1] = {0.1f, 30.0f, 100.0f, 1000.0f};
 unsigned Render::cascadeUpdateCounter[NUM_CASCADES] = {1, 1, 1};
 
@@ -127,7 +128,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifndef DEFERRED_SHADING
-		glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 #endif // !DEFERRED_SHADING
 
 #ifdef __APPLE__
@@ -189,6 +190,7 @@ int main()
 	Shader refractionPositionShader(FileSystem::getPath("shaders/deferred/refractionposition.vs").c_str(), FileSystem::getPath("shaders/deferred/refractionposition.fs").c_str());
 	Shader ssrefractionShader(FileSystem::getPath("shaders/deferred/ssrefraction.vs").c_str(), FileSystem::getPath("shaders/deferred/ssrefraction.fs").c_str());
 	Shader refractDrawShader(FileSystem::getPath("shaders/deferred/refractdraw.vs").c_str(), FileSystem::getPath("shaders/deferred/refractdraw.fs").c_str());
+	Shader postprocessShader(FileSystem::getPath("shaders/deferred/postprocess.vs").c_str(), FileSystem::getPath("shaders/deferred/postprocess.fs").c_str());
 	DeferredShading::lightingShader = &lightingShader;
 	DeferredShading::ssreflectionShader = &ssreflectionShader;
 	DeferredShading::reflectDrawShader = &reflectDrawShader;
@@ -199,11 +201,14 @@ int main()
 	DeferredShading::combineColorShader = &combineColorShader;
 	DeferredShading::csmShader = &csmShader;
 	DeferredShading::taaShader = &taaShader;
+
 	DeferredShading::causticShader = &causticShader;
 	DeferredShading::bufferDebugShader = &bufferviewShader;
 	DeferredShading::refractionPositionShader = &refractionPositionShader;
 	DeferredShading::ssrefractionShader = &ssrefractionShader;
 	DeferredShading::refractDrawShader = &refractDrawShader;
+
+	DeferredShading::postprocessShader = &postprocessShader;
 #else
 	Shader terrainShader(FileSystem::getPath("shaders/forward/terrain.vs").c_str(), FileSystem::getPath("shaders/forward/terrain.fs").c_str());
 	Shader waterShader(FileSystem::getPath("shaders/forward/water.vs").c_str(), FileSystem::getPath("shaders/forward/water.fs").c_str());
@@ -233,9 +238,8 @@ int main()
 		glm::vec3(0.3f, 0.3f, 0.3f),
 		glm::vec3(0.35f, 0.35f, 0.35f),
 		glm::vec3(0.4f, 0.4f, 0.4f)};
-	
 
-		Light main_light(parallel, lightShader);
+	Light main_light(parallel, lightShader);
 
 	GameController::mainLight = &main_light; // 这个设计实在不行
 
@@ -254,19 +258,18 @@ int main()
 
 	PickingTexture mouse_picking;
 #ifndef DEFERRED_SHADING
-		Water_Frame_Buffer waterfb;
-		Shadow_Frame_Buffer shadowfb;
-		Render main_renderer(main_scene, *GameController::mainLight, waterfb, mouse_picking, shadowfb);
+	Water_Frame_Buffer waterfb;
+	Shadow_Frame_Buffer shadowfb;
+	Render main_renderer(main_scene, *GameController::mainLight, waterfb, mouse_picking, shadowfb);
 #endif
 #ifdef DEFERRED_SHADING
-		Render main_renderer(main_scene, *GameController::mainLight, mouse_picking);
+	Render main_renderer(main_scene, *GameController::mainLight, mouse_picking);
 #endif
 
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
 	{
-
 
 		// per-frame time logic
 		// --------------------
@@ -281,7 +284,6 @@ int main()
 #endif // !DEFERRED_SHADING
 
 		main_renderer.DrawAll(pickingShader, modelShader, shadowShader);
-
 		/*
 		Render the else you need to render here!! Remember to set the clipping plane!!!
 		*/
@@ -311,7 +313,7 @@ int main()
 	Model::modelList.clear();
 
 #ifndef DEFERRED_SHADING
-		waterfb.cleanUp();
+	waterfb.cleanUp();
 #endif
 	// glfw: terminate, clearing all previously allocated GLFW resources.
 	// ------------------------------------------------------------------

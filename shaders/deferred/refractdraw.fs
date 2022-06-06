@@ -17,6 +17,7 @@ void main()
         return;
     }
 
+
     int scan_size = 2;
     float separation = 1.0;
     vec4 uv = texture(rTexcoord, aTexCoords);
@@ -40,6 +41,7 @@ void main()
         FragColor=vec4(0.0);
         return;
     }
+    
     //Use reflected color
     FragColor = texture(rColor, uv.xy);
     

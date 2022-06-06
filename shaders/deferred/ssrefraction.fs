@@ -2,6 +2,7 @@
 
 in vec2 aTexCoords;
 
+uniform int enable;
 //Position in world space
 uniform sampler2D gPosition; 
 //Normal in world space
@@ -23,6 +24,12 @@ out vec3 refracted_uv;
 
 void main()
 {
+    if(enable==0)
+    {
+        refracted_uv = vec3(aTexCoords.xy,1.0);
+        return;
+    }
+    
     //parameters
     float maxDistance = 10;
     float resolution = 0.5;

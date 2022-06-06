@@ -7,8 +7,10 @@
 
 #include "Camera.h"
 
-namespace KooNan {
-	class DeferredShading {
+namespace KooNan
+{
+    class DeferredShading
+    {
     public:
         DeferredShading() = delete;
         static Shader* lightingShader;
@@ -26,21 +28,21 @@ namespace KooNan {
         static Shader* causticShader;
         static Shader* bufferDebugShader;
         static Shader* refractionPositionShader;
+        static Shader *postprocessShader;
         static void DrawQuad()
-		{
-			static GLuint quadVAO = 0;
+        {
+            static GLuint quadVAO = 0;
             static GLuint quadVBO;
-            const Camera& cam = GameController::mainCamera;
-            
+            const Camera &cam = GameController::mainCamera;
+
             if (quadVAO == 0)
             {
                 GLfloat quadVertices[] = {
-                    // Positions       
+                    // Positions
                     -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
                     -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
                     1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-                    1.0f, -1.0f, 0.0f, 1.0f, 0.0f
-                };
+                    1.0f, -1.0f, 0.0f, 1.0f, 0.0f};
                 // Setup plane VAO
                 glGenVertexArrays(1, &quadVAO);
                 glGenBuffers(1, &quadVBO);
@@ -48,22 +50,28 @@ namespace KooNan {
                 glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
                 glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
                 glEnableVertexAttribArray(0);
-                glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+                glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid *)0);
                 glEnableVertexAttribArray(1);
-                glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+                glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
             }
             glBindVertexArray(quadVAO);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             glBindVertexArray(0);
-		}
-        static void setLightingPassShader(const glm::mat4* lightMVP,const glm::mat4* causticVP,const float* endViewSpace)
+        }
+
+        static void setLightingPassShader(const glm::mat4 *lightMVP, const glm::mat4 *causticVP, const float *endViewSpace)
         {
             lightingShader->use();
-            lightingShader->setInt("softShadowType",softShadowType);
-            if(csmOn)
-                lightingShader->setInt("csmShow",1);
+            if (toneMapping)
+                lightingShader->setInt("toneMapping", 1);
             else
-                lightingShader->setInt("csmShow",0);
+                lightingShader->setInt("toneMapping", 0);
+            lightingShader->setFloat("exposure", exposure);
+            lightingShader->setInt("softShadowType", softShadowType);
+            if (csmOn)
+                lightingShader->setInt("csmShow", 1);
+            else
+                lightingShader->setInt("csmShow", 0);
             lightingShader->setInt("gPosition", 0);
             lightingShader->setInt("gNormal", 1);
             lightingShader->setInt("gAlbedoSpec", 2);
@@ -98,9 +106,8 @@ namespace KooNan {
                 glm::vec2(-0.24188840, 0.99706507),
                 glm::vec2(-0.81409955, 0.91437590),
                 glm::vec2(0.19984126, 0.78641367),
-                glm::vec2(0.14383161, -0.14100790)
-            };
-            static GLuint rotationNoise=0;
+                glm::vec2(0.14383161, -0.14100790)};
+            static GLuint rotationNoise = 0;
             if (!rotationNoise)
             {
                 PCSSNoiseTextureInit(rotationNoise);
@@ -112,21 +119,20 @@ namespace KooNan {
             glActiveTexture(GL_TEXTURE9);
             glBindTexture(GL_TEXTURE_2D, rotationNoise);
             lightingShader->setInt("rotationNoise", 9);
-
-
-
         }
-        static void setSSReflectionShader(const glm::mat4& projection)
+        static void setSSReflectionShader(const glm::mat4 &projection)
         {
             ssreflectionShader->use();
-            Camera& cam = GameController::mainCamera;
-            if(ssrOn){
+            Camera &cam = GameController::mainCamera;
+            if (ssrOn)
+            {
                 ssreflectionShader->setInt("enable", 1);
             }
-            else{
+            else
+            {
                 ssreflectionShader->setInt("enable", 0);
-                }
-            ssreflectionShader->setFloat("thickness",ssrThickness);
+            }
+            ssreflectionShader->setFloat("thickness", ssrThickness);
             ssreflectionShader->setMat4("projection", projection);
             ssreflectionShader->setMat4("view", cam.GetViewMatrix());
             ssreflectionShader->setInt("gPosition", 0);
@@ -137,14 +143,16 @@ namespace KooNan {
 
         static void setReflectDrawShader()
         {
-            
+
             reflectDrawShader->use();
-            if(ReflectOn){
+            if (ReflectOn)
+            {
                 reflectDrawShader->setInt("enable", 1);
             }
-            else{
+            else
+            {
                 reflectDrawShader->setInt("enable", 0);
-                }
+            }
             reflectDrawShader->setInt("gPosition", 0);
             reflectDrawShader->setInt("gNormal", 1);
             reflectDrawShader->setInt("gMask", 3);
@@ -154,10 +162,18 @@ namespace KooNan {
             reflectDrawShader->setMat4("inv_view", glm::inverse(GameController::mainCamera.GetViewMatrix()));
         }
 
-        static void setSSRefractionShader(const glm::mat4& projection)
+        static void setSSRefractionShader(const glm::mat4 &projection)
         {
             ssrefractionShader->use();
-            Camera& cam = GameController::mainCamera;
+            if (ssRefractOn)
+            {
+                ssrefractionShader->setInt("enable", 1);
+            }
+            else
+            {
+                ssrefractionShader->setInt("enable", 0);
+            }
+            Camera &cam = GameController::mainCamera;
             ssrefractionShader->setMat4("projection", projection);
             ssrefractionShader->setMat4("view", cam.GetViewMatrix());
             ssrefractionShader->setInt("gPosition", 0);
@@ -174,29 +190,31 @@ namespace KooNan {
             refractDrawShader->setInt("rTexcoord", 5);
         }
 
-        static void setSSAOShader(const glm::mat4& projection)
+        static void setSSAOShader(const glm::mat4 &projection)
         {
             static std::vector<glm::vec3> ssaoKernel;
             if (ssaoKernel.empty())
             {
-                //Kernel data initialization
+                // Kernel data initialization
                 SSAOKernalInit(ssaoKernel);
             }
             static GLuint noiseTexture = 0;
             if (!noiseTexture)
             {
-                //Generate noise map
+                // Generate noise map
                 SSAONoiseTextureInit(noiseTexture);
             }
             glActiveTexture(GL_TEXTURE4);
             glBindTexture(GL_TEXTURE_2D, noiseTexture);
 
             ssaoShader->use();
-            Camera& cam = GameController::mainCamera;
-            if(ssaoOn){
-            ssaoShader->setInt("enable", 1);
+            Camera &cam = GameController::mainCamera;
+            if (ssaoOn)
+            {
+                ssaoShader->setInt("enable", 1);
             }
-            else{
+            else
+            {
                 ssaoShader->setInt("enable", 0);
             }
             ssaoShader->setInt("gPosition", 0);
@@ -270,7 +288,7 @@ namespace KooNan {
             combineColorShader->setInt("gNormal", 1);
             combineColorShader->setInt("gMask", 3);
         }
-        static void setCSMShader(const glm::mat4& view, const glm::mat4& projection)
+        static void setCSMShader(const glm::mat4 &view, const glm::mat4 &projection)
         {
             csmShader->use();
             csmShader->setMat4("view", view);
@@ -280,26 +298,30 @@ namespace KooNan {
         static void setTAAShader()
         {
             taaShader->use();
-            if(taaOn==1)
-                taaShader->setInt("taaOn",1);
+            if (taaOn == 1)
+                taaShader->setInt("taaOn", 1);
             else
-                taaShader->setInt("taaOn",0);
+                taaShader->setInt("taaOn", 0);
             taaShader->setInt("gPosition", 0);
             taaShader->setInt("currFrame", 1);
             taaShader->setInt("lastFrame", 2);
             taaShader->setInt("gDepth", 3);
             taaShader->setInt("gVelocity", 4);
-            
         }
-        static void setRefractionPositionShader(const glm::mat4& view, const glm::mat4& projection)
+        static void setRefractionPositionShader(const glm::mat4 &view, const glm::mat4 &projection)
         {
             refractionPositionShader->use();
             refractionPositionShader->setMat4("view", view);
             refractionPositionShader->setMat4("model", glm::mat4(1.0f));
             refractionPositionShader->setMat4("projection", projection);
         }
+        static void setPostprocessShader()
+        {
+            postprocessShader->use();
+        }
+
     private:
-        static void SSAOKernalInit(std::vector<glm::vec3>& ssaoKernel)
+        static void SSAOKernalInit(std::vector<glm::vec3> &ssaoKernel)
         {
             std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0);
             std::default_random_engine generator;
@@ -308,8 +330,7 @@ namespace KooNan {
                 glm::vec3 sample(
                     randomFloats(generator) * 2.0 - 1.0,
                     randomFloats(generator) * 2.0 - 1.0,
-                    randomFloats(generator)
-                );
+                    randomFloats(generator));
                 sample = glm::normalize(sample);
                 sample *= randomFloats(generator);
                 GLfloat scale = GLfloat(i) / 64.0;
@@ -318,7 +339,7 @@ namespace KooNan {
                 ssaoKernel.push_back(sample);
             }
         }
-        static void SSAONoiseTextureInit(GLuint& noiseTexture)
+        static void SSAONoiseTextureInit(GLuint &noiseTexture)
         {
             std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0);
             std::default_random_engine generator;
@@ -340,7 +361,7 @@ namespace KooNan {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         }
-        static void PCSSNoiseTextureInit(GLuint& noiseTexture)
+        static void PCSSNoiseTextureInit(GLuint &noiseTexture)
         {
             std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0);
             std::default_random_engine generator;
@@ -351,8 +372,7 @@ namespace KooNan {
                 float angle = randomFloats(generator) * glm::pi<float>() * 2.0f;
                 glm::vec2 noise(
                     glm::cos(angle),
-                    glm::sin(angle)
-                );
+                    glm::sin(angle));
                 pcssNoise.push_back(noise);
             }
             glGenTextures(1, &noiseTexture);
@@ -363,8 +383,8 @@ namespace KooNan {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         }
-	};
-    
+    };
+
 }
 
 #endif // !DEFERREDSHADING
