@@ -328,22 +328,24 @@ namespace KooNan
 
 			gbuf.bindTexture();
 			taabuf.bindTexture();
-			postprocessor.bindToWrite();
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			// postprocessor.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			DeferredShading::setTAAShader();
 			DeferredShading::DrawQuad();
 
 
-			lastViewProjection = projection * GameController::mainCamera.GetViewMatrix();
 
 
 			// postprocess effect
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			postprocessor.bindTexture();
-			DeferredShading::setPostprocessShader();
-			DeferredShading::DrawQuad();
+			// glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			// postprocessor.bindTexture();
+			// DeferredShading::setPostprocessShader();
+			// DeferredShading::DrawQuad();
+
 			taabuf.copyToLast();
+			lastViewProjection = projection * GameController::mainCamera.GetViewMatrix();
 #else
 			InitLighting(main_scene.WaterShader);
 			InitLighting(main_scene.TerrainShader);
