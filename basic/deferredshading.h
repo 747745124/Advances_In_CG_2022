@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
+#include <algorithm>
 #include "Camera.h"
 
 namespace KooNan
@@ -319,13 +319,25 @@ namespace KooNan
         }
         static void setPostprocessShader()
         {
+            double x, y = 0.0;
+            glfwGetCursorPos(Common::gWindow, &x, &y);
+            std::clamp(x, 0.0, 1.0);
+            std::clamp(y, 0.0, 1.0);
+
+
             postprocessShader->use();
+            postprocessShader->setArrayF("weights", 441, Common::gauss_flat);
             postprocessShader->setInt("effectType", effectType);
             postprocessShader->setFloat("exposure", exposure);
             if (toneMapping)
                 postprocessShader->setInt("toneMapping", 1);
             else
                 postprocessShader->setInt("toneMapping", 0);
+            #ifdef __APPLE__
+            postprocessShader->setVec2("mouseFocus", 2*x/Common::SCR_WIDTH,1-2*y/Common::SCR_HEIGHT);
+            #else
+            postprocessShader->setVec2("mouseFocus", x/Common::SCR_WIDTH, 1-y/Common::SCR_HEIGHT);
+            #endif
         }
 
     private:

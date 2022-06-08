@@ -170,6 +170,8 @@ namespace KooNan
 				ImGui::RadioButton("None", &effectType, -1);
 				ImGui::SameLine();
 				ImGui::RadioButton("Sobel", &effectType, 0);
+				ImGui::SameLine();
+				ImGui::RadioButton("Mean Filter", &effectType, 1);
 
 				if (showFPS)
 				{
@@ -252,6 +254,8 @@ namespace KooNan
 				ImGui::RadioButton("None", &effectType, -1);
 				ImGui::SameLine();
 				ImGui::RadioButton("Sobel", &effectType, 0);
+				ImGui::SameLine();
+				ImGui::RadioButton("Mean Filter", &effectType, 1);
 
 				if (showFPS)
 				{

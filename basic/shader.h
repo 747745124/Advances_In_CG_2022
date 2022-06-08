@@ -218,6 +218,15 @@ public:
             throw std::runtime_error("Mat4 set failed! Variable name:"+name);
         }
     }
+    // ------------------------------------------------------------------------
+    void setArrayF(const std::string& name, int size ,float arr[]) const
+    {
+        glUniform1fv(glGetUniformLocation(ID, name.c_str()), size, arr);
+        if(glGetError()==GL_INVALID_OPERATION)
+        {
+            throw std::runtime_error("Bool set failed! Variable name:"+name);
+        }
+    }
 
 private:
     // utility function for checking shader compilation/linking errors.

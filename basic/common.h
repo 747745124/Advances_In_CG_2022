@@ -31,7 +31,10 @@ namespace KooNan
 		static float perspective_clipping_far;
 		static const std::string saveFileName;
 		static glm::mat4 GetPerspectiveMat(Camera &cam);
+		static void FilterCreation(double gauss[][21]);
 
+		static double gauss[21][21];
+		static float gauss_flat[441];
 	};
 }
 

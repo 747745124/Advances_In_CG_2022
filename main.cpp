@@ -25,6 +25,8 @@
 using namespace KooNan;
 using namespace glm;
 
+
+
 // Define four point lights position
 glm::vec3 pointLightPositions[] = {
 	glm::vec3(2.0f, 3.0f, 2.0f),
@@ -118,6 +120,10 @@ const glm::vec2 Render::haltonSequence[NUM_TAA_SAMPLES] = {
 unsigned Render::haltonIndex = 0;
 glm::mat4 Render::lastViewProjection;
 GLFWwindow *Common::gWindow = nullptr;
+
+double Common::gauss[21][21] = {0.0f};
+float Common::gauss_flat[441] = {0.0f};
+
 int main()
 {
 	// glfw: initialize and configure
@@ -223,6 +229,16 @@ int main()
 	Scene main_scene(256.0f, 1, 1, -0.7f, terrainShader, waterShader, skyShader, groundPaths, skyboxPaths);
 	GameController::mainScene = &main_scene; // 这个设计实在是不行
 
+	
+	Common::FilterCreation(Common::gauss);
+
+	for(int i = 0; i < 21; i++)
+    {
+        for(int j = 0; j < 21; j++)
+        {
+			Common::gauss_flat[i*21+j] = Common::gauss[i][j];
+        }
+    }   
 	// tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
 	// -------------------------------------------------------------------------------------------
 	// Model

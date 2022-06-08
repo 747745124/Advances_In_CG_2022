@@ -326,7 +326,6 @@ namespace KooNan
 
 			gbuf.bindTexture();
 			taabuf.bindTexture();
-			// glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 			postprocessor.bindToWrite();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			DeferredShading::setTAAShader();
