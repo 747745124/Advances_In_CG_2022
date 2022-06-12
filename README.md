@@ -31,6 +31,7 @@
 * Real Time Local Reflections (Stochastic Screen-Space Reflections)
 * Cascaded Shadows Maps && Softshadow approximation
 * SSAO && SSDO
+* Post Processings (Tone Mapping & DoF)
 
 # References
 * https://learnopengl.com/Advanced-Lighting/Deferred-Shading

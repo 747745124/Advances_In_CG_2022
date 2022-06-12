@@ -66,3 +66,8 @@
 ## 22-06-03 commit d58f9b6
 1. 增加了实时水面caustics
 2. 目前的问题是在水面三角形顶点上做ray marching带来的帧数下降
+
+## 22-06-09 commit c92228f
+1. 新增DoF (Gaussian & Mean)与Sobel实现
+2. bug fixes
+
