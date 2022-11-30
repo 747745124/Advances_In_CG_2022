@@ -26,7 +26,7 @@
 * GameController.h
 * GameObject.h
 
-## Features to be implemented:
+## Features implemented:
 * Deferred shading
 * Real Time Local Reflections (Stochastic Screen-Space Reflections)
 * Cascaded Shadows Maps && Softshadow approximation
