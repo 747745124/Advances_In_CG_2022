@@ -40,31 +40,56 @@ cmake ..
 ```
 
 
+
 ## Style Guidance:
+
 * Function Name: Either Lower Camel Case or using '_'
 * Class Name: Upper Camel Case
-* Avoid `using namespace std` in global scope;(Instead use "using std::vector;" in your own function!)
-* Using standard libraries(e.g. smart pointers) properly for safety.(RAII design is better)
+* Avoid `using namespace std` in global scope;(Instead use "``using std::vector;``" in your own function!)
+* Using standard libraries(e.g. smart pointers) properly for safety. (RAII design is better)
 * Avoid nested `if-else`, using if return instead.(nested if-elses code may be substitude by switch-cases code, which runs much faster)
 * Using `nullptr` instead of `NULL`
 * Using `""` to include self-defined headers and libraries in directory `/lib` , `< >` for system libraries.
 * Using `const` as often as possible
+* Using range based query for simplicity
+
+
 
 ## Codes need to be refactored:
+
 * Render.h
 * Entity.h
 * GameController.h
 * GameObject.h
 
+
+
 ## Features implemented:
+
 * Deferred shading
+
 * Real Time Local Reflections (Stochastic Screen-Space Reflections)
+
+<img src="https://live.staticflickr.com/65535/52580727761_cf6a8a5dae_o.png" alt="image-20221223005629295" style="zoom:33%;" />
+
 * Cascaded Shadows Maps && Softshadow approximation
+
+  <img src="https://live.staticflickr.com/65535/52580992994_6c741eb5fc_o.png" alt="image-20221223005759633" style="zoom:33%;" />
+
+<img src="https://live.staticflickr.com/65535/52581165880_7466485133_o.png" alt="image-20221223005737958" style="zoom:33%;" />
+
 * SSAO && SSDO
+
+  <img src="https://live.staticflickr.com/65535/52580727506_294c877e88_o.png" alt="image-20221223005916428" style="zoom:33%;" />
+
 * Caustics
+
 * Post Processings (Tone Mapping & DoF)
 
+<img src="https://live.staticflickr.com/65535/52581249633_a078439352_o.png" alt="image-20221223010149966" style="zoom:33%;" />
+
 # References
+
 * https://learnopengl.com/Advanced-Lighting/Deferred-Shading
 * https://ogldev.org/www/tutorial35/tutorial35.html
 * https://github.com/lettier/3d-game-shaders-for-beginners
