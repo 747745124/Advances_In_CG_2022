@@ -1,12 +1,5 @@
-/lib
-/include/assimp
-/include/glad
-/include/GLFW
-/include/imgui
-/include/KHR
 /build
 /bin
-glad.c
 /.idea
 /CMakeFiles
 .DS_Store
