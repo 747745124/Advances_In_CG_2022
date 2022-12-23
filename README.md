@@ -1,14 +1,44 @@
 # Advanced Topics in Computer Graphics
 ## Build Instructions:
-* Download and build glfw and glad suitable to your own platform 
-* Download and build assimp on your own platform
-* Download imgui src
-* Edit cmakelist for your own platform if needed
-1. Add /GLFW /glad /KHR /glm /imgui /assimp to /include directory
-2. Add runtime and compile-time libs(For glfw and assimp) to /lib directory
-3. `mkdir build&&cd build`
-4. `cmake ..`
-5. Use your own ide to build project
+
+#### For Mac Users (Recommend to build with VSCode)
+
+1. Download CMake 
+
+> https://cmake.org/download/
+
+2. Execute below shell script in terminal
+
+```shell
+mkdir build
+cd build
+cmake ..
+```
+
+
+
+#### For Windows Users
+
+> Header files and dependencies are compatible with Mac OS, however, these have not been tested with Windows platform. A prebuilt dependency for Windows is provided compatible with VS 2022. If any build error occurs, make sure you download the correct version of pre-compiled library for GLFW and assimp. Modify CMakeLists.txt when necessary.
+
+1. Download CMake
+2. Download GLFW pre-compiled library for Windows
+   1. Extract the `glfw3.lib` file to the `/lib` folder
+   2. Replace the files in `/include/GLFW` with corresponding extracted files
+
+>  https://www.glfw.org/download
+
+3. Download assimp library 
+   1. Extract the pre-compiled `.lib` file to the `/lib` folder
+   2. Replace the files in `/include/assimp` with corresponding extracted files
+4. Execute below shell script in terminal
+
+```shell
+mkdir build
+cd build
+cmake ..
+```
+
 
 ## Style Guidance:
 * Function Name: Either Lower Camel Case or using '_'
