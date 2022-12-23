@@ -88,6 +88,8 @@ cmake ..
 
 <img src="https://live.staticflickr.com/65535/52581249633_a078439352_o.png" alt="image-20221223010149966" style="zoom:33%;" />
 
+* Temportal Anti-aliasing
+
 # References
 
 * https://learnopengl.com/Advanced-Lighting/Deferred-Shading
