@@ -8,7 +8,7 @@
 
 #include <GameController.h>
 
-namespace KooNan
+namespace GUI_Param
 {
 	int menuFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBackground;
 	int selectPageFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
@@ -28,9 +28,6 @@ namespace KooNan
 	class GUI
 	{
 	public:
-		// init: ��ʼ��GUI����
-		//   ��GLFW��ʼ���ʹ��ڴ��������??
-		//   �ڻ���GUIǰ����
 		static void initEnv(GLFWwindow *window)
 		{
 			// Setup Dear ImGui context
@@ -83,8 +80,6 @@ namespace KooNan
 			delete[] textures, framebuffers;
 		}
 
-		// newFrame: ����ǰ��׼��
-		//   ÿ�λ���ѭ������Ҫ����
 		static void newFrame()
 		{
 			// feed inputs to dear imgui, start new frame
@@ -93,8 +88,6 @@ namespace KooNan
 			ImGui::NewFrame();
 		}
 
-		// setWidgets: �������пؼ�
-		//   ��initEnv�����??
 		static void drawWidgets(GLFWwindow *window)
 		{
 			static ImVec2 menuButtonSize(buttonWidth1, buttonHeight1);
@@ -413,7 +406,6 @@ namespace KooNan
 				{
 					ImGui::Begin("Edit Menu", 0, menuFlags & ~ImGuiWindowFlags_NoBackground);
 					// ImGui::SetWindowPos(ImVec2(Common::SCR_WIDTH - shotcutButtonSize.x - 10, 0));
-					//  �Ѳ˵��ƶ���ѡ�н�����Χ
 
 					ImGui::SetWindowPos(ImVec2(GameController::lastCursorX, GameController::lastCursorY));
 					if (ImGui::Button("Transform", shotcutButtonSize))

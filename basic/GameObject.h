@@ -6,74 +6,69 @@
 
 #include <list>
 
-namespace KooNan
+class GameObject
 {
-	class GameObject
+	// È«ï¿½Ö±ï¿½ï¿½ï¿½
+public:
+	static std::list<GameObject *> gameObjList; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ï¿½ï¿½ï¿½
+
+	glm::vec3 pos; // Î»ï¿½ï¿½
+	float rotY;	   // ï¿½ï¿½ï¿½ï¿½
+	glm::vec3 sca; // ï¿½ï¿½ï¿½ï¿½
+	glm::mat4 modelMat;
+	bool IsPickable; // ï¿½Ç·ï¿½É±ï¿½Ê°È¡
+	string modelPath;
+
+private:
+	Model *model;
+
+public:
+	GameObject(const std::string &modelPath, const glm::mat4 &modelMat = glm::mat4(1.0f), bool IsPickable = false, const glm::vec3 position = glm::vec3(0.0f), const float rotateY = 0.0f, const glm::vec3 scale = glm::vec3(0.2f))
+		: pos(position), rotY(rotateY), sca(scale)
 	{
-		// È«¾Ö±äÁ¿
-	public:
-		static std::list<GameObject *> gameObjList; // ´¢´æËùÓÐÓÎÏ·ÎïÌå
-
-		glm::vec3 pos; // Î»ÒÆ
-		float rotY;	   // ×ÔÐý
-		glm::vec3 sca; // Ëõ·Å
-		glm::mat4 modelMat;
-		bool IsPickable; //ÊÇ·ñ¿É±»Ê°È¡
-		string modelPath;
-
-	private:
-		Model *model;
-
-	public:
-		GameObject(const std::string &modelPath, const glm::mat4 &modelMat = glm::mat4(1.0f), bool IsPickable = false, const glm::vec3 position = glm::vec3(0.0f), const float rotateY = 0.0f, const glm::vec3 scale = glm::vec3(0.2f))
-			: pos(position), rotY(rotateY), sca(scale)
+		this->modelMat = modelMat;
+		this->IsPickable = IsPickable;
+		this->modelPath = modelPath;
+		if (Model::modelList.find(modelPath) == Model::modelList.end())
 		{
-			this->modelMat = modelMat;
-			this->IsPickable = IsPickable;
-			this->modelPath = modelPath;
-			if (Model::modelList.find(modelPath) == Model::modelList.end())
-			{
-				// ¸ÃÄ£ÐÍÎ´¼ÓÔØµ½List
-				Model *model = new Model(modelPath);
-				this->model = model;
-			}
-			else
-				// Ä£ÐÍÒÑ¼ÓÔØ
-				this->model = Model::modelList[modelPath];
-			gameObjList.push_back(this);
+			// ï¿½ï¿½Ä£ï¿½ï¿½Î´ï¿½ï¿½ï¿½Øµï¿½List
+			Model *model = new Model(modelPath);
+			this->model = model;
 		}
+		else
+			// Ä£ï¿½ï¿½ï¿½Ñ¼ï¿½ï¿½ï¿½
+			this->model = Model::modelList[modelPath];
+		gameObjList.push_back(this);
+	}
 
-		~GameObject()
-		{
-		}
+	~GameObject()
+	{
+	}
 
-		void Update();
+	void Update();
 
-		void Draw(Shader &shader,
-				  const glm::vec3 viewPos,
-				  const glm::mat4 &projectionMat,
-				  const glm::mat4 &viewMat = glm::mat4(1.0f),
-				  bool isHit = false);
+	void Draw(Shader &shader,
+			  const glm::vec3 viewPos,
+			  const glm::mat4 &projectionMat,
+			  const glm::mat4 &viewMat = glm::mat4(1.0f),
+			  bool isHit = false);
 
-		void DrawShadowPass(Shader& shadowPassShader);
+	void DrawShadowPass(Shader &shadowPassShader);
 
-		static void Draw(Mesh &mesh, Shader &shader,
-						 const glm::vec3 viewPos,
-						 const glm::mat4 &projectionMat,
-						 const glm::mat4 &viewMat = glm::mat4(1.0f),
-						 const glm::mat4 &modelMat = glm::mat4(1.0f),
-						 const glm::vec4 &clippling_plane = glm::vec4(0.0f, -1.0f, 0.0f, 999999.0f),
-						 bool isHit = false);
+	static void Draw(Mesh &mesh, Shader &shader,
+					 const glm::vec3 viewPos,
+					 const glm::mat4 &projectionMat,
+					 const glm::mat4 &viewMat = glm::mat4(1.0f),
+					 const glm::mat4 &modelMat = glm::mat4(1.0f),
+					 const glm::vec4 &clippling_plane = glm::vec4(0.0f, -1.0f, 0.0f, 999999.0f),
+					 bool isHit = false);
 
-		void Pick(Shader &shader, unsigned int objIndex, unsigned int drawIndex,
-				  const glm::mat4 &projectionMat,
-				  const glm::mat4 &viewMat = glm::mat4(1.0f));
+	void Pick(Shader &shader, unsigned int objIndex, unsigned int drawIndex,
+			  const glm::mat4 &projectionMat,
+			  const glm::mat4 &viewMat = glm::mat4(1.0f));
 
-		static void Pick(Mesh &mesh, Shader &shader, unsigned int objIndex, unsigned int drawIndex,
-						 const glm::mat4 &projectionMat,
-						 const glm::mat4 &viewMat = glm::mat4(1.0f),
-						 const glm::mat4 &modelMat = glm::mat4(1.0f));
-	};
-
-	
-}
+	static void Pick(Mesh &mesh, Shader &shader, unsigned int objIndex, unsigned int drawIndex,
+					 const glm::mat4 &projectionMat,
+					 const glm::mat4 &viewMat = glm::mat4(1.0f),
+					 const glm::mat4 &modelMat = glm::mat4(1.0f));
+};

@@ -6,20 +6,17 @@
 #include "common.h"
 #include <string>
 
-namespace KooNan
+class VideoRecord
 {
-    class VideoRecord
-    {
-	public:
-        static FILE* ffmpeg;
-        static int* recbuffer;
-		
-        static void RecordInit(unsigned int framerate,unsigned int width,unsigned int height,std::string output_name = "output.mp4");
-        
-        static void GrabFrame();
+public:
+    static FILE *ffmpeg;
+    static int *recbuffer;
 
-        static void EndRecord();
-    };
-	
-}
+    static void RecordInit(unsigned int framerate, unsigned int width, unsigned int height, std::string output_name = "output.mp4");
+
+    static void GrabFrame();
+
+    static void EndRecord();
+};
+
 #endif

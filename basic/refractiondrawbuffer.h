@@ -4,62 +4,63 @@
 #include <glad/glad.h>
 #include "common.h"
 
-namespace KooNan {
-	class RefractionDrawBuffer {
-	public:
-		RefractionDrawBuffer() { refdrawbuffer_init(); }
-		~RefractionDrawBuffer() { cleanUp(); }
-		void bindToWrite();
-		void bindToRead();
-		void bindTexture();
-	private:
-		void refdrawbuffer_init();
-		void cleanUp();
-		GLuint refdrawbuffer;
-		GLuint draw_text;
-	};
+class RefractionDrawBuffer
+{
+public:
+	RefractionDrawBuffer() { refdrawbuffer_init(); }
+	~RefractionDrawBuffer() { cleanUp(); }
+	void bindToWrite();
+	void bindToRead();
+	void bindTexture();
 
-	void RefractionDrawBuffer::refdrawbuffer_init()
-	{
-		unsigned SCR_WIDTH = Common::SCR_WIDTH;
-		unsigned SCR_HEIGHT = Common::SCR_HEIGHT;
+private:
+	void refdrawbuffer_init();
+	void cleanUp();
+	GLuint refdrawbuffer;
+	GLuint draw_text;
+};
 
-		glGenFramebuffers(1, &refdrawbuffer);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, refdrawbuffer);
+void RefractionDrawBuffer::refdrawbuffer_init()
+{
+	unsigned SCR_WIDTH = Common::SCR_WIDTH;
+	unsigned SCR_HEIGHT = Common::SCR_HEIGHT;
 
-		glGenTextures(1, &draw_text);
-		glBindTexture(GL_TEXTURE_2D, draw_text);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, draw_text, 0);
+	glGenFramebuffers(1, &refdrawbuffer);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, refdrawbuffer);
 
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-			std::cout << "Framebuffer not complete!" << std::endl;
+	glGenTextures(1, &draw_text);
+	glBindTexture(GL_TEXTURE_2D, draw_text);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, draw_text, 0);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	}
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "Framebuffer not complete!" << std::endl;
 
-	void RefractionDrawBuffer::cleanUp()
-	{
-		glDeleteFramebuffers(1, &refdrawbuffer);
-		glDeleteTextures(1, &draw_text);
-	}
-
-	void RefractionDrawBuffer::bindToWrite()
-	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, refdrawbuffer);
-	}
-
-	void RefractionDrawBuffer::bindToRead()
-	{
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, refdrawbuffer);
-	}
-
-	void RefractionDrawBuffer::bindTexture()
-	{
-		glActiveTexture(GL_TEXTURE6);
-		glBindTexture(GL_TEXTURE_2D, draw_text);
-	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
+
+void RefractionDrawBuffer::cleanUp()
+{
+	glDeleteFramebuffers(1, &refdrawbuffer);
+	glDeleteTextures(1, &draw_text);
+}
+
+void RefractionDrawBuffer::bindToWrite()
+{
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, refdrawbuffer);
+}
+
+void RefractionDrawBuffer::bindToRead()
+{
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, refdrawbuffer);
+}
+
+void RefractionDrawBuffer::bindTexture()
+{
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, draw_text);
+}
+
 #endif

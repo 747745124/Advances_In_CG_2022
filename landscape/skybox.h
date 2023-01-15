@@ -18,23 +18,21 @@
 
 #include "Shader.h"
 
-namespace KooNan
+class Skybox
 {
-	class Skybox
-	{
-	public:
-		Skybox(std::vector<std::string> paths);
+public:
+	Skybox(std::vector<std::string> paths);
 
-		void Draw(Shader &shader, glm::mat4 model, glm::mat4 view, glm::mat4 projection);
+	void Draw(Shader &shader, glm::mat4 model, glm::mat4 view, glm::mat4 projection);
 
-		unsigned int getCubeMap() { return texture; }
+	unsigned int getCubeMap() { return texture; }
 
-		void bindSkyboxTexture(int i);
-	private:
-		unsigned int VAO, VBO, texture;
+	void bindSkyboxTexture(int i);
 
-		unsigned int GenCubeMap(std::vector<std::string> facePaths);
-	};
+private:
+	unsigned int VAO, VBO, texture;
 
-}
+	unsigned int GenCubeMap(std::vector<std::string> facePaths);
+};
+
 #endif // !SKYBOX_H

@@ -22,10 +22,8 @@
 #include "Texture.h"
 #include "Render.h"
 
-using namespace KooNan;
+using namespace GUI_Param;
 using namespace glm;
-
-
 
 // Define four point lights position
 glm::vec3 pointLightPositions[] = {
@@ -76,7 +74,7 @@ Shader *DeferredShading::lightingShader = nullptr;
 Shader *DeferredShading::ssreflectionShader = nullptr;
 Shader *DeferredShading::reflectDrawShader = nullptr;
 Shader *DeferredShading::ssaoShader = nullptr;
-Shader* DeferredShading::ssdoShader = nullptr;
+Shader *DeferredShading::ssdoShader = nullptr;
 Shader *DeferredShading::simpleBlurShader = nullptr;
 Shader *DeferredShading::kuwaharaBlurShader = nullptr;
 Shader *DeferredShading::combineColorShader = nullptr;
@@ -88,6 +86,7 @@ Shader *DeferredShading::refractionPositionShader = nullptr;
 Shader *DeferredShading::ssrefractionShader = nullptr;
 Shader *DeferredShading::refractDrawShader = nullptr;
 Shader *DeferredShading::postprocessShader = nullptr;
+
 const float Render::cascade_Z[NUM_CASCADES + 1] = {0.1f, 30.0f, 100.0f, 1000.0f};
 unsigned Render::cascadeUpdateCounter[NUM_CASCADES] = {1, 1, 1};
 
@@ -144,9 +143,9 @@ int main()
 	// glfw window creation
 	// --------------------
 #ifdef __APPLE__
-	GLFWwindow *window = glfwCreateWindow(Common::SCR_WIDTH / 2, Common::SCR_HEIGHT / 2, "Koonan", NULL, NULL);
+	GLFWwindow *window = glfwCreateWindow(Common::SCR_WIDTH / 2, Common::SCR_HEIGHT / 2, "Sample", NULL, NULL);
 #else
-	GLFWwindow *window = glfwCreateWindow(Common::SCR_WIDTH, Common::SCR_HEIGHT, "Koonan", NULL, NULL);
+	GLFWwindow *window = glfwCreateWindow(Common::SCR_WIDTH, Common::SCR_HEIGHT, "Sample", NULL, NULL);
 #endif // __APPLE__
 
 	if (window == NULL)
@@ -197,6 +196,7 @@ int main()
 	Shader ssrefractionShader(FileSystem::getPath("shaders/deferred/ssrefraction.vs").c_str(), FileSystem::getPath("shaders/deferred/ssrefraction.fs").c_str());
 	Shader refractDrawShader(FileSystem::getPath("shaders/deferred/refractdraw.vs").c_str(), FileSystem::getPath("shaders/deferred/refractdraw.fs").c_str());
 	Shader postprocessShader(FileSystem::getPath("shaders/deferred/postprocess.vs").c_str(), FileSystem::getPath("shaders/deferred/postprocess.fs").c_str());
+
 	DeferredShading::lightingShader = &lightingShader;
 	DeferredShading::ssreflectionShader = &ssreflectionShader;
 	DeferredShading::reflectDrawShader = &reflectDrawShader;
@@ -215,6 +215,7 @@ int main()
 	DeferredShading::refractDrawShader = &refractDrawShader;
 
 	DeferredShading::postprocessShader = &postprocessShader;
+
 #else
 	Shader terrainShader(FileSystem::getPath("shaders/forward/terrain.vs").c_str(), FileSystem::getPath("shaders/forward/terrain.fs").c_str());
 	Shader waterShader(FileSystem::getPath("shaders/forward/water.vs").c_str(), FileSystem::getPath("shaders/forward/water.fs").c_str());
@@ -229,16 +230,15 @@ int main()
 	Scene main_scene(256.0f, 1, 1, -0.7f, terrainShader, waterShader, skyShader, groundPaths, skyboxPaths);
 	GameController::mainScene = &main_scene; // 这个设计实在是不行
 
-	
 	Common::FilterCreation(Common::gauss);
 
-	for(int i = 0; i < 21; i++)
-    {
-        for(int j = 0; j < 21; j++)
-        {
-			Common::gauss_flat[i*21+j] = Common::gauss[i][j];
-        }
-    }   
+	for (int i = 0; i < 21; i++)
+	{
+		for (int j = 0; j < 21; j++)
+		{
+			Common::gauss_flat[i * 21 + j] = Common::gauss[i][j];
+		}
+	}
 	// tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
 	// -------------------------------------------------------------------------------------------
 	// Model
@@ -291,7 +291,7 @@ int main()
 		// --------------------
 		GameController::updateGameController(window);
 
-		//需要渲染三次 前两次不渲染水面 最后一次渲染水面
+		// 需要渲染三次 前两次不渲染水面 最后一次渲染水面
 
 #ifndef DEFERRED_SHADING
 		main_renderer.DrawReflection(modelShader);
